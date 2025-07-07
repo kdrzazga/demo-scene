@@ -1,0 +1,8 @@
+Autor: Krzysiek D. (tak kazal sie wpisac)
+Kategoria: WILD
+
+Opis:
+
+Remake mojej ulubionej gry na male Atari z czasow mlodosci. Oczywiscie, jako Komodorowiec, gralem w nia po cichu, u kuzyna. Gra zawiera 5 poziomow i jest latwiejsza od oryginalu, jednak tak samo jak oryginal, polega glownie na ciagnieciu druta.
+
+Do pisania kodu probowano wykorzystac AI, jednak model jezykowy wypluwal same glupoty, dlatego calosc gry to robotka reczna.
