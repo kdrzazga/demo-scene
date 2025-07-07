@@ -1,5 +1,8 @@
+Tytul: mario-contra
 Autor: Krzysiek D. (tak kazal sie wpisac)
 Kategoria: WILD
 
 Opis: Takie tam polaczenie 3 gier: Contra, Mario Bros i Ghost'n'Goblins a w zasadzie Ghouls.
 Biegaj po cmentarzu. Zabij ksiezniczke i uwolnij smoka, czy jakos tak. Na koniec odlec helikopterem wpizdu.
+
+AI nie stosowano.
