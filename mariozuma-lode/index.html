@@ -1,0 +1,49 @@
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="files/styles.css">
+    <title>Mariozuma's Lode</title>
+</head>
+<body>
+<div id="header" class="big header">MARIOZUMA'S LODE</div>
+<div id="infoFrame" class="panel">
+    <div id="room-number">Room Intro</div>
+    <hr>
+    <div id="connection-info" style="font-size: 1em; color: rgba(222, 116, 2, 1);">
+        Lives: Infinity<br/>
+        Items: <div id="equipment" style="font-size: 0.7em; color: rgba(222, 116, 2, 1);">
+        <table>
+            <tr>
+                <td id="key-red" style="color: red;"></td><td id="key-green" style="color: green;"></td><td id="key-blue" style="color: blue;"></td><td id="item4"></td><td id="item5">&nbsp;</td>
+            </tr>
+        </table>
+        </div>
+        Achievements: <div id="achievements" style="font-size: 0.7em; color: rgba(222, 116, 2, 1);">
+        <table>
+            <tr>
+                <td id="princess"></td><td id="joe-panama"></td><td>&nbsp;</td>
+            </tr>
+        </table>
+    </div>
+    </div>
+    <hr>
+    <div id="controls" class="small" style="font-size: 1em">Movement: arrow keys<br><br>Acid flush: z/x/c/v/b/n/m<br><br>Jumping: space/shift<br><br>Just a crossover of<br>3 classic games:<br>Montezuma's Revenge<br/>Super Mario Bros<br/>& Lode Runner</div>
+    <hr>
+    <div id="tribute">This game is tribute to:<br/>Bob Whitehead<br/>& Doug Smith</div>
+    <hr>
+    <div id="extra-info"></div>
+</div>
+<div id = "photos" class="panel" style="display: none">
+    <img id="photo" src="_blank">
+</div>
+<div id = "extraInfoFrame" class="panel" style="left: 85%; visibility: hidden">
+</div>
+<div id = "game-container"></div>
+</body>
+<script src="../common/phaser.min.js"></script>
+<script src="../common/extended-scene.js"></script>
+<script src="../common/alphabet.js"></script>
+<script src="files/globals.js"></script>
+<script src="files/mariozuma-lode.js"></script>
+<script src="files/levels.js"></script>
+<script src="files/conf.js"></script>
+</html>
