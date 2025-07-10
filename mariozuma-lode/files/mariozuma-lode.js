@@ -448,7 +448,17 @@ class MainScene extends ExtendedScene {
     }
 
     walkPlayer(left) {
+
+        const playerTile = this.getTileCoords(this.player);
+
+        if (left && playerTile[0] <= 2 && (playerTile[1] <= 1))
+            return;
+
         this.player.setFlipX(left);
+
+        if (left && this.player.x <= 2*Globals.TILE_WIDTH && (Globals.TILE_WIDTH > this.player.y > 2*Globals.TILE_WIDTH || false))
+            return;
+
         const condition = left ? this.player.x > MainScene.PLAYER_SPEED : this.player.x < this.sys.canvas.width
         if (condition){
             const movement = left ? -MainScene.PLAYER_SPEED : MainScene.PLAYER_SPEED;
@@ -855,5 +865,12 @@ class MainScene extends ExtendedScene {
         Globals.INITIAL_PLAYER_X = Globals.PLAYER_X;
         Globals.PLAYER_Y = Globals.TILE_WIDTH * tileY;
         Globals.INITIAL_PLAYER_Y = Globals.PLAYER_Y;
+    }
+
+    getTileCoords(sprite){
+        const tileX = Math.ceil(sprite.x/Globals.TILE_WIDTH);
+        const tileY = Math.ceil(sprite.y/Globals.TILE_WIDTH);
+
+        return [tileX, tileY];
     }
 }
