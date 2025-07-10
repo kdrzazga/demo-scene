@@ -417,6 +417,11 @@ class MainScene extends ExtendedScene {
         this.checkDoor();
     }
 
+     checkJumpKeys(duration){
+        if (this.player.x > Globals.TILE_WIDTH)
+            super.checkJumpKeys(duration);
+     }
+
     checkFireKeys(){
         const keys = [
             this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z),
@@ -443,7 +448,17 @@ class MainScene extends ExtendedScene {
     }
 
     walkPlayer(left) {
+
+        const playerTile = this.getTileCoords(this.player);
+
+        if (left && playerTile[0] <= 2 && (playerTile[1] <= 1))
+            return;
+
         this.player.setFlipX(left);
+
+        if (left && this.player.x <= 2*Globals.TILE_WIDTH && (Globals.TILE_WIDTH > this.player.y > 2*Globals.TILE_WIDTH || false))
+            return;
+
         const condition = left ? this.player.x > MainScene.PLAYER_SPEED : this.player.x < this.sys.canvas.width
         if (condition){
             const movement = left ? -MainScene.PLAYER_SPEED : MainScene.PLAYER_SPEED;
@@ -647,12 +662,11 @@ class MainScene extends ExtendedScene {
 
         this.spriteGroup.children.iterate((child)=> {
             if (child.texture.key === 'brick2') {
-                const enemyTileX = Math.ceil(child.x/Globals.TILE_WIDTH);
-                const enemyTileY = Math.ceil(child.y/Globals.TILE_WIDTH);
+                const enemyTile = this.getTileCoords(child);
                 /*console.log(`${child.texture.key}[${child.x}][${child.y}] is non-enemy. [${enemyTileX}][${enemyTileY}]`);
                 console.log(`[${underlyingSquareCoords[0]}][${underlyingSquareCoords[1]}]`);
                 */
-                if (enemyTileX === (underlyingSquareCoords[0]) && enemyTileY === underlyingSquareCoords[1]){
+                if (enemyTile[0] === (underlyingSquareCoords[0]) && enemyTile[1] === underlyingSquareCoords[1]){
                     //console.log(child.texture.key);
                     enemySprite.speedX = 0;
                     enemySprite.x = child.x;
@@ -850,5 +864,12 @@ class MainScene extends ExtendedScene {
         Globals.INITIAL_PLAYER_X = Globals.PLAYER_X;
         Globals.PLAYER_Y = Globals.TILE_WIDTH * tileY;
         Globals.INITIAL_PLAYER_Y = Globals.PLAYER_Y;
+    }
+
+    getTileCoords(sprite){
+        const tileX = Math.ceil(sprite.x/Globals.TILE_WIDTH);
+        const tileY = Math.ceil(sprite.y/Globals.TILE_WIDTH);
+
+        return [tileX, tileY];
     }
 }

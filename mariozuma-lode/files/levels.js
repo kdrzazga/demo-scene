@@ -289,6 +289,9 @@ class Scene5 extends MainScene{
 
             bullet.x +=400;
         });
+
+        let pipe = this.add.sprite(2*Globals.TILE_WIDTH, -160, 'pipe-down');
+        pipe.setDepth(10)
     }
 }
 
@@ -442,6 +445,10 @@ class Scene9 extends MainScene{
         this.nextScene['right'] = 'Scene10';
         this.exits['right']['x'] = '13';
         this.exits['right']['y'] = '2';
+
+        this.nextScene['left'] = 'SceneReturn';
+        this.exits['left']['x'] = '0';
+        this.exits['left']['y'] = '2';
     }
 
     create(){
@@ -460,6 +467,133 @@ class Scene9 extends MainScene{
         }
     }
 }
+
+
+class SceneReturn extends MainScene{
+
+    constructor(){
+        super('SceneReturn');
+        this.backgroundColor = 'black';
+
+        this.nonBrickRows = [1,2,4,5,6,7,8,9,10];
+
+        this.snakeRows= [ {'row': 4, 'side': 'left'}, {'row': 4, 'side': 'right'} , {'row': 8, 'side': 'right'}
+            , {'row': 8, 'side': 'left'} , {'row': 2, 'side': 'left'}];
+
+        this.nextScene['left'] = 'Scene5';
+        this.nextScene['right'] = 'Scene9';
+        this.exits['left']['x'] = '0';
+        this.exits['left']['y'] = '2';
+        this.exits['right']['x'] = '13';
+        this.exits['right']['y'] = '2';
+    }
+
+    create(){
+        super.create();
+        this.createSpriteGroup();
+    }
+
+    createSpriteGroup() {
+        super.createSpriteGroup();
+        const graphics = this.add.graphics();
+        graphics.fillStyle(0x880015, 1);
+        graphics.fillRect(0, 0, 800, 3*Globals.TILE_WIDTH);
+
+        const createLightPoint = (x, y, texture='lightpoint1') => {
+            const sprite = this.add.sprite(x, y, texture);
+            sprite.play('flickering-light');
+            return sprite;
+        };
+
+        let pipe = this.add.sprite(61, -200, 'pipe-down');
+        pipe.setFlipY(true);
+        pipe.setDepth(10)
+
+        const lightPointsPositions = [
+            { x: Globals.TILE_WIDTH * 2, y: Globals.TILE_WIDTH * 8.5 },
+            { x: Globals.TILE_WIDTH * 12, y: Globals.TILE_WIDTH * 8.5 },
+            { x: Globals.TILE_WIDTH * 5.6, y: Globals.TILE_WIDTH * 6.5 },
+            { x: Globals.TILE_WIDTH * 6.5, y: Globals.TILE_WIDTH * 4.5 },
+        ];
+
+        const lightPoints = lightPointsPositions.map(pos => createLightPoint.call(this, pos.x, pos.y));
+
+        const getSnakesAtRow = (row) => {
+            return this.getSprites('snake').filter(s => Math.round(s.y / Globals.TILE_WIDTH) === row);
+        };
+
+        const bottomSnakes = getSnakesAtRow(8);
+        const bottomConfigs = [
+            {
+                index: 0,
+                x: 2 * Globals.TILE_WIDTH,
+                speedX: 0.1,
+                minX: Globals.TILE_WIDTH,
+                maxX: 4 * Globals.TILE_WIDTH,
+            },
+            {
+                index: 1,
+                x: 10 * Globals.TILE_WIDTH,
+                speedX: 0.2,
+                minX: 9 * Globals.TILE_WIDTH,
+                maxX: 12 * Globals.TILE_WIDTH,
+            },
+        ];
+
+        bottomConfigs.forEach(config => {
+            const snake = bottomSnakes[config.index];
+            snake.x = config.x;
+            snake.speedX = config.speedX;
+            snake.minX = config.minX;
+            snake.maxX = config.maxX;
+        });
+
+        const midSnakes = getSnakesAtRow(4);
+        const midConfigs = [
+            {
+                index: 0,
+                minX: 4 * Globals.TILE_WIDTH,
+                maxX: 9 * Globals.TILE_WIDTH,
+            },
+            {
+                index: 1,
+                x: 6 * Globals.TILE_WIDTH,
+                minX: 4 * Globals.TILE_WIDTH,
+                maxX: 9 * Globals.TILE_WIDTH,
+            },
+        ];
+
+        midConfigs.forEach(config => {
+            const snake = midSnakes[config.index];
+            if (config.x !== undefined) snake.x = config.x;
+            snake.minX = config.minX;
+            snake.maxX = config.maxX;
+        });
+    }
+
+    //@Overrride
+    checkExit(){
+         const coords = this.calculateSpriteSquare(this.player);
+
+        const directions = ['left', 'right'];
+
+        directions.forEach( d => {
+            const exitX = this.exits[d]['x'];
+            const exitY = this.exits[d]['y'];
+
+            if (coords[0] == exitX && coords[1] == exitY){
+                this.scene.start(this.nextScene[d]);
+
+                if (d === 'left'){
+                    this.setGlobalInitialPos(1.5, 2);
+                }
+                else if (d === 'right'){
+                    this.setGlobalInitialPos(1.5, 2);                }
+            }
+        });
+    }
+}
+
 
 class Scene10 extends MainScene{
 
