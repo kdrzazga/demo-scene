@@ -418,10 +418,8 @@ class MainScene extends ExtendedScene {
     }
 
      checkJumpKeys(duration){
-
         if (this.player.x > Globals.TILE_WIDTH)
             super.checkJumpKeys(duration);
-
      }
 
     checkFireKeys(){
