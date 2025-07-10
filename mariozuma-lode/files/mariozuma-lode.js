@@ -423,8 +423,8 @@ class MainScene extends ExtendedScene {
         this.checkDoor();
     }
 
-     checkJumpKeys(duration){
-        if (this.player.x > Globals.TILE_WIDTH)
+     checkJumpKeys(duration, override=false){
+        if (this.player.x > Globals.TILE_WIDTH || override)
             super.checkJumpKeys(duration);
      }
 

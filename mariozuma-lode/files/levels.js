@@ -518,7 +518,6 @@ class SceneReturn extends MainScene{
         const lightPointsPositions = [
             { x: Globals.TILE_WIDTH * 2, y: Globals.TILE_WIDTH * 8.5 },
             { x: Globals.TILE_WIDTH * 12, y: Globals.TILE_WIDTH * 8.5 },
-            { x: Globals.TILE_WIDTH * 5.6, y: Globals.TILE_WIDTH * 6.5 },
             { x: Globals.TILE_WIDTH * 6.5, y: Globals.TILE_WIDTH * 4.5 },
         ];
 
@@ -1445,6 +1444,10 @@ class Scene23 extends MainScene{
         pipeLeft.setDepth(10)
     }
 
+    checkJumpKeys(duration){
+        super.checkJumpKeys(duration, true);
+    }
+
     //@Overrride
     checkExit(){
          const coords = this.calculateSpriteSquare(this.player);
@@ -1519,6 +1522,10 @@ class Scene24 extends MainScene{ //multiple pipes to multiple floors
     let pipeRight = this.add.sprite(12*Globals.TILE_WIDTH, 235, 'pipe-down');
     pipeLeft.setFlipX(true);
     pipeRight.setDepth(10)
+    }
+
+    checkJumpKeys(duration, override=false){
+       super.checkJumpKeys(duration, true);
     }
 
     checkExit(){
