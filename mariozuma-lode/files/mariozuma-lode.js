@@ -417,6 +417,13 @@ class MainScene extends ExtendedScene {
         this.checkDoor();
     }
 
+     checkJumpKeys(duration){
+
+        if (this.player.x > Globals.TILE_WIDTH)
+            super.checkJumpKeys(duration);
+
+     }
+
     checkFireKeys(){
         const keys = [
             this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z),

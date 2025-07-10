@@ -289,6 +289,9 @@ class Scene5 extends MainScene{
 
             bullet.x +=400;
         });
+
+        let pipe = this.add.sprite(66, -160, 'pipe-down');
+        pipe.setDepth(10)
     }
 }
 
@@ -459,6 +462,10 @@ class Scene9 extends MainScene{
             xs.forEach(x => this.add.sprite(x*Globals.TILE_WIDTH, y*Globals.TILE_WIDTH, 'brick'));
         }
     }
+}
+
+class SceneReturn extends MainScene{
+
 }
 
 class Scene10 extends MainScene{
