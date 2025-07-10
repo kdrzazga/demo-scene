@@ -662,12 +662,11 @@ class MainScene extends ExtendedScene {
 
         this.spriteGroup.children.iterate((child)=> {
             if (child.texture.key === 'brick2') {
-                const enemyTileX = Math.ceil(child.x/Globals.TILE_WIDTH);
-                const enemyTileY = Math.ceil(child.y/Globals.TILE_WIDTH);
+                const enemyTile = this.getTileCoords(child);
                 /*console.log(`${child.texture.key}[${child.x}][${child.y}] is non-enemy. [${enemyTileX}][${enemyTileY}]`);
                 console.log(`[${underlyingSquareCoords[0]}][${underlyingSquareCoords[1]}]`);
                 */
-                if (enemyTileX === (underlyingSquareCoords[0]) && enemyTileY === underlyingSquareCoords[1]){
+                if (enemyTile[0] === (underlyingSquareCoords[0]) && enemyTile[1] === underlyingSquareCoords[1]){
                     //console.log(child.texture.key);
                     enemySprite.speedX = 0;
                     enemySprite.x = child.x;
