@@ -204,6 +204,7 @@ class MainScene extends ExtendedScene {
         this.load.image('key-blue', 'files/items/key-blue.png');
 
         this.load.audio('cucaracha', 'files/sfx/kukaracza.mp3');
+        this.load.audio('cucaracha-short', 'files/sfx/kukaracza-short.mp3');
         this.load.audio('fire', '../common/sfx/fajer.mp3')
         this.load.audio('ping', '../common/sfx/ping1.mp3')
         this.load.audio('montezuma-ambient', '../common/sfx/dark-excitement.mp3');
@@ -821,6 +822,9 @@ class MainScene extends ExtendedScene {
 
                     const sceneKey = this.sys.settings.key;
                     Globals.doors[sceneKey][door.texture.key] = false;
+
+                    const music = this.sound.add('cucaracha-short', { loop: false });
+                    this.music.play();
                 }
                 else {
                     let diff = door.x - this.player.x;

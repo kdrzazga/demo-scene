@@ -2167,6 +2167,10 @@ class SceneTreasure extends MainScene{
 
     proposeRescueMission(){
         this.time.delayedCall(3456, () => {
+
+            const cucaracha = this.sound.add('cucaracha', { loop: false });
+            cucaracha.play();
+
             alert("CONGRATULATIONS! You found Montezuma's gold!");
             if (confirm("Do you want to return to previous room and save Panama Joe and the Princess?")){
 
