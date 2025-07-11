@@ -1,12 +1,14 @@
 class MainScene extends ExtendedScene {
 
     static PLAYER_SPEED = 2;
+    static mainTheme = null;
 
     constructor(name){
         super(name);
         this.player = null;
         this.animKey = 'stand';
         this.backgroundColor = 0x880015;
+        this.music = null;
 
         this.nonBrickRows = [];
         this.nonBrickColumns = [];
@@ -200,6 +202,12 @@ class MainScene extends ExtendedScene {
         this.load.image('key-red', 'files/items/key-red.png');
         this.load.image('key-green', 'files/items/key-green.png');
         this.load.image('key-blue', 'files/items/key-blue.png');
+
+        this.load.audio('cucaracha', 'files/sfx/kukaracza.mp3');
+        this.load.audio('fire', '../common/sfx/fajer.mp3')
+        this.load.audio('ping', '../common/sfx/ping1.mp3')
+        this.load.audio('montezuma-ambient', '../common/sfx/dark-excitement.mp3');
+        this.load.audio('main-theme', '../common/sfx/AntonioZepeda.mp3');
     }
 
     create(){
@@ -394,6 +402,8 @@ class MainScene extends ExtendedScene {
         rectangle.destroy();
         this.rectSprite = this.add.sprite(Globals.PLAYER_X, Globals.PLAYER_Y + Globals.TILE_WIDTH, 'highlight');
         this.rectSprite.setDepth(4);
+
+        MainScene.mainTheme = this.sound.add('main-theme', { loop: true });
     }
 
     update(time, delta) {
@@ -417,8 +427,8 @@ class MainScene extends ExtendedScene {
         this.checkDoor();
     }
 
-     checkJumpKeys(duration){
-        if (this.player.x > Globals.TILE_WIDTH)
+     checkJumpKeys(duration, override=false){
+        if (this.player.x > Globals.TILE_WIDTH || override)
             super.checkJumpKeys(duration);
      }
 
@@ -725,6 +735,8 @@ class MainScene extends ExtendedScene {
             const exitY = this.exits[d]['y'];
 
             if (coords[0] == exitX && coords[1] == exitY){
+                if (this.music != null)
+                    this.music.stop();
                 this.scene.start(this.nextScene[d]);
 
                 if (d === 'left'){
@@ -753,6 +765,8 @@ class MainScene extends ExtendedScene {
             allTextureSprites.forEach(enemy => {
                 const distance = Phaser.Math.Distance.Between(this.player.x, this.player.y, enemy.x, enemy.y);
                 if (distance < 3*Globals.TILE_WIDTH/4) {
+                    if (this.music != null)
+                        this.music.stop();
                     this.scene.restart();
                 }
             });
@@ -774,6 +788,9 @@ class MainScene extends ExtendedScene {
             const sceneKey = this.sys.settings.key;
             Globals.doorKeys[sceneKey] = false;
             doorKeys[0].y = 2000;
+
+            const music = this.sound.add('ping', { loop: false });
+            music.play();
         }
     }
 
@@ -838,6 +855,12 @@ class MainScene extends ExtendedScene {
         const keyCellSelector = color + '-item';
         const keyCell = document.getElementById(keyCellSelector);
         keyCell.innerText = '';
+    }
+
+    shutdown() {
+        if (this.music != null) {
+            this.music.stop();
+        }
     }
 
     getSprites(textureKey){

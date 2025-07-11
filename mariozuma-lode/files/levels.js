@@ -15,6 +15,7 @@ class SceneIntro extends MainScene{
     create(){
         super.create();
         this.createSpriteGroup();
+        MainScene.mainTheme.play();
     }
 
     preload(){
@@ -413,6 +414,8 @@ class Scene8 extends MainScene{
     create(){
         super.create();
         this.createSpriteGroup();
+        this.music = this.sound.add('fire', { loop: false });
+        this.music.play();
     }
 
     createSpriteGroup() {
@@ -454,6 +457,8 @@ class Scene9 extends MainScene{
     create(){
         super.create();
         this.createSpriteGroup();
+        this.music = this.sound.add('fire', { loop: false });
+        //this.music.play();
     }
 
     createSpriteGroup() {
@@ -466,6 +471,8 @@ class Scene9 extends MainScene{
             xs.forEach(x => this.add.sprite(x*Globals.TILE_WIDTH, y*Globals.TILE_WIDTH, 'brick'));
         }
     }
+
+    //@Override
 }
 
 
@@ -512,7 +519,6 @@ class SceneReturn extends MainScene{
         const lightPointsPositions = [
             { x: Globals.TILE_WIDTH * 2, y: Globals.TILE_WIDTH * 8.5 },
             { x: Globals.TILE_WIDTH * 12, y: Globals.TILE_WIDTH * 8.5 },
-            { x: Globals.TILE_WIDTH * 5.6, y: Globals.TILE_WIDTH * 6.5 },
             { x: Globals.TILE_WIDTH * 6.5, y: Globals.TILE_WIDTH * 4.5 },
         ];
 
@@ -625,6 +631,8 @@ class Scene10 extends MainScene{
     create(){
         super.create();
         this.createSpriteGroup();
+        this.music = this.sound.add('fire', { loop: false });
+        this.music.play();
     }
 
     createSpriteGroup() {
@@ -669,6 +677,8 @@ class Scene11 extends MainScene{
     create(){
         super.create();
         this.createSpriteGroup();
+        this.music = this.sound.add('fire', { loop: false });
+        this.music.play();
     }
 
     createSpriteGroup() {
@@ -684,7 +694,8 @@ class Scene11 extends MainScene{
 
     //@Overrride
     checkExit(){
-         const coords = this.calculateSpriteSquare(this.player);
+
+        const coords = this.calculateSpriteSquare(this.player);
 
         const directions = ['left', 'right'];
 
@@ -693,6 +704,7 @@ class Scene11 extends MainScene{
             const exitY = this.exits[d]['y'];
 
             if (coords[0] == exitX && coords[1] == exitY){
+                this.music.stop();
                 this.scene.start(this.nextScene[d]);
 
                 if (d === 'left'){
@@ -927,6 +939,9 @@ class Scene15 extends MainScene{
     create(){
         super.create();
         this.createSpriteGroup();
+
+        this.music = this.sound.add('fire', { loop: false });
+        this.music.play();
     }
 
     createSpriteGroup() {
@@ -955,6 +970,7 @@ class Scene15 extends MainScene{
             const exitY = this.exits[d]['y'];
 
             if (coords[0] == exitX && coords[1] == exitY){
+                this.music.stop();
                 this.scene.start(this.nextScene[d]);
 
                 if (d === 'top'){
@@ -989,6 +1005,9 @@ class Scene16 extends MainScene{ //g.scene.scenes[14].scene.key
     create(){
         super.create();
         this.createSpriteGroup();
+
+        this.music = this.sound.add('fire', { loop: false });
+        this.music.play();
     }
 
     createSpriteGroup() {
@@ -1024,6 +1043,7 @@ class Scene16 extends MainScene{ //g.scene.scenes[14].scene.key
             const exitY = this.exits[d]['y'];
 
             if (coords[0] == exitX && coords[1] == exitY){
+                this.music.stop();
                 this.scene.start(this.nextScene[d]);
 
                 if (d === 'left'){
@@ -1340,6 +1360,8 @@ class Scene22 extends MainScene{
     create(){
         super.create();
         this.createSpriteGroup();
+        this.music = this.sound.add('fire', { loop: false });
+        this.music.play();
     }
 
     createSpriteGroup() {
@@ -1367,6 +1389,7 @@ class Scene22 extends MainScene{
             const exitY = this.exits[d]['y'];
 
             if (coords[0] == exitX && coords[1] == exitY){
+                this.music.stop();
                 this.scene.start(this.nextScene[d]);
 
                 if (d === 'left'){
@@ -1400,6 +1423,8 @@ class Scene23 extends MainScene{
     create(){
         super.create();
         this.createSpriteGroup();
+        this.music = this.sound.add('fire', { loop: false });
+        this.music.play();
     }
 
     createSpriteGroup() {
@@ -1420,6 +1445,10 @@ class Scene23 extends MainScene{
         pipeLeft.setDepth(10)
     }
 
+    checkJumpKeys(duration){
+        super.checkJumpKeys(duration, true);
+    }
+
     //@Overrride
     checkExit(){
          const coords = this.calculateSpriteSquare(this.player);
@@ -1431,6 +1460,7 @@ class Scene23 extends MainScene{
             const exitY = this.exits[d]['y'];
 
             if (coords[0] == exitX && coords[1] == exitY){
+                this.music.stop();
                 this.scene.start(this.nextScene[d]);
 
                 if (d === 'left'){
@@ -1493,6 +1523,10 @@ class Scene24 extends MainScene{ //multiple pipes to multiple floors
     let pipeRight = this.add.sprite(12*Globals.TILE_WIDTH, 235, 'pipe-down');
     pipeLeft.setFlipX(true);
     pipeRight.setDepth(10)
+    }
+
+    checkJumpKeys(duration, override=false){
+       super.checkJumpKeys(duration, true);
     }
 
     checkExit(){
@@ -1616,6 +1650,8 @@ class Scene26 extends MainScene{
     create(){
         super.create();
         this.createSpriteGroup();
+        this.music = this.sound.add('fire', { loop: false });
+        this.music.play();
     }
 
     createSpriteGroup() {
@@ -1653,6 +1689,7 @@ class Scene26 extends MainScene{
                     this.player.y -= 6;
                     this.player.x -= 1;
                     this.time.delayedCall(1256, () => {
+                        this.music.stop();
                         this.scene.start('Scene26');
                     });
                 }
@@ -1670,6 +1707,7 @@ class Scene26 extends MainScene{
             const exitY = this.exits[d]['y'];
 
             if (coords[0] == exitX && coords[1] == exitY){
+                this.music.stop();
                 this.scene.start(this.nextScene[d]);
 
                 if (d === 'left'){
@@ -1701,6 +1739,8 @@ class SceneKamikaze extends MainScene{
     create(){
         super.create();
         this.createSpriteGroup();
+        this.music = this.sound.add('fire', { loop: false });
+        this.music.play();
     }
 
     createSpriteGroup() {
@@ -1782,6 +1822,7 @@ class SceneKamikaze extends MainScene{
             this.kupas[i].y += this.kupas[i].speedY;
             const distance = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.kupas[i].x, this.kupas[i].y);
             if (distance < 3*Globals.TILE_WIDTH/4) {
+                this.music.stop();
                 this.scene.restart();
             }
         }
@@ -1803,6 +1844,7 @@ class SceneKamikaze extends MainScene{
                     this.player.y -= 6;
                     this.player.x -= 1;
                     this.time.delayedCall(1256, () => {
+                        this.music.stop();
                         this.scene.start('SceneKamikaze');
                     });
                 }
@@ -1820,6 +1862,7 @@ class SceneKamikaze extends MainScene{
             const exitY = this.exits[d]['y'];
 
             if (coords[0] == exitX && coords[1] == exitY){
+                this.music.stop();
                 this.scene.start(this.nextScene[d]);
 
                 if (d === 'left'){
@@ -1911,6 +1954,9 @@ class SceneMontezuma extends MainScene{
     create(){
         super.create();
         this.createSpriteGroup();
+        MainScene.mainTheme.stop();
+        this.music = this.sound.add('montezuma-ambient', { loop: true });
+        this.music.play();
     }
 
     createSpriteGroup() {
@@ -1940,6 +1986,8 @@ class SceneMontezuma extends MainScene{
             const exitY = this.exits[d]['y'];
 
             if (coords[0] == exitX && coords[1] == exitY){
+                this.music.stop();
+                MainScene.mainTheme.play();
                 this.scene.start(this.nextScene[d]);
 
                 if (d === 'left'){

@@ -1,4 +1,5 @@
 class Globals {
+    static mainTheme = null;
     static debug = false;
     static doors = {
         'Scene7' : {
