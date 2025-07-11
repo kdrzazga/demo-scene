@@ -2151,6 +2151,7 @@ class SceneTreasure extends MainScene{
     create(){
         super.create();
         this.createSpriteGroup();
+        this.cucaracha = this.sound.add('cucaracha', { loop: false });
     }
 
     createSpriteGroup() {
@@ -2168,9 +2169,6 @@ class SceneTreasure extends MainScene{
     proposeRescueMission(){
         this.time.delayedCall(3456, () => {
 
-            const cucaracha = this.sound.add('cucaracha', { loop: false });
-            cucaracha.play();
-
             alert("CONGRATULATIONS! You found Montezuma's gold!");
             if (confirm("Do you want to return to previous room and save Panama Joe and the Princess?")){
 
@@ -2178,6 +2176,7 @@ class SceneTreasure extends MainScene{
                 this.scene.start('SceneCages');
             }
             else {
+                this.cucaracha.play();
                 alert("You keep all the GOLD for YOURSELF! You are selfish and ... rich !");
                 alert("GAME OVER! YOU WIN!");
                 location.reload();
@@ -2200,6 +2199,7 @@ class SceneTreasure extends MainScene{
         }
 
         this.time.delayedCall(3456, () => {
+            this.cucaracha.play();
             alert("Now you need to divide the treasure ! Silly!");
             alert("GAME OVER! Let's assume you win :/");
             location.reload();
