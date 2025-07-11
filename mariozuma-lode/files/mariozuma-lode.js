@@ -824,7 +824,7 @@ class MainScene extends ExtendedScene {
                     Globals.doors[sceneKey][door.texture.key] = false;
 
                     const music = this.sound.add('cucaracha-short', { loop: false });
-                    this.music.play();
+                    music.play();
                 }
                 else {
                     let diff = door.x - this.player.x;

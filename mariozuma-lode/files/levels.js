@@ -1955,7 +1955,7 @@ class SceneMontezuma extends MainScene{
         super.create();
         this.createSpriteGroup();
         MainScene.mainTheme.stop();
-        this.music = this.sound.add('montezuma-ambient', { loop: true });
+        this.music = this.sound.add('montezuma-ambient', { loop: false });
         this.music.play();
     }
 
