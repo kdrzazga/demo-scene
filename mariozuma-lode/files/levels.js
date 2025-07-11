@@ -15,6 +15,7 @@ class SceneIntro extends MainScene{
     create(){
         super.create();
         this.createSpriteGroup();
+        MainScene.mainTheme.play();
     }
 
     preload(){
@@ -1953,6 +1954,7 @@ class SceneMontezuma extends MainScene{
     create(){
         super.create();
         this.createSpriteGroup();
+        MainScene.mainTheme.stop();
         this.music = this.sound.add('montezuma-ambient', { loop: true });
         this.music.play();
     }
@@ -1985,6 +1987,7 @@ class SceneMontezuma extends MainScene{
 
             if (coords[0] == exitX && coords[1] == exitY){
                 this.music.stop();
+                MainScene.mainTheme.play();
                 this.scene.start(this.nextScene[d]);
 
                 if (d === 'left'){

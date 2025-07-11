@@ -1,6 +1,7 @@
 class MainScene extends ExtendedScene {
 
     static PLAYER_SPEED = 2;
+    static mainTheme = null;
 
     constructor(name){
         super(name);
@@ -205,7 +206,8 @@ class MainScene extends ExtendedScene {
         this.load.audio('cucaracha', 'files/sfx/kukaracza.mp3');
         this.load.audio('fire', '../common/sfx/fajer.mp3')
         this.load.audio('ping', '../common/sfx/ping1.mp3')
-        this.load.audio('montezuma-ambient', '../common/sfx/dark-excitement.mp3')
+        this.load.audio('montezuma-ambient', '../common/sfx/dark-excitement.mp3');
+        this.load.audio('main-theme', '../common/sfx/AntonioZepeda.mp3');
     }
 
     create(){
@@ -400,6 +402,8 @@ class MainScene extends ExtendedScene {
         rectangle.destroy();
         this.rectSprite = this.add.sprite(Globals.PLAYER_X, Globals.PLAYER_Y + Globals.TILE_WIDTH, 'highlight');
         this.rectSprite.setDepth(4);
+
+        MainScene.mainTheme = this.sound.add('main-theme', { loop: true });
     }
 
     update(time, delta) {
