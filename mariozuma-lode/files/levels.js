@@ -2176,16 +2176,22 @@ class SceneTreasure extends MainScene{
                 this.scene.start('SceneCages');
             }
             else {
-                this.cucaracha.play();
                 alert("You keep all the GOLD for YOURSELF! You are selfish and ... rich !");
                 alert("GAME OVER! YOU WIN!");
-                location.reload();
+
+                this.cucaracha.play();
+
+                this.time.delayedCall(1111, () => {
+                this.cucaracha.play();
+                    location.reload();
+                });
             }
 
         });
     }
 
     finalTriumph(){
+        this.cucaracha.play();
         const princessSavedCell = document.getElementById('princess');
         const panamaJoeSavedCell = document.getElementById('joe-panama');
         if (princessSavedCell.innerHTML != ''){
@@ -2199,7 +2205,6 @@ class SceneTreasure extends MainScene{
         }
 
         this.time.delayedCall(3456, () => {
-            this.cucaracha.play();
             alert("Now you need to divide the treasure ! Silly!");
             alert("GAME OVER! Let's assume you win :/");
             location.reload();
