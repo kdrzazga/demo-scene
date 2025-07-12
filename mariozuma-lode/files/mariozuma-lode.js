@@ -116,6 +116,10 @@ class MainScene extends ExtendedScene {
         this.load.image('pipe-down', 'files/background/pipeD.png');
         this.load.image('pipe-short', 'files/background/pipe-short.png');
 
+        this.load.image('valdgir-logo', 'files/background/valdgir-swords.png');
+        this.load.image('aldir', 'files/background/aldir.png');
+        this.load.image('aldir-quote', 'files/background/valdgirQuote.png');
+
         this.load.image('lightpoint1', 'files/background/brick/lightpoint165.png');
         this.load.image('lightpoint2', 'files/background/brick/lightpoint220.png');
         this.load.image('lightpoint3', 'files/background/brick/lightpoint305.png');

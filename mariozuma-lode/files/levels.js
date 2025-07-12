@@ -121,7 +121,7 @@ class Scene2 extends MainScene{
         this.aztecSnakesRows = [0, 9];
 
         this.nextScene['left'] = 'Scene1';
-        this.nextScene['right'] = 'Scene3';
+        this.nextScene['right'] = 'SceneValdgirSwords';
         this.exits['left']['x'] = '0';
         this.exits['left']['y'] = '2';
         this.exits['right']['x'] = '13';
@@ -150,7 +150,107 @@ class Scene2 extends MainScene{
             }
         });
     }
+
+    //@Overrride
+    checkExit(){
+        const coords = this.calculateSpriteSquare(this.player);
+
+        const directions = ['left', 'right'];
+
+        directions.forEach( d => {
+            const exitX = this.exits[d]['x'];
+            const exitY = this.exits[d]['y'];
+
+            if (coords[0] == exitX && coords[1] == exitY){
+                this.scene.start(this.nextScene[d]);
+
+                if (d === 'left'){
+                    this.setGlobalInitialPos(12, 9);
+                }
+                else if (d === 'right'){
+                    this.setGlobalInitialPos(2, 9);
+                }
+            }
+        });
+    }
 }
+
+
+class SceneValdgirSwords extends MainScene{
+
+    constructor(){
+        super('SceneValdgirSwords'); //g.scene.scenes[14].scene.key
+
+        this.nonBrickRows = [3,4,5,6,8,9];
+        this.skullRows= [ {'row': 9, 'side': 'right'} ];
+
+        this.nextScene['left'] = 'Scene2';
+        this.exits['left']['x'] = '0';
+        this.exits['left']['y'] = '9 ';
+
+        this.nextScene['right'] = 'Scene3';
+        this.exits['right']['x'] = '13';
+        this.exits['right']['y'] = '9';//g.scene.scenes[14].calculateSpriteSquare(g.scene.scenes[14].player)
+
+        this.aldirQoute = null;
+    }
+
+    create(){
+        super.create();
+        this.createSpriteGroup();
+    }
+
+    createSpriteGroup() {
+        super.createSpriteGroup();
+
+        const valdgirLogo = this.add.sprite(5.9*Globals.TILE_WIDTH + 13, 4.5*Globals.TILE_WIDTH, 'valdgir-logo');
+
+        const aldir = this.add.sprite(4*Globals.TILE_WIDTH, 9*Globals.TILE_WIDTH, 'aldir');
+        this.aldirQoute = this.add.sprite(4.6*Globals.TILE_WIDTH, 7.6*Globals.TILE_WIDTH, 'aldir-quote');
+        this.aldirQoute.setDepth(11);
+
+        const xs = [0,1,2,3, 9, 10,11, 12, 13];
+        for(let y = 0; y < 8; y++){
+             xs.forEach(x => {
+                const b = this.add.sprite(x*Globals.TILE_WIDTH, y*Globals.TILE_WIDTH, 'brick');
+                b.setDepth(10);
+             });
+        }
+
+    }
+
+    update(time, delta) {
+        super.update(time, delta);
+        if (3*Globals.TILE_WIDTH <= this.player.x && this.player.x <= 5*Globals.TILE_WIDTH)
+            this.aldirQoute.y = 7.6*Globals.TILE_WIDTH;
+        else
+            this.aldirQoute.y = 2000;
+    }
+
+    //@Overrride
+    checkExit(){
+        const coords = this.calculateSpriteSquare(this.player);
+
+        const directions = ['left', 'right'];
+
+        directions.forEach( d => {
+            const exitX = this.exits[d]['x'];
+            const exitY = this.exits[d]['y'];
+
+            if (coords[0] == exitX && coords[1] == exitY){
+                this.scene.start(this.nextScene[d]);
+
+                if (d === 'left'){
+                    this.setGlobalInitialPos(13, 9);
+                }
+                else if (d === 'right'){
+                    this.setGlobalInitialPos(2, 2);
+                }
+            }
+        });
+    }
+}
+
 
 class Scene3 extends MainScene{
 
@@ -163,7 +263,7 @@ class Scene3 extends MainScene{
         this.skullRows= [ {'row': 4, 'side': 'right'}, {'row': 6, 'side': 'left'} , {'row': 8, 'side': 'right'} ];
         this.snakeRows= [ {'row': 4, 'side': 'left'}, {'row': 6, 'side': 'right'} , {'row': 8, 'side': 'right'} ];
 
-        this.nextScene['left'] = 'Scene2';
+        this.nextScene['left'] = 'SceneValdgirSwords';
         this.nextScene['right'] = 'Scene4';
         this.exits['left']['x'] = '0';
         this.exits['left']['y'] = '2';
@@ -186,6 +286,29 @@ class Scene3 extends MainScene{
             if (this._isEnemy(child)){
                 child.x += factor;
                 factor *= -1.6;
+            }
+        });
+    }
+
+    //@Overrride
+    checkExit(){
+        const coords = this.calculateSpriteSquare(this.player);
+
+        const directions = ['left', 'right'];
+
+        directions.forEach( d => {
+            const exitX = this.exits[d]['x'];
+            const exitY = this.exits[d]['y'];
+
+            if (coords[0] == exitX && coords[1] == exitY){
+                this.scene.start(this.nextScene[d]);
+
+                if (d === 'left'){
+                    this.setGlobalInitialPos(12, 2);
+                }
+                else if (d === 'right'){
+                    this.setGlobalInitialPos(2, 2);
+                }
             }
         });
     }
