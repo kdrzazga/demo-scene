@@ -1955,7 +1955,7 @@ class SceneMontezuma extends MainScene{
         super.create();
         this.createSpriteGroup();
         MainScene.mainTheme.stop();
-        this.music = this.sound.add('montezuma-ambient', { loop: true });
+        this.music = this.sound.add('montezuma-ambient', { loop: false });
         this.music.play();
     }
 
@@ -2151,6 +2151,7 @@ class SceneTreasure extends MainScene{
     create(){
         super.create();
         this.createSpriteGroup();
+        this.cucaracha = this.sound.add('cucaracha', { loop: false });
     }
 
     createSpriteGroup() {
@@ -2167,6 +2168,7 @@ class SceneTreasure extends MainScene{
 
     proposeRescueMission(){
         this.time.delayedCall(3456, () => {
+
             alert("CONGRATULATIONS! You found Montezuma's gold!");
             if (confirm("Do you want to return to previous room and save Panama Joe and the Princess?")){
 
@@ -2176,13 +2178,20 @@ class SceneTreasure extends MainScene{
             else {
                 alert("You keep all the GOLD for YOURSELF! You are selfish and ... rich !");
                 alert("GAME OVER! YOU WIN!");
-                location.reload();
+
+                this.cucaracha.play();
+
+                this.time.delayedCall(1111, () => {
+                this.cucaracha.play();
+                    location.reload();
+                });
             }
 
         });
     }
 
     finalTriumph(){
+        this.cucaracha.play();
         const princessSavedCell = document.getElementById('princess');
         const panamaJoeSavedCell = document.getElementById('joe-panama');
         if (princessSavedCell.innerHTML != ''){
