@@ -75,11 +75,20 @@ class MainScene extends ExtendedScene {
 
         this.load.image('bullet', 'files/enemies/bullet.png');
 
-        this.load.image('skull1', 'files/enemies/skull/skull1.gif');
-        this.load.image('skull2', 'files/enemies/skull/skull2.gif');
-        this.load.image('skull3', 'files/enemies/skull/skull3.gif');
-        this.load.image('skull4', 'files/enemies/skull/skull4.gif');
-        this.load.image('skull5', 'files/enemies/skull/skull5.gif');
+        const urlParams = new URLSearchParams(window.location.search);
+        const value = urlParams.get('skull');
+
+        const skull1File = value !== 'matasek' ?'files/enemies/skull/skull1.gif' : 'files/enemies/matasek.png';
+        const skull2File = value !== 'matasek' ?'files/enemies/skull/skull2.gif' : 'files/enemies/matasek.png';
+        const skull3File = value !== 'matasek' ?'files/enemies/skull/skull3.gif' : 'files/enemies/matasek.png';
+        const skull4File = value !== 'matasek' ?'files/enemies/skull/skull4.gif' : 'files/enemies/matasek.png';
+        const skull5File = value !== 'matasek' ?'files/enemies/skull/skull5.gif' : 'files/enemies/matasek.png';
+
+        this.load.image('skull1', skull1File);
+        this.load.image('skull2', skull2File);
+        this.load.image('skull3', skull3File);
+        this.load.image('skull4', skull4File);
+        this.load.image('skull5', skull5File);
 
         this.load.image('snake1', 'files/enemies/snake/snake (1).gif');
         this.load.image('snake2', 'files/enemies/snake/snake (2).gif');
