@@ -1,0 +1,16 @@
+Welcome to the world of electric wires!
+You need to provide electricity to building floors. Sounds easy? Not exactly, since animals like rats, bats and spiders can make your job a nightmare.
+
+You are standing on a floor ceiling. See that wire endings on left and right? Simply draw a wire between them to advance to level 1:
+
+Good luck!
+
+-------------
+
+The game is a loose adaptation of 8-bit Atari game published with the same title in 1984 by Synapse Software.
+
+
+
+
+
+FONT: Calibri 12px Bold

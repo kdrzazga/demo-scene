@@ -116,6 +116,11 @@ class MainScene extends ExtendedScene {
         this.load.image('pipe-down', 'files/background/pipeD.png');
         this.load.image('pipe-short', 'files/background/pipe-short.png');
 
+        this.load.image('valdgir-logo', 'files/background/valdgir-swords.png');
+        this.load.image('valdgir-logo2', 'files/background/valdgir-swords2.png');
+        this.load.image('aldir', 'files/background/aldir.png');
+        this.load.image('aldir-quote', 'files/background/valdgirQuote.png');
+
         this.load.image('lightpoint1', 'files/background/brick/lightpoint165.png');
         this.load.image('lightpoint2', 'files/background/brick/lightpoint220.png');
         this.load.image('lightpoint3', 'files/background/brick/lightpoint305.png');
@@ -204,6 +209,7 @@ class MainScene extends ExtendedScene {
         this.load.image('key-blue', 'files/items/key-blue.png');
 
         this.load.audio('cucaracha', 'files/sfx/kukaracza.mp3');
+        this.load.audio('cucaracha-short', 'files/sfx/kukaracza-short.mp3');
         this.load.audio('fire', '../common/sfx/fajer.mp3')
         this.load.audio('ping', '../common/sfx/ping1.mp3')
         this.load.audio('montezuma-ambient', '../common/sfx/dark-excitement.mp3');
@@ -389,6 +395,17 @@ class MainScene extends ExtendedScene {
                 { key: 'lode-runner19' }
             ],
             frameRate: 20,
+            repeat: -1
+        });
+
+
+        this.anims.create({
+            key: 'valdgir-swords',
+            frames: [
+                { key: 'valdgir-logo' },
+                { key: 'valdgir-logo2' }
+            ],
+            frameRate: 3,
             repeat: -1
         });
 
@@ -821,6 +838,9 @@ class MainScene extends ExtendedScene {
 
                     const sceneKey = this.sys.settings.key;
                     Globals.doors[sceneKey][door.texture.key] = false;
+
+                    const music = this.sound.add('cucaracha-short', { loop: false });
+                    music.play();
                 }
                 else {
                     let diff = door.x - this.player.x;
