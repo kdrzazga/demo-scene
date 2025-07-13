@@ -175,13 +175,12 @@ class Scene2 extends MainScene{
     }
 }
 
-
 class SceneValdgirSwords extends MainScene{
 
     constructor(){
         super('SceneValdgirSwords'); //g.scene.scenes[14].scene.key
 
-        this.nonBrickRows = [3,4,5,6,8,9];
+        this.nonBrickRows = [1,2,3,4,5,6,8,9];
         this.skullRows= [ {'row': 9, 'side': 'right'} ];
 
         this.nextScene['left'] = 'Scene2';
@@ -203,13 +202,18 @@ class SceneValdgirSwords extends MainScene{
     createSpriteGroup() {
         super.createSpriteGroup();
 
-        const valdgirLogo = this.add.sprite(5.9*Globals.TILE_WIDTH + 13, 4.5*Globals.TILE_WIDTH, 'valdgir-logo');
+        const graphics = this.add.graphics();
+        graphics.fillStyle(0x000000, 1);
+        graphics.fillRect(0, 0, 800, 390);
+
+        const valdgirLogo = this.add.sprite(6.3*Globals.TILE_WIDTH + 13, 4.5*Globals.TILE_WIDTH, 'valdgir-logo');
+        valdgirLogo.play('valdgir-swords');
 
         const aldir = this.add.sprite(4*Globals.TILE_WIDTH, 9*Globals.TILE_WIDTH, 'aldir');
         this.aldirQoute = this.add.sprite(4.6*Globals.TILE_WIDTH, 7.6*Globals.TILE_WIDTH, 'aldir-quote');
         this.aldirQoute.setDepth(11);
 
-        const xs = [0,1,2,3, 9, 10,11, 12, 13];
+        const xs = [0,1,12, 13];
         for(let y = 0; y < 8; y++){
              xs.forEach(x => {
                 const b = this.add.sprite(x*Globals.TILE_WIDTH, y*Globals.TILE_WIDTH, 'brick');
@@ -274,7 +278,7 @@ class Scene3 extends MainScene{
     create(){
         super.create();
         this.createSpriteGroup();
-        const lightpoint = this.add.sprite(Globals.TILE_WIDTH * 6, Globals.TILE_WIDTH*8.5, 'lightpoint1');
+        const lightpoint = this.add.sprite(Globals.TILE_WIDTH * 9, Globals.TILE_WIDTH*8.5, 'lightpoint1');
         lightpoint.play('flickering-light');
     }
 

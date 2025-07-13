@@ -117,6 +117,7 @@ class MainScene extends ExtendedScene {
         this.load.image('pipe-short', 'files/background/pipe-short.png');
 
         this.load.image('valdgir-logo', 'files/background/valdgir-swords.png');
+        this.load.image('valdgir-logo2', 'files/background/valdgir-swords2.png');
         this.load.image('aldir', 'files/background/aldir.png');
         this.load.image('aldir-quote', 'files/background/valdgirQuote.png');
 
@@ -394,6 +395,17 @@ class MainScene extends ExtendedScene {
                 { key: 'lode-runner19' }
             ],
             frameRate: 20,
+            repeat: -1
+        });
+
+
+        this.anims.create({
+            key: 'valdgir-swords',
+            frames: [
+                { key: 'valdgir-logo' },
+                { key: 'valdgir-logo2' }
+            ],
+            frameRate: 3,
             repeat: -1
         });
 
