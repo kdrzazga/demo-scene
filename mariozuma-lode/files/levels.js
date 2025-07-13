@@ -165,10 +165,10 @@ class Scene2 extends MainScene{
                 this.scene.start(this.nextScene[d]);
 
                 if (d === 'left'){
-                    this.setGlobalInitialPos(12, 9);
+                    this.setGlobalInitialPos(12, 2);
                 }
                 else if (d === 'right'){
-                    this.setGlobalInitialPos(2, 9);
+                    this.setGlobalInitialPos(1, 9);
                 }
             }
         });
@@ -241,7 +241,7 @@ class SceneValdgirSwords extends MainScene{
                 this.scene.start(this.nextScene[d]);
 
                 if (d === 'left'){
-                    this.setGlobalInitialPos(13, 9);
+                    this.setGlobalInitialPos(12, 2);
                 }
                 else if (d === 'right'){
                     this.setGlobalInitialPos(2, 2);
@@ -304,7 +304,7 @@ class Scene3 extends MainScene{
                 this.scene.start(this.nextScene[d]);
 
                 if (d === 'left'){
-                    this.setGlobalInitialPos(12, 2);
+                    this.setGlobalInitialPos(12, 9);
                 }
                 else if (d === 'right'){
                     this.setGlobalInitialPos(2, 2);
