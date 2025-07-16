@@ -213,6 +213,11 @@ class SceneValdgirSwords extends MainScene{
         this.aldirQoute = this.add.sprite(4.6*Globals.TILE_WIDTH, 7.6*Globals.TILE_WIDTH, 'aldir-quote');
         this.aldirQoute.setDepth(11);
 
+        this.valdgirHead = this.add.sprite(2 * config.width/3, config.height/4, 'valdgir-head');
+        this.valdgirHead.setFlipX(true);
+        this.valdgirHead.setScale(0.57);
+        this.valdgirHead.setDepth(11);
+
         const xs = [0,1,12, 13];
         for(let y = 0; y < 8; y++){
              xs.forEach(x => {
