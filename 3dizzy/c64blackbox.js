@@ -26,7 +26,6 @@ class C64Blackbox {
 		this.headerLines = [];
 		this.context = null;
 		this.cursor = null;
-		this.bruceGame = null;
 		this.dizzolGame = null;
 		this.clearColor = Globals.colors[11];
 		this.backgroundColor = Globals.lightgrayColor;
@@ -45,7 +44,6 @@ class C64Blackbox {
         this.context = canvas.getContext('2d');
         canvas.width = Globals.screenWidth;
         canvas.height = Globals.screenHeight;
-		this.bruceGame = new BruceGame(canvas);
 		this.dizzolGame = new DizzolGame(canvas, this);
 
         C64Blackbox.texture = new THREE.CanvasTexture(canvas);
@@ -109,9 +107,6 @@ class C64Blackbox {
     		['F2, 2, U, J - SOFT RESET', 1],
     		['F3, 3, I, K - CHANGE BACKGROUND COLOR', 1],
     		['F5 - HARD RESET/RELOAD', 1],
-    		['F6, 6, 0, =, O, L - ' + String.fromCharCode(0xe05f) + 'K&A+ LOGO', 1],
-    		['F7, 7, -, P, ; - ' + String.fromCharCode(0xe05f) + 'BRUCE LEE SIMPLE GAME', 1],
-    		['F8, 8 - ' + String.fromCharCode(0xe05f) + 'CEBULUS SIMPLE GAME', 1],
     		['F9, 9 - ' + String.fromCharCode(0xe05f) + 'DIZZOL SIMPLE GAME', 2],
     		['READY.', 1]
     	];
@@ -200,7 +195,6 @@ class C64Blackbox {
 	        return;
 	    console.log('F9 was pressed. Simple game Dizzol')
 
-        this.bruceGame.reset();
 	    this.cursor.clear();
 	    this.context.fillStyle = this.defaultColor;
 	    this.context.fillText(String.fromCharCode(0xe05f) + 'DIZZY', 0, this.cursor.position.y + 4);
@@ -221,15 +215,8 @@ class C64Blackbox {
 	
 	handleMovement(direction) {
 
-        if (!this.bruceGame.active && !this.dizzolGame.active){
-            return;
-        }
+	    let game = this.dizzolGame;
 
-	    let game = this.bruceGame.active ? this.bruceGame : this.dizzolGame;
-
-		if (this.bruceGame.active) {
-		    this.clearOutputBottom(Math.floor(5 * Globals.screenHeight / 6));
-        }
 		switch (direction) {
 			case Direction.UP:
 				console.log('UP key was pressed.');
@@ -250,14 +237,7 @@ class C64Blackbox {
 	}
 	
 	handleFire(){
-		if (this.bruceGame.active){
-			console.log('FIRE key was pressed.');
-			this.clearOutputBottom(Math.floor(5 * Globals.screenHeight / 6));
-			this.bruceGame.punch(this.bruceGame.player);
-		}
-		else if (this.dizzolGame.active){
 			this.dizzolGame.handleFirePressed();
-		}
 	}
 	
 	loadPicture(fileName, x, y) {
