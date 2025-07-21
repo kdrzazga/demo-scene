@@ -28,7 +28,9 @@ class Dizzy extends Player{
         super(canvas, 450, 409);
     	this.picPath = "dizzol/jajoL.png";
     	this.picLeftPath = "dizzol/jajoL.png";
+    	this.picLeftStepPath = "dizzol/jajoLstep.png";
     	this.picRightPath = "dizzol/jajoR.png";
+    	this.picRightStepPath = "dizzol/jajoRstep.png";
     	this.inventory = [new Coin()];
     	this.hp = 1;
     }
