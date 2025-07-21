@@ -159,7 +159,7 @@ class Room2 extends Room{
 
     constructor(canvas){
         super(DizzolGame.ROOM2, canvas, "dizzol/2.png", new RoomExit(100, 428), new RoomExit(510, 20.5 * C64Blackbox.rowHeight)
-            , null, null, null, 0);
+            , null, null, 0);
 
         this.setInfo("2. TOTEM");
 
@@ -177,7 +177,26 @@ class Room2 extends Room{
         const garlic21 = new Garlic(canvas, 500, 300);
         this.addItemOnFloor(garlic21);
     }
+}
 
+class Room3 extends Room{
+
+    constructor(canvas){
+        super(DizzolGame.ROOM3, canvas, "dizzol/3.png", new RoomExit(-5, 350), new RoomExit(530, 20.5 * C64Blackbox.rowHeight)
+            , null, null, 1);
+
+        this.setInfo("3. BAT CAVE ENTRANCE");
+
+        this.floorLevels = [
+            { range: [0, 145], level: 362 },
+            { range: [146, 175], level: 368 },
+            { range: [176, 190], level: 375 },
+            { range: [191, 260], level: 380 },
+            { range: [261, 290], level: 390 },
+            { range: [291, 379], level: 400 },
+            { range: [308, Infinity], level: 420 }
+        ];
+    }
 }
 
 class RoomRegistry{
@@ -234,8 +253,8 @@ class RoomRegistry{
 
         const room1 = new Room1(canvas);
         const room2 = new Room2(canvas);
+        const room3 = new Room3(canvas);
 
-        const room3 = new Room(DizzolGame.ROOM3, canvas, "dizzol/3.png", new RoomExit(-5, 350), new RoomExit(530, 20.5 * C64Blackbox.rowHeight), room3floorLevels, [], 1);
         const room4 = new Room(DizzolGame.ROOM4, canvas, "dizzol/4.png", new RoomExit(-5, 20.5 * C64Blackbox.rowHeight), new RoomExit(530, 350), room4floorLevels, [], 0);
         const room5 = new Room(DizzolGame.ROOM5, canvas, "dizzol/5.png", new RoomExit(-5, 20.5 * C64Blackbox.rowHeight), new RoomExit(510, 20.5 * C64Blackbox.rowHeight), room1.floorLevels, [], 3);
         const room6 = new Room(DizzolGame.ROOM6, canvas, "dizzol/6.png", exit6Left, exit67Right, room67floorLevels, [], 1);
