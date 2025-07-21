@@ -37,7 +37,6 @@ class C64Blackbox {
     init() {
         this.setupRenderer();
 		this.setupHeaderContent();
-		this.setupHelpContent();
 		
         this.functionKeysActivated = true;
         const canvas = document.createElement('canvas');
@@ -67,28 +66,9 @@ class C64Blackbox {
     executeParamAction(){
         console.log(this.param);
         switch(this.param){
-            case 'F1':
-                this.handleHelp();
-                break;
-            case 'F2':
-                this.handleF2();
-                break;
-            case 'F3':
-                this.handleF3();
-                break;
-            case 'F6':
-                this.handleF6();
-                break;
-            case 'F7':
-                this.handleF7();
-                break;
-            case 'F8':
-                this.handleF8();
-                break;
             case 'F9':
                 this.handleF9();
                 break;
-
         }
     }
 
@@ -152,13 +132,6 @@ class C64Blackbox {
         context.clearRect(0, 0, C64Blackbox.texture.image.width, C64Blackbox.texture.image.height);
         this.drawInitialText(context); 		
 		console.log('Output reset. C64 screen redrawn.');
-    }
-	
-    clearOutputBottom(thresholdY) {
-        const context = C64Blackbox.texture.image.getContext('2d');
-		context.fillStyle = this.backgroundColor;
-        context.fillRect(0, thresholdY, C64Blackbox.texture.image.width, C64Blackbox.texture.image.height);
-		console.log('Bottom Output reset.');
     }
 	
 	handleHelp() {
