@@ -1,5 +1,20 @@
 class Room{
 
+    static FLOOR_LEVELS_1 = [
+                       { range: [0, 120], level: 419 },
+                       { range: [121, 152], level: 415 },
+                       { range: [152, 200], level: 411 },
+                       { range: [201, 250], level: 405 },
+                       { range: [251, 310], level: 410 },
+                       { range: [311, 440], level: 402 },
+                       { range: [441, Infinity], level: 409 }
+                   ];
+   static FLOOR_LEVELS_67 = [
+                        { range: [-Infinity, 120], level: 431 },
+                        { range: [121, 150], level: 439 },
+                        { range: [151, 270], level: 446 },
+                        { range: [238, Infinity], level: 425 }
+                    ];
     constructor(number, canvas, picPath, leftExit, rightExit, floorLevels, checkpoints, batsCount){
         this.number = number;
         this.picPath = picPath;
@@ -280,9 +295,9 @@ class RoomRegistry{
 
         const room7 = new Room7(canvas);//(DizzolGame.ROOM7, canvas, "dizzol/7.png", LEFT_EXIT_67, RIGHT_EXIT_67, DizzyGlobals.FLOOR_LEVELS_67, twoTotemCheckpoints, 0);
         const room8 = new Room8(canvas);//(DizzolGame.ROOM8, canvas, "dizzol/8.png", LEFT_EXIT_67, RIGHT_EXIT_67, DizzyGlobals.FLOOR_LEVELS_67, [], 0);
-        const room9 = new Room(DizzolGame.ROOM9, canvas, "dizzol/9.png", exit67Left, exit67Right, DizzyGlobals.FLOOR_LEVELS_67, [], 0);
-        const room10 = new Room(DizzolGame.ROOM10, canvas, "dizzol/10.png", exit67Left, exit67Right, DizzyGlobals.FLOOR_LEVELS_67, desertDeathCheckpoints, 0);
-        const room11 = new Room(DizzolGame.ROOM11, canvas, "dizzol/11.png", exit67Left, exit67Right, DizzyGlobals.FLOOR_LEVELS_67, desertDeathCheckpoints2, 0);
+        const room9 = new Room(DizzolGame.ROOM9, canvas, "dizzol/9.png", exit67Left, exit67Right, Room.FLOOR_LEVELS_67, [], 0);
+        const room10 = new Room(DizzolGame.ROOM10, canvas, "dizzol/10.png", exit67Left, exit67Right, Room.FLOOR_LEVELS_67, desertDeathCheckpoints, 0);
+        const room11 = new Room(DizzolGame.ROOM11, canvas, "dizzol/11.png", exit67Left, exit67Right, Room.FLOOR_LEVELS_67, desertDeathCheckpoints2, 0);
 
         const labels = [
             /*"1. SCULPTURE", "2. TOTEM", "3. BAT CAVE ENTRANCE", "4. ANCIENT DRAWINGS",
