@@ -139,7 +139,6 @@ class DizzolGame{
         const currentRoom = this.getCurrentRoom();
 
         currentRoom.writeUpperInfo("You picked " + this.pickGarlic());
-
         new Promise((resolve) => {
             setTimeout(() => {
                 resolve();
@@ -174,6 +173,7 @@ class DizzolGame{
                 room.items = room.items.filter(i => i !== item);
                 this.player.inventory.push(item);
                 result = 'garlic';
+                ping();
             }
         })
         return result;
