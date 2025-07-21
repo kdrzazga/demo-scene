@@ -1,3 +1,131 @@
+class Room{
+
+    constructor(number, canvas, picPath, leftExit, rightExit, floorLevels, checkpoints, batsCount){
+        this.number = number;
+        this.picPath = picPath;
+        this.leftExit = leftExit;
+        this.rightExit = rightExit;
+		this.floorLevels = floorLevels;
+		this.checkpoints = checkpoints;
+
+        this.context = canvas.getContext('2d');
+        this.loader = new PictureLoader(this.context);
+        this.enemyLoader = new PictureLoader(this.context);
+        this.garlicLoader = new PictureLoader(this.context);
+        this.bats = [];
+        this.items = [];
+        this.info = '';
+
+        this.initializeBats(batsCount, canvas);
+    }
+
+    initializeBats(batsCount, canvas){
+        for (let i = 0; i < batsCount; i++) {
+            const bat = new Bat(canvas, 291 + 39 * i, 2 + i);
+            this.bats.push(bat);
+        }
+        if (this.bats.length > 0) {
+            this.bats[0].x = 326;
+        }
+        console.log('Created bats in Room ' + this.number);
+    }
+
+    load(){
+        this.read();
+        this.draw();
+    }
+
+    read() {
+        this.loadPicture(this.loader, this.picPath).catch(error => {
+            console.error('Failed to load picture:', error);
+        });
+
+        if (this.bats.length > 0) {
+            this.loadPicture(this.enemyLoader, this.bats[0].picPath).catch(error => {
+                console.error('Failed to load bat picture:', error);
+            });
+        }
+
+        this.loadPicture(this.garlicLoader, Garlic.PATH).catch(error => {
+            console.error('Failed to load garlic picture:', error);
+        });
+    }
+
+    loadPicture(loader, path) {
+        if (path) {
+            loader.fileName = path;
+            return loader.read().then(texture => {
+                loader.texture = texture;
+            });
+        }
+        return Promise.resolve();  // No picture to load
+    }
+
+    draw(){
+        this.loader.draw(0, 9 * C64Blackbox.rowHeight);
+        //this.writeRoomInfo();
+    }
+
+    writeRoomInfo(){
+        this.writeUpperInfo(this.info);
+    }
+
+    writeUpperInfo(text){
+        const rowHeight = C64Blackbox.rowHeight;
+        const cursor = this.c64Blackbox.cursor;
+        const y = (2 + 3 * 2) * rowHeight;
+        const x = 2*rowHeight;
+        this.context.fillStyle = cursor.backgroundColor;
+        this.context.fillRect(x - 2, y - rowHeight + 2, 39*cursor.size + 4, cursor.size + 8);
+        this.context.fillStyle = cursor.color;
+        this.context.fillText(text, x, y);
+    }
+
+    drawEnemies(){
+       this.bats.filter(enemy => enemy.hp>0).forEach(bat => this.enemyLoader.draw(bat.x, bat.y));
+    }
+
+    drawItems(){
+        let garlics = this.items.filter(i => 'garlic' === i.name);
+        garlics.forEach(item => this.garlicLoader.draw(item.x, item.y));
+    }
+
+    animate(){
+        if (this.bats.length > 0){
+
+            this.bats.forEach(b => b.move());
+            this.draw();
+            this.drawItems();
+            this.drawEnemies();
+        }
+    }
+
+	getFloorLevel(x) {
+	    if (this.floorLevels == null)
+	        return null;
+        for (let { range, level } of this.floorLevels) {
+            if (x >= range[0] && x <= range[1]) {
+                return level;
+            }
+        }
+        return null;
+    }
+
+    addItemOnFloor(item){
+        let x = item.x;
+        item.y = this.getFloorLevel(x) + 27;
+        this.items.push(item);
+    }
+
+    setInfo(info){
+        this.info = info;
+    }
+
+    setC64Blackbox(c64Blackbox){
+        this.c64Blackbox = c64Blackbox;
+    }
+}
+
 class Room1 extends Room{
 
     constructor(canvas){
@@ -6,8 +134,6 @@ class Room1 extends Room{
 
         const garlic11 = new Garlic(canvas, 500, 300);
         const garlic12 = new Garlic(canvas, 400, 300);
-        this.addItemOnFloor(garlic11);
-        this.addItemOnFloor(garlic12);
 
         this.setInfo("1. SCULPTURE");
 
@@ -23,6 +149,8 @@ class Room1 extends Room{
 
         const room1Sfx = new SfxEvent("dizzol/huu.mp3");
         this.checkpoints = [new Checkpoint(310, 411, room1Sfx)];
+        this.addItemOnFloor(garlic11);
+        this.addItemOnFloor(garlic12);
     }
 
 }
@@ -39,17 +167,7 @@ class RoomRegistry{
     }
 
     createRoomSet(canvas, c64Blackbox){
-		const room1floorLevels = [
-            { range: [0, 120], level: 419 },
-            { range: [121, 152], level: 415 },
-            { range: [152, 200], level: 411 },
-            { range: [201, 250], level: 405 },
-            { range: [251, 310], level: 410 },
-            { range: [311, 440], level: 402 },
-            { range: [441, Infinity], level: 409 }
-        ];
-
-		const room2floorLevels = [
+        const room2floorLevels = [
             { range: [0, 128], level: 425 },
             { range: [129, 200], level: 428 },
             { range: [201, 260], level: 418 },
@@ -88,9 +206,6 @@ class RoomRegistry{
         const exit67Left = new RoomExit(-5, 431);
         const exit6Left = new RoomExit(70, 431);
         const exit67Right = new RoomExit(530, 425);
-
-        const room1Sfx = new SfxEvent("dizzol/huu.mp3");
-        const room1Checkpoints = [new Checkpoint(310, 411, room1Sfx)];
         const totemSfx1 = new SfxEvent("dizzol/totem.mp3");
         const totemSfx2 = new SfxEvent("dizzol/totem.mp3");
         const singleTotemCheckpoints = [new Checkpoint(315, 411, totemSfx1)];
@@ -100,12 +215,7 @@ class RoomRegistry{
         const desertDeathCheckpoints = [new Checkpoint(500, 411, desertDeathEvent)];
         const desertDeathCheckpoints2 = [new Checkpoint(500, 411, desertDeathEvent2)];
 
-        const room1 = new Room1(canvas);//(DizzolGame.ROOM1, canvas, "dizzol/1.png", new RoomExit(-5, 20.5 * C64Blackbox.rowHeight), null, room1floorLevels, room1Checkpoints, 0);
-
-        const garlic11 = new Garlic(canvas, 500, 300);
-        const garlic12 = new Garlic(canvas, 400, 300);
-        //room1.addItemOnFloor(garlic11);
-        //room1.addItemOnFloor(garlic12);
+        const room1 = new Room1(canvas);
 
         const room2 = new Room(DizzolGame.ROOM2, canvas, "dizzol/2.png", new RoomExit(100, 428), new RoomExit(510, 20.5 * C64Blackbox.rowHeight), room2floorLevels, singleTotemCheckpoints, 0);
 
@@ -114,7 +224,7 @@ class RoomRegistry{
 
         const room3 = new Room(DizzolGame.ROOM3, canvas, "dizzol/3.png", new RoomExit(-5, 350), new RoomExit(530, 20.5 * C64Blackbox.rowHeight), room3floorLevels, [], 1);
         const room4 = new Room(DizzolGame.ROOM4, canvas, "dizzol/4.png", new RoomExit(-5, 20.5 * C64Blackbox.rowHeight), new RoomExit(530, 350), room4floorLevels, [], 0);
-        const room5 = new Room(DizzolGame.ROOM5, canvas, "dizzol/5.png", new RoomExit(-5, 20.5 * C64Blackbox.rowHeight), new RoomExit(510, 20.5 * C64Blackbox.rowHeight), room1floorLevels, [], 3);
+        const room5 = new Room(DizzolGame.ROOM5, canvas, "dizzol/5.png", new RoomExit(-5, 20.5 * C64Blackbox.rowHeight), new RoomExit(510, 20.5 * C64Blackbox.rowHeight), room1.floorLevels, [], 3);
         const room6 = new Room(DizzolGame.ROOM6, canvas, "dizzol/6.png", exit6Left, exit67Right, room67floorLevels, [], 1);
         const room7 = new Room(DizzolGame.ROOM7, canvas, "dizzol/7.png", exit67Left, exit67Right, room67floorLevels, twoTotemCheckpoints, 0);
         const room8 = new Room(DizzolGame.ROOM8, canvas, "dizzol/8.png", exit67Left, exit67Right, room67floorLevels, [], 0);
