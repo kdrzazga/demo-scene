@@ -148,14 +148,27 @@ class C64Blackbox {
 	    this.context.fillText('LOADING...', 0, this.cursor.position.y + 5);
 	    this.cursor.moveDown(1);
 
+        const x = 200-56;
+        const y = this.cursor.position.y + 15;
+        for (let i = 1; i <= 11; i++) {
+            let timeout = i*777;
+            if (i %3 == 1) timeout +=200;
+            setTimeout(() => {
+                const imageName = `dizzol/covers/1.${i}.png`;
+                this.loadPicture(imageName, x, y);
+            }, timeout);
+        }
+
+        new Promise(resolve => setTimeout(resolve, 3000));
+
 		setTimeout(() => {
 		    this.clearOutput();
 		    this.functionKeysActivated = false;
 		    setTimeout(() => {
 		                this.dizzolGame.activate();
 		                this.dizzolGame.draw();
-                    }, 1500);
-        }, 6000);
+                    }, 700);
+        }, 12000);
 	}
 	
 	handleMovement(direction) {
