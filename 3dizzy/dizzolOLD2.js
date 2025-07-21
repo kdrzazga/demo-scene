@@ -101,8 +101,6 @@ class Room{
     }
 
 	getFloorLevel(x) {
-	    if (this.floorLevels == null)
-	        return null;
         for (let { range, level } of this.floorLevels) {
             if (x >= range[0] && x <= range[1]) {
                 return level;
