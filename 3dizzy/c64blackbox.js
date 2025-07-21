@@ -1,3 +1,12 @@
+function playMusic() {
+    var audio = new Audio('../common/sfx/AntonioZepeda.mp3');
+    audio.play();
+    setInterval(function() {
+      audio.play();
+    }, (7*60+0)*165);
+    console.log('Music started.');
+}
+
 class Globals{
 	static runningTime = 0;	
 	
@@ -162,6 +171,7 @@ class C64Blackbox {
         new Promise(resolve => setTimeout(resolve, 3000));
 
 		setTimeout(() => {
+		    playMusic();
 		    this.clearOutput();
 		    this.functionKeysActivated = false;
 		    setTimeout(() => {
