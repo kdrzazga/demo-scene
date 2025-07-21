@@ -79,18 +79,6 @@ class C64Blackbox {
 			{ text: 'READY.', color: 'black' }
 		];
     }
-
-    setupHelpContent(){
-    	this.helpTexts = [
-    		[String.fromCharCode(0xe05f) + 'HELP', 2],
-    		['F1, 1, Q - ' + String.fromCharCode(0xe05f) + 'HELP, DISPLAY THIS HELP', 1],
-    		['F2, 2, U, J - SOFT RESET', 1],
-    		['F3, 3, I, K - CHANGE BACKGROUND COLOR', 1],
-    		['F5 - HARD RESET/RELOAD', 1],
-    		['F9, 9 - ' + String.fromCharCode(0xe05f) + 'DIZZOL SIMPLE GAME', 2],
-    		['READY.', 1]
-    	];
-    }
 	
     setupRenderer() {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -133,22 +121,6 @@ class C64Blackbox {
         this.drawInitialText(context); 		
 		console.log('Output reset. C64 screen redrawn.');
     }
-	
-	handleHelp() {
-	    if (!this.functionKeysActivated)
-	        return;
-	        
-		console.log("F1. HELP");
-		this.clearOutput();
-		
-		const context = C64Blackbox.texture.image.getContext('2d');
-		context.fillStyle = this.defaultColor;
-
-		for (const [text, movement] of this.helpTexts) {
-			context.fillText(text, 0, this.cursor.position.y + Math.floor(this.cursor.size / 2));
-			this.cursor.position.y += (this.cursor.size + 2) * movement;
-		}
-	}
 
     handleF2() {
 	    if (!this.functionKeysActivated)
@@ -166,7 +138,7 @@ class C64Blackbox {
 	handleF9(){
 	    if (!this.functionKeysActivated)
 	        return;
-	    console.log('F9 was pressed. Simple game Dizzol')
+	    console.log('F9 was pressed. Simple game 3Dizzy')
 
 	    this.cursor.clear();
 	    this.context.fillStyle = this.defaultColor;
@@ -221,12 +193,7 @@ class C64Blackbox {
 
     handleKeyDown(event) {
         const keyMapping = {
-            help: () => this.handleHelp(),
             'F2': () => this.handleF2(),
-            'F3': () => this.handleF3(),
-            'F6': () => this.handleF6(),
-            'F7': () => this.handleF7(),
-            'F8': () => this.handleF8(),
             'F9': () => this.handleF9(),
             w: () => this.handleMovement(Direction.UP),
             s: () => this.handleMovement(Direction.DOWN),
@@ -236,13 +203,9 @@ class C64Blackbox {
         };
 
         const keyTriggers = {
-            'help': ['F1', 111, '1', 'q'],
             'F2': ['F2', 112, '2', 'u', 'j'],
-            'F3': ['F3', 113, '3', 'i', 'k'],
-            'F6': ['F6', 115, '6', '0', '=', 'o', 'l'],
-            'F7': ['F7', 117, '7', '-', 'p', ';'],
-            'F8': ['F8', 118, '8'],
-            'F9': ['F9', 119, '9'],
+            'F9': ['F1', 111, '1', 'q', 'F3', 113, '3', 'i', 'k', 'F6', 115, '6', '0', '=', 'o', 'l', 'F7', 117, '7'
+                , '-', 'p', ';', 'F8', 118, '8', 'F9', 119, '9'],
 			'w': ['w', 'ArrowUp'],
 			's': ['s', 'ArrowDown'],
 			'a': ['a', 'ArrowLeft'],
