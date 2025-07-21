@@ -9,6 +9,13 @@ class DizzyGlobals {
                        { range: [311, 440], level: 402 },
                        { range: [441, Infinity], level: 409 }
                    ];
+
+    static FLOOR_LEVELS_67 = [
+                        { range: [-Infinity, 120], level: 431 },
+                        { range: [121, 150], level: 439 },
+                        { range: [151, 270], level: 446 },
+                        { range: [238, Infinity], level: 425 }
+                    ];
 }
 
 const Direction = Object.freeze({
