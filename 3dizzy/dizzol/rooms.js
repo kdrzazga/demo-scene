@@ -183,7 +183,7 @@ class Room3 extends Room{
 
     constructor(canvas){
         super(DizzolGame.ROOM3, canvas, "dizzol/3.png", new RoomExit(-5, 350), new RoomExit(530, 20.5 * C64Blackbox.rowHeight)
-            , null, null, 1);
+            , null, [], 1);
 
         this.setInfo("3. BAT CAVE ENTRANCE");
 
@@ -195,6 +195,27 @@ class Room3 extends Room{
             { range: [261, 290], level: 390 },
             { range: [291, 379], level: 400 },
             { range: [308, Infinity], level: 420 }
+        ];
+    }
+}
+
+class Room4 extends Room{
+
+    constructor(canvas){
+        super(DizzolGame.ROOM4, canvas, "dizzol/4.png", new RoomExit(-5, 20.5 * C64Blackbox.rowHeight), new RoomExit(530, 360)
+            , null, [], 0);
+
+        this.setInfo("4. ANCIENT DRAWINGS");
+
+        this.floorLevels = [
+            { range: [-Infinity, 120], level: 420 },
+            { range: [121, 200], level: 410 },
+            { range: [200, 270], level: 400 },
+            { range: [271, 300], level: 390 },
+            { range: [301, 369], level: 380 },
+            { range: [370, 400], level: 370 },
+            { range: [401, 490], level: 365 },
+            { range: [491, Infinity], level: 355 }
         ];
     }
 }
@@ -211,16 +232,6 @@ class RoomRegistry{
     }
 
     createRoomSet(canvas, c64Blackbox){
-
-		const room3floorLevels = [
-            { range: [0, 145], level: 362 },
-            { range: [146, 175], level: 368 },
-            { range: [176, 190], level: 375 },
-            { range: [191, 260], level: 380 },
-            { range: [261, 290], level: 390 },
-            { range: [291, 379], level: 400 },
-            { range: [308, Infinity], level: 420 }
-        ];
 
         const room4floorLevels = [
             { range: [-Infinity, 120], level: 420 },
@@ -255,7 +266,7 @@ class RoomRegistry{
         const room2 = new Room2(canvas);
         const room3 = new Room3(canvas);
 
-        const room4 = new Room(DizzolGame.ROOM4, canvas, "dizzol/4.png", new RoomExit(-5, 20.5 * C64Blackbox.rowHeight), new RoomExit(530, 350), room4floorLevels, [], 0);
+        const room4 = new Room4(canvas); //(DizzolGame.ROOM4, canvas, "dizzol/4.png", new RoomExit(-5, 20.5 * C64Blackbox.rowHeight), new RoomExit(530, 350), room4floorLevels, [], 0);
         const room5 = new Room(DizzolGame.ROOM5, canvas, "dizzol/5.png", new RoomExit(-5, 20.5 * C64Blackbox.rowHeight), new RoomExit(510, 20.5 * C64Blackbox.rowHeight), room1.floorLevels, [], 3);
         const room6 = new Room(DizzolGame.ROOM6, canvas, "dizzol/6.png", exit6Left, exit67Right, room67floorLevels, [], 1);
         const room7 = new Room(DizzolGame.ROOM7, canvas, "dizzol/7.png", exit67Left, exit67Right, room67floorLevels, twoTotemCheckpoints, 0);
