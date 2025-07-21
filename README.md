@@ -8,4 +8,4 @@ Just all the stuff that I've ever published on demo party (mostly the WILD categ
 
 2. upcoming... Electrician (Lost Party 2026) 
 
-3. upcoming... Mario-Contra (Lost Party 2026)
+3. upcoming... 3Dizzy (Lost Party 2026)
