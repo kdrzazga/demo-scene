@@ -1,12 +1,3 @@
-function playMusic() {
-    var audio = new Audio('../common/sfx/AntonioZepeda.mp3');
-    audio.play();
-    setInterval(function() {
-      audio.play();
-    }, (7*60+0)*165);
-    console.log('Music started.');
-}
-
 class Globals{
 	static runningTime = 0;	
 	
@@ -14,6 +5,7 @@ class Globals{
 	static screenWidth = 520;
 	static screenHeight = 512;
     static colors = ['black', 'white', 'red', 'cyan', 'magenta', 'green', '#4536a6', 'yellow', '#675200', '#c33d00', '#c18178', '#606060', '#8a8a8a', '#b3ec91', '#867ade', Globals.lightgrayColor];
+    static dizzyLoadInterval = 777;
 }
 
 class C64Blackbox {
@@ -160,7 +152,7 @@ class C64Blackbox {
         const x = 200-56;
         const y = this.cursor.position.y + 15;
         for (let i = 1; i <= 11; i++) {
-            let timeout = i*777;
+            let timeout = i*Globals.dizzyLoadInterval;
             if (i %3 == 1) timeout +=200;
             setTimeout(() => {
                 const imageName = `dizzol/covers/1.${i}.png`;
@@ -178,7 +170,7 @@ class C64Blackbox {
 		                this.dizzolGame.activate();
 		                this.dizzolGame.draw();
                     }, 700);
-        }, 12000);
+        }, 15.4*Globals.dizzyLoadInterval);
 	}
 	
 	handleMovement(direction) {
@@ -268,7 +260,6 @@ class C64Blackbox {
         cancelAnimationFrame(this.animationFrameId);
     }
 }
-
 
 class Cursor{
 	

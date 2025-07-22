@@ -28,7 +28,9 @@ class Dizzy extends Player{
         super(canvas, 450, 409);
     	this.picPath = "dizzol/jajoL.png";
     	this.picLeftPath = "dizzol/jajoL.png";
+    	this.picLeftStepPath = "dizzol/jajoLstep.png";
     	this.picRightPath = "dizzol/jajoR.png";
+    	this.picRightStepPath = "dizzol/jajoRstep.png";
     	this.inventory = [new Coin()];
     	this.hp = 1;
     }
@@ -85,6 +87,20 @@ class Troll extends Sprite{
     	this.picPath = "dizzol/trollR.png";
     	this.picLeftPath = "dizzol/trollR.png";
     	this.picRightPath = "dizzol/trollR.png";
+    	this.hp = 1;
+    }
+
+    move() {
+        //TODO
+    }
+}
+class Aldir extends Sprite{
+
+    constructor(canvas, x){
+        super(canvas, x, 360);
+    	this.picPath = "../common/pics/aldir.png";
+    	this.picLeftPath = "../common/pics/aldir.png";
+    	this.picRightPath = "../common/pics/aldir.png";
     	this.hp = 1;
     }
 

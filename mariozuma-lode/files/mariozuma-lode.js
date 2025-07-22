@@ -127,7 +127,7 @@ class MainScene extends ExtendedScene {
 
         this.load.image('valdgir-logo', 'files/background/valdgir/valdgir-swords.png');
         this.load.image('valdgir-logo2', 'files/background/valdgir/valdgir-swords2.png');
-        this.load.image('aldir', 'files/background/valdgir/aldir.png');
+        this.load.image('aldir', '../common/pics/aldir.png');
         this.load.image('aldir-quote', 'files/background/valdgir/valdgirQuote.png');
         this.load.image('valdgir-head', 'files/background/valdgir/valdgir-head.png');
 

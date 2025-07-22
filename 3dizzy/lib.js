@@ -49,16 +49,27 @@ class Sprite {
     moveRight() {
         if (this.hp > 0) {
             this.x += this.speed;
-            this.picPath = this.picRightPath;
             this.direction = Direction.RIGHT;
+
+            const currentTime = performance.now();
+                    if (currentTime % 400 < 200) {
+                        this.picPath = this.picRightPath;
+                    } else {
+                        this.picPath = this.picRightStepPath;
+                    }
         }
     }
 
     moveLeft() {
         if (this.hp > 0) {
             this.x -= this.speed;
-            this.picPath = this.picLeftPath;
             this.direction = Direction.LEFT;
+            const currentTime = performance.now();
+                    if (currentTime % 400 < 200) {
+                        this.picPath = this.picLeftPath;
+                    } else {
+                        this.picPath = this.picLeftStepPath;
+                    }
         }
     }
 

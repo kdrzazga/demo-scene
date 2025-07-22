@@ -60,6 +60,28 @@ class Room3 extends Room{
     }
 }
 
+class Room12 extends Room{
+    constructor(canvas){
+        super(DizzolGame.ROOM12, canvas, "dizzol/12.png", new RoomExit(-5, 360), new RoomExit(530, 360)
+                , null, [], 0);
+
+        this.setInfo("12. VALDGIR'S SWORDS");
+
+        this.floorLevels = [{ range: [-Infinity, 140], level: 360 }
+            , { range: [141, 330], level: 380 }
+            , { range: [331, Infinity], level: 360 }
+        ];
+
+
+        this.aldir = new Aldir();
+    }
+
+    draw(){
+        super.draw();
+        this.enemyLoader.load('../../common/pics/aldir.png', 115, 340);
+    }
+}
+
 class Room4 extends Room{
 
     constructor(canvas){
@@ -183,8 +205,9 @@ class RoomRegistry{
         const room9 = new Room9(canvas);
         const room10 = new Room10(canvas);
         const room11 = new Room11(canvas);
+        const room12 = new Room12(canvas);
 
-        this.allRooms = [room1, room2, room3, room4, room5, room6, room7, room8, room9, room10, room11];
+        this.allRooms = [room1, room2, room3, room4, room5, room6, room7, room8, room9, room10, room11, room12];
 
         this.allRooms.forEach(room => {
             room.read(); // read = load background without displaying it
