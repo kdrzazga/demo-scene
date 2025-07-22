@@ -11,12 +11,13 @@ class DizzolGame{
     static ROOM9 = 9;
     static ROOM10 = 10;
     static ROOM11 = 11;
+    static ROOM12 = 12;
     static NO_ROOM = 999999999;
 
     static roomTransitionsLeft = {
                 [DizzolGame.ROOM1]: {nextRoom: DizzolGame.ROOM2, nextRoomPlayerPos: 500},
                 [DizzolGame.ROOM2]: {nextRoom: DizzolGame.ROOM3, resetCheckpoint: true, nextRoomPlayerPos: 500},
-                [DizzolGame.ROOM3]: {nextRoom: DizzolGame.ROOM4, resetCheckpoint: false, nextRoomPlayerPos: 500},
+                [DizzolGame.ROOM3]: {nextRoom: DizzolGame.ROOM12, resetCheckpoint: false, nextRoomPlayerPos: 500},
                 [DizzolGame.ROOM4]: {nextRoom: DizzolGame.ROOM5, resetCheckpoint: false, nextRoomPlayerPos: 500},
                 [DizzolGame.ROOM5]: {nextRoom: DizzolGame.ROOM6, resetCheckpoint: false, nextRoomPlayerPos: 500},
                 [DizzolGame.ROOM6]: {nextRoom: DizzolGame.ROOM7, resetCheckpoint: false, nextRoomPlayerPos: 500},
@@ -24,21 +25,23 @@ class DizzolGame{
                 [DizzolGame.ROOM8]: {nextRoom: DizzolGame.ROOM9, resetCheckpoint: true, nextRoomPlayerPos: 500},
                 [DizzolGame.ROOM9]: {nextRoom: DizzolGame.ROOM10, resetCheckpoint: false, nextRoomPlayerPos: 500},
                 [DizzolGame.ROOM10]: {nextRoom: DizzolGame.ROOM11, resetCheckpoint: false, nextRoomPlayerPos: 500},
-                [DizzolGame.ROOM11]: {nextRoom: DizzolGame.ROOM1, resetCheckpoint: false, nextRoomPlayerPos: 500}
+                [DizzolGame.ROOM11]: {nextRoom: DizzolGame.ROOM1, resetCheckpoint: false, nextRoomPlayerPos: 500},
+                [DizzolGame.ROOM12]: {nextRoom: DizzolGame.ROOM4, nextRoomPlayerPos: 500}
             };
 
     static roomTransitionsRight = {
                 [DizzolGame.ROOM1]: {nextRoom: DizzolGame.NO_ROOM, nextRoomPlayerPos: 5},
                 [DizzolGame.ROOM2]: {nextRoom: DizzolGame.ROOM1, resetCheckpoint: true, nextRoomPlayerPos: 5},
                 [DizzolGame.ROOM3]: {nextRoom: DizzolGame.ROOM2, nextRoomPlayerPos: 100},
-                [DizzolGame.ROOM4]: {nextRoom: DizzolGame.ROOM3, resetCheckpoint: true, nextRoomPlayerPos: 5},
+                [DizzolGame.ROOM4]: {nextRoom: DizzolGame.ROOM12, resetCheckpoint: true, nextRoomPlayerPos: 5},
                 [DizzolGame.ROOM5]: {nextRoom: DizzolGame.ROOM4, resetCheckpoint: true, nextRoomPlayerPos: 5},
                 [DizzolGame.ROOM6]: {nextRoom: DizzolGame.ROOM5, resetCheckpoint: true, nextRoomPlayerPos: 5},
                 [DizzolGame.ROOM7]: {nextRoom: DizzolGame.ROOM6, resetCheckpoint: true, nextRoomPlayerPos: 70},
                 [DizzolGame.ROOM8]: {nextRoom: DizzolGame.ROOM7, resetCheckpoint: true, nextRoomPlayerPos: 5},
                 [DizzolGame.ROOM9]: {nextRoom: DizzolGame.ROOM8, resetCheckpoint: true, nextRoomPlayerPos: 5},
                 [DizzolGame.ROOM10]: {nextRoom: DizzolGame.ROOM9, resetCheckpoint: true, nextRoomPlayerPos: 5},
-                [DizzolGame.ROOM11]: {nextRoom: DizzolGame.ROOM10, resetCheckpoint: true, nextRoomPlayerPos: 5}
+                [DizzolGame.ROOM11]: {nextRoom: DizzolGame.ROOM10, resetCheckpoint: true, nextRoomPlayerPos: 5},
+                [DizzolGame.ROOM12]: {nextRoom: DizzolGame.ROOM3, nextRoomPlayerPos: 5}
             };
 
     constructor(canvas, c64Blackbox){
