@@ -67,7 +67,18 @@ class Room12 extends Room{
 
         this.setInfo("12. VALDGIR'S SWORDS");
 
-        this.floorLevels = [{ range: [-Infinity, Infinity], level: 360 }];
+        this.floorLevels = [{ range: [-Infinity, 140], level: 360 }
+            , { range: [141, 330], level: 380 }
+            , { range: [331, Infinity], level: 360 }
+        ];
+
+
+        this.aldir = new Aldir();
+    }
+
+    draw(){
+        super.draw();
+        this.enemyLoader.load('../../common/pics/aldir.png', 115, 340);
     }
 }
 

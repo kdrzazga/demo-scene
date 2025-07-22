@@ -97,7 +97,7 @@ class Troll extends Sprite{
 class Aldir extends Sprite{
 
     constructor(canvas, x){
-        super(canvas, x, 400);
+        super(canvas, x, 360);
     	this.picPath = "../common/pics/aldir.png";
     	this.picLeftPath = "../common/pics/aldir.png";
     	this.picRightPath = "../common/pics/aldir.png";
