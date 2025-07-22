@@ -94,6 +94,20 @@ class Troll extends Sprite{
         //TODO
     }
 }
+class Aldir extends Sprite{
+
+    constructor(canvas, x){
+        super(canvas, x, 400);
+    	this.picPath = "../common/pics/aldir.png";
+    	this.picLeftPath = "../common/pics/aldir.png";
+    	this.picRightPath = "../common/pics/aldir.png";
+    	this.hp = 1;
+    }
+
+    move() {
+        //TODO
+    }
+}
 
 class Knight extends Sprite{
 
