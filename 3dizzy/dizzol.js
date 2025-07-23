@@ -127,9 +127,7 @@ class DizzolGame{
     }
 
     moveFighterRight(fighter){//fighter only for backward compatibility
-        //this.player.moveRight();
         const currentRoom = this.getCurrentRoom();
-        //this.player.y = currentRoom.getFloorLevel(this.player.x);
         currentRoom.movePlayerRight(this.player);
         this.draw();
         this.checkExit(Direction.RIGHT);

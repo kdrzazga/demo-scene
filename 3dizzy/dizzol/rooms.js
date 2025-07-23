@@ -80,6 +80,29 @@ class Room12 extends Room{
         super.draw();
         this.enemyLoader.load('../../common/pics/aldir.png', 115, 340);
     }
+
+    movePlayerLeft(player){
+        super.movePlayerLeft(player);
+        if (player.x > 90 && player.x < 140){
+            console.log("Aldgir: Have you seen my swords?");
+        }
+    }
+
+    movePlayerRight(player){
+        super.movePlayerRight(player);
+        if (player.x > 90 && player.x < 140){
+            console.log("Aldgir: Have you seen my swords?");
+        }
+    }
+
+    handleFirePress(player){
+        super.handleFirePress(player);
+        if (player.x > 150 && player.x < 320){
+            console.log("Aldgir: Don't touch Valdgir's trasure !!!");
+        }
+
+    }
+
 }
 
 class Room4 extends Room{
