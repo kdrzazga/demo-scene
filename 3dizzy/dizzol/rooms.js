@@ -176,6 +176,12 @@ class Room9 extends Room{
 
         this.setInfo("9. TROLL DEMANDS TOLL");
     }
+
+
+    draw(){
+        super.draw();
+        this.enemyLoader.load('dizzol/trollR.png', 220, 241);
+    }
 }
 
 class Room10 extends Room{
@@ -208,18 +214,6 @@ class RoomRegistry{
 
     createRoomSet(canvas, c64Blackbox){
 
-        /*const exit67Left = new RoomExit(-5, 431);
-        const exit6Left = new RoomExit(70, 431);
-        const exit67Right = new RoomExit(530, 425);
-        const totemSfx1 = new SfxEvent("dizzol/totem.mp3");
-        const totemSfx2 = new SfxEvent("dizzol/totem.mp3");
-        const singleTotemCheckpoints = [new Checkpoint(315, 411, totemSfx1)];
-        const twoTotemCheckpoints = [new Checkpoint(140, 435, totemSfx1), new Checkpoint(305, 435, totemSfx2)];
-        const desertDeathEvent = new DelayedDeathEvent(null, 22000);
-        const desertDeathEvent2 = new DelayedDeathEvent(null, 22000);
-        const desertDeathCheckpoints = [new Checkpoint(500, 411, desertDeathEvent)];
-        const desertDeathCheckpoints2 = [new Checkpoint(500, 411, desertDeathEvent2)];*/
-
         const room1 = new Room1(canvas);
         const room2 = new Room2(canvas);
         const room3 = new Room3(canvas);
@@ -245,7 +239,7 @@ class RoomRegistry{
 }
 
 class RoomExit{
-    static size = 15;
+    static size = DizzyGlobals.PLAYER_SPEED * 5;
 
     constructor(x, y){
         this.x = x;

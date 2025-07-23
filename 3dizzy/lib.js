@@ -1,5 +1,7 @@
 class DizzyGlobals {
 
+    static PLAYER_SPEED = 3;
+
     static FLOOR_LEVELS_1 = [
                        { range: [0, 120], level: 419 },
                        { range: [121, 152], level: 415 },
@@ -27,7 +29,7 @@ const Direction = Object.freeze({
 
 class Sprite {
     constructor(canvas, x, y) {
-        this.speed = 3;
+        this.speed = DizzyGlobals.PLAYER_SPEED;
         this.hp = 4;
         this.x = x;
         this.y = y;
