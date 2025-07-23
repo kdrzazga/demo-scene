@@ -194,6 +194,14 @@ class Room9 extends Room{
         }
     }
 
+    movePlayerRight(player){
+        super.movePlayerRight(player);
+        if (player.x < this.trollX){
+            console.log("Pay a toll !");
+            this.enemyLoader.load('dizzol/trollQuote1.png', this.trollX, 190);
+        }
+    }
+
     draw(){
         super.draw();
         this.enemyLoader.load('dizzol/trollR.png',this.trollX, 241);
