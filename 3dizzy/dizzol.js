@@ -87,8 +87,8 @@ class DizzolGame{
         setInterval(() => {
             if (!this.active)
                 return;
+
             const currentRoom = this.getCurrentRoom();
-            //this.player.draw();
             currentRoom.animate(this.player);
             this.checkCollisions();
         }, 16);

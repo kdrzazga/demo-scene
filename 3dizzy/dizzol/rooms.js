@@ -182,12 +182,21 @@ class Room9 extends Room{
         super(DizzolGame.ROOM9, canvas, "dizzol/9.png", new RoomExit(-5, 302), new RoomExit(530, 302), [{ range: [-Infinity, Infinity], level: 302 }], [], 0);
 
         this.setInfo("9. TROLL DEMANDS TOLL");
+
+        this.trollX = 220;
     }
 
+    movePlayerLeft(player){
+        super.movePlayerLeft(player);
+        if (player.x > this.trollX){
+            console.log("Pay a toll !");
+            this.enemyLoader.load('dizzol/trollQuote1.png', this.trollX, 190);
+        }
+    }
 
     draw(){
         super.draw();
-        this.enemyLoader.load('dizzol/trollR.png', 220, 241);
+        this.enemyLoader.load('dizzol/trollR.png',this.trollX, 241);
     }
 }
 
