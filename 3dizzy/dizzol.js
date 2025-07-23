@@ -88,8 +88,8 @@ class DizzolGame{
             if (!this.active)
                 return;
             const currentRoom = this.getCurrentRoom();
-            this.player.draw();
-            currentRoom.animate();
+            //this.player.draw();
+            currentRoom.animate(this.player);
             this.checkCollisions();
         }, 16);
     }
@@ -116,14 +116,12 @@ class DizzolGame{
         const currentRoom = this.getCurrentRoom();
         currentRoom.draw();
         currentRoom.drawEnemies();
-        this.player.draw();
         currentRoom.drawItems();
     }
 
     moveFighterLeft(fighter){//fighter only for backward compatibility
-        this.player.moveLeft();
         const currentRoom = this.getCurrentRoom();
-        this.player.y = currentRoom.getFloorLevel(this.player.x);
+        currentRoom.movePlayerLeft(this.player);
         this.draw();
         this.checkExit(Direction.LEFT);
     }

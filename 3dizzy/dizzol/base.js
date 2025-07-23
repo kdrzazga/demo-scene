@@ -16,6 +16,7 @@ class Room{
                         { range: [238, Infinity], level: 425 }
                     ];
     constructor(number, canvas, picPath, leftExit, rightExit, floorLevels, checkpoints, batsCount){
+        this.player = null;
         this.number = number;
         this.picPath = picPath;
         this.leftExit = leftExit;
@@ -78,6 +79,8 @@ class Room{
 
     draw(){
         this.loader.draw(0, 9 * C64Blackbox.rowHeight);
+        if(this.player)
+            this.player.draw();
         //this.writeRoomInfo();
     }
 
@@ -105,7 +108,9 @@ class Room{
         garlics.forEach(item => this.garlicLoader.draw(item.x, item.y));
     }
 
-    animate(){
+    animate(player){
+        this.player = player;
+        this.player.draw();
         if (this.bats.length > 0){
 
             this.bats.forEach(b => b.move());
@@ -113,6 +118,14 @@ class Room{
             this.drawItems();
             this.drawEnemies();
         }
+    }
+
+    movePlayerLeft(player){
+        player.moveLeft();
+        player.y = this.getFloorLevel(player.x);
+    }
+
+    movePlayerRight(){
     }
 
 	getFloorLevel(x) {
