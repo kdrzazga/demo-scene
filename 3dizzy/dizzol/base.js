@@ -81,7 +81,6 @@ class Room{
         this.loader.draw(0, 9 * C64Blackbox.rowHeight);
         if(this.player)
             this.player.draw();
-        //this.writeRoomInfo();
     }
 
     writeRoomInfo(){

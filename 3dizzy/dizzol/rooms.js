@@ -187,11 +187,24 @@ class Room9 extends Room{
     }
 
     movePlayerLeft(player){
+        const margin = 20;
         super.movePlayerLeft(player);
-        if (player.x > this.trollX){
+        if (player.x > this.trollX + margin){
             console.log("Pay a toll !");
             this.enemyLoader.load('dizzol/trollQuote1.png', this.trollX, 190);
         }
+        if (Math.abs(player.x - this.trollX) <= margin ){
+            if (player.inventory.some(item => item.name === 'coin')){
+                const coinIndex = player.inventory.findIndex(item => item.name === 'coin');
+                player.inventory.splice(coinIndex,1);
+                player.x -= 3*margin;
+                console.log('TOLL PAID !');
+            }
+            else{
+                player.x += 2*margin;
+            }
+        }
+
     }
 
     movePlayerRight(player){
