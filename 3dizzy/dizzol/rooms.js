@@ -163,16 +163,23 @@ class Room7 extends Room{
 class Room8 extends Room{
 
     constructor(canvas){
-        super(DizzolGame.ROOM8, canvas, "dizzol/8.png", new RoomExit(-5, 431), new RoomExit(530, 425), DizzyGlobals.FLOOR_LEVELS_67, [], 0);
+        super(DizzolGame.ROOM8, canvas, "dizzol/8.png", new RoomExit(-5, 302), new RoomExit(530, 395), [], [], 0);
 
         this.setInfo("8. STAIRS");
+
+        this.floorLevels = [
+            { range: [0, 145], level: 302 },
+            { range: [146, 260], level: 335 },
+            { range: [261, 379], level: 368 },
+            { range: [308, Infinity], level: 395 }
+        ];
     }
 }
 
 class Room9 extends Room{
 
     constructor(canvas){
-        super(DizzolGame.ROOM9, canvas, "dizzol/9.png", new RoomExit(-5, 431), new RoomExit(530, 425), Room.FLOOR_LEVELS_67, [], 0);
+        super(DizzolGame.ROOM9, canvas, "dizzol/9.png", new RoomExit(-5, 302), new RoomExit(530, 302), [{ range: [-Infinity, Infinity], level: 302 }], [], 0);
 
         this.setInfo("9. TROLL DEMANDS TOLL");
     }
