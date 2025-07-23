@@ -85,6 +85,7 @@ class Room12 extends Room{
         super.movePlayerLeft(player);
         if (player.x > 90 && player.x < 140){
             console.log("Aldgir: Have you seen my swords?");
+            this.enemyLoader.load('dizzol/valdgirQuote.png', 99, 270);
         }
     }
 
@@ -92,13 +93,15 @@ class Room12 extends Room{
         super.movePlayerRight(player);
         if (player.x > 90 && player.x < 140){
             console.log("Aldgir: Have you seen my swords?");
+            this.enemyLoader.load('dizzol/valdgirQuote.png', 99, 270);
         }
     }
 
-    handleFirePress(player){
-        super.handleFirePress(player);
+    handleFirePressed(player){
+        super.handleFirePressed(player);
         if (player.x > 150 && player.x < 320){
             console.log("Aldgir: Don't touch Valdgir's trasure !!!");
+            this.enemyLoader.load('dizzol/valdgirTreasureQuote.png', 99, 270);
         }
 
     }
