@@ -80,6 +80,32 @@ class Room12 extends Room{
         super.draw();
         this.enemyLoader.load('../../common/pics/aldir.png', 115, 340);
     }
+
+    movePlayerLeft(player){
+        super.movePlayerLeft(player);
+        if (player.x > 90 && player.x < 140){
+            console.log("Aldgir: Have you seen my swords?");
+            this.enemyLoader.load('dizzol/valdgirQuote.png', 99, 270);
+        }
+    }
+
+    movePlayerRight(player){
+        super.movePlayerRight(player);
+        if (player.x > 90 && player.x < 140){
+            console.log("Aldgir: Have you seen my swords?");
+            this.enemyLoader.load('dizzol/valdgirQuote.png', 99, 270);
+        }
+    }
+
+    handleFirePressed(player){
+        super.handleFirePressed(player);
+        if (player.x > 150 && player.x < 320){
+            console.log("Aldgir: Don't touch Valdgir's trasure !!!");
+            this.enemyLoader.load('dizzol/valdgirTreasureQuote.png', 99, 270);
+        }
+
+    }
+
 }
 
 class Room4 extends Room{
@@ -137,18 +163,61 @@ class Room7 extends Room{
 class Room8 extends Room{
 
     constructor(canvas){
-        super(DizzolGame.ROOM8, canvas, "dizzol/8.png", new RoomExit(-5, 431), new RoomExit(530, 425), DizzyGlobals.FLOOR_LEVELS_67, [], 0);
+        super(DizzolGame.ROOM8, canvas, "dizzol/8.png", new RoomExit(-5, 302), new RoomExit(530, 395), [], [], 0);
 
         this.setInfo("8. STAIRS");
+
+        this.floorLevels = [
+            { range: [0, 145], level: 302 },
+            { range: [146, 260], level: 335 },
+            { range: [261, 379], level: 368 },
+            { range: [308, Infinity], level: 395 }
+        ];
     }
 }
 
 class Room9 extends Room{
 
     constructor(canvas){
-        super(DizzolGame.ROOM9, canvas, "dizzol/9.png", new RoomExit(-5, 431), new RoomExit(530, 425), Room.FLOOR_LEVELS_67, [], 0);
+        super(DizzolGame.ROOM9, canvas, "dizzol/9.png", new RoomExit(-5, 302), new RoomExit(530, 302), [{ range: [-Infinity, Infinity], level: 302 }], [], 0);
 
         this.setInfo("9. TROLL DEMANDS TOLL");
+
+        this.trollX = 220;
+    }
+
+    movePlayerLeft(player){
+        const margin = 20;
+        super.movePlayerLeft(player);
+        if (player.x > this.trollX + margin){
+            console.log("Pay a toll !");
+            this.enemyLoader.load('dizzol/trollQuote1.png', this.trollX, 190);
+        }
+        if (Math.abs(player.x - this.trollX) <= margin ){
+            if (player.inventory.some(item => item.name === 'coin')){
+                const coinIndex = player.inventory.findIndex(item => item.name === 'coin');
+                player.inventory.splice(coinIndex,1);
+                player.x -= 3*margin;
+                console.log('TOLL PAID !');
+            }
+            else{
+                player.x += 2*margin;
+            }
+        }
+
+    }
+
+    movePlayerRight(player){
+        super.movePlayerRight(player);
+        if (player.x < this.trollX){
+            console.log("Pay a toll !");
+            this.enemyLoader.load('dizzol/trollQuote1.png', this.trollX, 190);
+        }
+    }
+
+    draw(){
+        super.draw();
+        this.enemyLoader.load('dizzol/trollR.png',this.trollX, 241);
     }
 }
 
@@ -182,18 +251,6 @@ class RoomRegistry{
 
     createRoomSet(canvas, c64Blackbox){
 
-        /*const exit67Left = new RoomExit(-5, 431);
-        const exit6Left = new RoomExit(70, 431);
-        const exit67Right = new RoomExit(530, 425);
-        const totemSfx1 = new SfxEvent("dizzol/totem.mp3");
-        const totemSfx2 = new SfxEvent("dizzol/totem.mp3");
-        const singleTotemCheckpoints = [new Checkpoint(315, 411, totemSfx1)];
-        const twoTotemCheckpoints = [new Checkpoint(140, 435, totemSfx1), new Checkpoint(305, 435, totemSfx2)];
-        const desertDeathEvent = new DelayedDeathEvent(null, 22000);
-        const desertDeathEvent2 = new DelayedDeathEvent(null, 22000);
-        const desertDeathCheckpoints = [new Checkpoint(500, 411, desertDeathEvent)];
-        const desertDeathCheckpoints2 = [new Checkpoint(500, 411, desertDeathEvent2)];*/
-
         const room1 = new Room1(canvas);
         const room2 = new Room2(canvas);
         const room3 = new Room3(canvas);
@@ -219,7 +276,7 @@ class RoomRegistry{
 }
 
 class RoomExit{
-    static size = 15;
+    static size = DizzyGlobals.PLAYER_SPEED * 5;
 
     constructor(x, y){
         this.x = x;

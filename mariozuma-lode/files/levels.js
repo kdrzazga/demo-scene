@@ -209,7 +209,7 @@ class SceneValdgirSwords extends MainScene{
         const valdgirLogo = this.add.sprite(6.3*Globals.TILE_WIDTH + 13, 4.5*Globals.TILE_WIDTH, 'valdgir-logo');
         valdgirLogo.play('valdgir-swords');
 
-        const aldir = this.add.sprite(4*Globals.TILE_WIDTH, 9*Globals.TILE_WIDTH, 'aldir');
+        const aldir = this.add.sprite(4*Globals.TILE_WIDTH, 9.13*Globals.TILE_WIDTH, 'aldir');
         this.aldirQoute = this.add.sprite(4.6*Globals.TILE_WIDTH, 7.6*Globals.TILE_WIDTH, 'aldir-quote');
         this.aldirQoute.setDepth(11);
 

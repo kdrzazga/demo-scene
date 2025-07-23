@@ -87,9 +87,9 @@ class DizzolGame{
         setInterval(() => {
             if (!this.active)
                 return;
+
             const currentRoom = this.getCurrentRoom();
-            this.player.draw();
-            currentRoom.animate();
+            currentRoom.animate(this.player);
             this.checkCollisions();
         }, 16);
     }
@@ -116,22 +116,19 @@ class DizzolGame{
         const currentRoom = this.getCurrentRoom();
         currentRoom.draw();
         currentRoom.drawEnemies();
-        this.player.draw();
         currentRoom.drawItems();
     }
 
     moveFighterLeft(fighter){//fighter only for backward compatibility
-        this.player.moveLeft();
         const currentRoom = this.getCurrentRoom();
-        this.player.y = currentRoom.getFloorLevel(this.player.x);
+        currentRoom.movePlayerLeft(this.player);
         this.draw();
         this.checkExit(Direction.LEFT);
     }
 
     moveFighterRight(fighter){//fighter only for backward compatibility
-        this.player.moveRight();
         const currentRoom = this.getCurrentRoom();
-        this.player.y = currentRoom.getFloorLevel(this.player.x);
+        currentRoom.movePlayerRight(this.player);
         this.draw();
         this.checkExit(Direction.RIGHT);
     }
@@ -140,46 +137,7 @@ class DizzolGame{
         console.log('FIRE !');
 
         const currentRoom = this.getCurrentRoom();
-
-        currentRoom.writeUpperInfo("You picked " + this.pickGarlic());
-        new Promise((resolve) => {
-            setTimeout(() => {
-                resolve();
-            }, 1000);
-        }).then(() => {
-            let inventoryInfo = "Inventory: ";
-            this.player.inventory.forEach(item => {
-                inventoryInfo += (item.name + " ");
-            });
-            console.log(inventoryInfo);
-            currentRoom.writeUpperInfo(inventoryInfo);
-
-            return new Promise((resolve2) => {
-                setTimeout(() => {
-                    resolve2();
-                }, 1000);
-            });
-        }).then(() => {
-            currentRoom.writeRoomInfo();
-        });
-    }
-
-    pickGarlic(){
-        let result = "nothing";
-        const room = this.getCurrentRoom();
-        const itemsShallowCopy = [...room.items];
-
-        itemsShallowCopy.forEach(item =>{
-            console.log("item at " + item.x + " player at " + this.player.x);
-            if (item.collide(this.player)){
-                console.log("Grabbing " + item.name);
-                room.items = room.items.filter(i => i !== item);
-                this.player.inventory.push(item);
-                result = 'garlic';
-                ping();
-            }
-        })
-        return result;
+        currentRoom.handleFirePressed(this.player);
     }
 
     checkExit(direction) {

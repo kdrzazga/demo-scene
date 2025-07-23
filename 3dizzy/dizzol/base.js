@@ -16,6 +16,7 @@ class Room{
                         { range: [238, Infinity], level: 425 }
                     ];
     constructor(number, canvas, picPath, leftExit, rightExit, floorLevels, checkpoints, batsCount){
+        this.player = null;
         this.number = number;
         this.picPath = picPath;
         this.leftExit = leftExit;
@@ -78,7 +79,8 @@ class Room{
 
     draw(){
         this.loader.draw(0, 9 * C64Blackbox.rowHeight);
-        //this.writeRoomInfo();
+        if(this.player)
+            this.player.draw();
     }
 
     writeRoomInfo(){
@@ -105,7 +107,9 @@ class Room{
         garlics.forEach(item => this.garlicLoader.draw(item.x, item.y));
     }
 
-    animate(){
+    animate(player){
+        this.player = player;
+        this.player.draw();
         if (this.bats.length > 0){
 
             this.bats.forEach(b => b.move());
@@ -113,6 +117,59 @@ class Room{
             this.drawItems();
             this.drawEnemies();
         }
+    }
+
+    movePlayerLeft(player){
+        player.moveLeft();
+        player.y = this.getFloorLevel(player.x);
+    }
+
+    movePlayerRight(player){
+        player.moveRight();
+        player.y = this.getFloorLevel(player.x);
+    }
+
+    handleFirePressed(player) {
+
+        this.writeUpperInfo("You picked " + this.pickGarlic(player));
+        new Promise((resolve) => {
+            setTimeout(() => {
+                resolve();
+            }, 1500);
+        }).then(() => {
+            let inventoryInfo = "Inventory: ";
+            player.inventory.forEach(item => {
+                inventoryInfo += (item.name + " ");
+            });
+            console.log(inventoryInfo);
+            this.writeUpperInfo(inventoryInfo);
+
+            return new Promise((resolve2) => {
+                setTimeout(() => {
+                    resolve2();
+                }, 1500);
+            });
+        }).then(() => {
+            this.writeRoomInfo();
+        });
+
+    }
+
+    pickGarlic(player){
+        let result = "nothing";
+        const itemsShallowCopy = [...this.items];
+
+        itemsShallowCopy.forEach(item =>{
+            console.log("item at " + item.x + " player at " + player.x);
+            if (item.collide(player)){
+                console.log("Grabbing " + item.name);
+                this.items = this.items.filter(i => i !== item);
+                player.inventory.push(item);
+                result = 'garlic';
+                ping();
+            }
+        })
+        return result;
     }
 
 	getFloorLevel(x) {
