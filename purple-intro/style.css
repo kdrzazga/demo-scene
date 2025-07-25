@@ -1,0 +1,26 @@
+body {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+table {
+    margin: 0 auto;
+    border-collapse: collapse;
+}
+
+td {
+    background-color: purple;
+}
+
+@font-face {
+    font-family: 'c64-mono';
+    src: url('../common/fonts/C64_Pro_Mono-STYLE.ttf');
+}
+
+#scroll {
+    position: absolute;
+    top: 1%;
+    width: 122%;
+    height: 3%;
+    z-index: 1;
+}
