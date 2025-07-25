@@ -14,7 +14,7 @@ td {
 
 @font-face {
     font-family: 'c64-mono';
-    src: url('../common/fonts/C64_Pro_Mono-STYLE.ttf');
+    src: url('../../common/fonts/C64_Pro_Mono-STYLE.ttf');
 }
 
 #scroll {
