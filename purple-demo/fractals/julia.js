@@ -74,7 +74,7 @@ class JuliaScene extends Phaser.Scene {
                 );
 
                 colorValue = 2.52 * colorValue;
-                const color = Phaser.Display.Color.GetColor(colorValue, 0 colorValue);
+                const color = Phaser.Display.Color.GetColor(colorValue, 0, colorValue);
 
                 this.graphics.fillStyle(color, 1);
                 this.graphics.fillRect(px * pixelWidth, py * pixelWidth, pixelWidth, pixelWidth);
