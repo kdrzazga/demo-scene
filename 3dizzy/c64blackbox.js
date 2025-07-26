@@ -33,6 +33,8 @@ class C64Blackbox {
 		this.defaultColor = 'black';
 		this.classRef = C64Blackbox;
 		this.param = '';
+
+		this.keyboardLock = false;
 	}
 
     init() {
@@ -137,6 +139,12 @@ class C64Blackbox {
     }
 
 	handleF9(){
+        if (this.keyboardLock){
+            console.log('Keyboard locked');
+            return;
+        }
+
+	    this.keyboardLock = true;
 	    if (!this.functionKeysActivated)
 	        return;
 	    console.log('F9 was pressed. Simple game 3Dizzy')
