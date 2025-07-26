@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandelbrot and Julia </title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+</head>
+<body style="background-color: black; color:white;">
+<table>
+    <tr><td>Mandelbrot</td><td>Julia</td></tr>
+    <tr><td>Iterations: <input type="range" id="iterationSliderM" min="1" max="500" value="100" onchange="getMandelParamsFromUi();"></td>
+        <td>Iterations: <input type="range" id="iterationSliderJ" min="1" max="70" value="100" onchange="getJuliaParamsFromUi();">&nbsp;<div id = 'julia-max'></div><br/>
+            Re: <input type="range" id="cReInput" min="-1" max="1" value="-0.4" step="0.1" onchange="getJuliaParamsFromUi();">&nbsp;<div id = 'julia-re'></div><br/>
+            Im: <input type="range" id="cImInput" min="-1" max="1" value="0.7" step="0.1" onchange="getJuliaParamsFromUi();">&nbsp;<div id = 'julia-im'></div>
+        </td></tr>
+    <tr><td><div id="mandelbrot"></div></td><td><div id="julia"></div></td></tr>
+</table>
+<script src="mandelbrot.js"></script>
+<script src="julia.js"></script>
+</body>
+</html>
