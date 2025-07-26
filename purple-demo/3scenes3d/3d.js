@@ -17,8 +17,8 @@ class MyScene {
         this.headerLines = [];
         this.context = null;
         this.cursor = null;
-        this.clearColor = 0xaaaaaa; // Example color
-        this.backgroundColor = 0xcccccc; // Example color
+        this.clearColor = 0xcc00cc; // Example color
+        this.backgroundColor = 0xcc00cc; // Example color
         this.defaultColor = 'black';
 
         this.planes = [];
