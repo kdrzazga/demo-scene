@@ -14,7 +14,7 @@ class Scene2 extends DigDugScene {
         this.load.image('saboteur2', 'pics/sab2.png');
         this.load.image('saboteur3', 'pics/sab3.png');
 
-        this.alphabet = new Alphabet(this);
+        this.alphabet = new Alphabet(this, '../../common/pics');
     }
 
     create() {

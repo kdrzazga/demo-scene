@@ -1,27 +1,32 @@
 class Alphabet {
 
-    constructor(scene){
+    constructor(scene, directory){
         this.scene = scene;
+        if (directory)
+            this.directory = directory;
         this.loadAlphabet()
     }
 
     loadAlphabet(){
-        this.scene.load.image('a', '../common/pics/alphabet/a.png');
-        this.scene.load.image('b', '../common/pics/alphabet/b.png');
-        this.scene.load.image('c', '../common/pics/alphabet/c.png');
-        this.scene.load.image('d', '../common/pics/alphabet/d.png');
-        this.scene.load.image('e', '../common/pics/alphabet/e.png');
 
-        this.scene.load.image('i', '../common/pics/alphabet/i.png');
+        const directory = this.directory ? this.directory : ''
 
-        this.scene.load.image('m', '../common/pics/alphabet/m.png');
+        this.scene.load.image('a', directory + '/alphabet/a.png');
+        this.scene.load.image('b', directory + '/alphabet/b.png');
+        this.scene.load.image('c', directory + '/alphabet/c.png');
+        this.scene.load.image('d', directory + '/alphabet/d.png');
+        this.scene.load.image('e', directory + '/alphabet/e.png');
 
-        this.scene.load.image('o', '../common/pics/alphabet/o.png');
-        this.scene.load.image('p', '../common/pics/alphabet/p.png');
-        this.scene.load.image('r', '../common/pics/alphabet/r.png');
-        this.scene.load.image('u', '../common/pics/alphabet/u.png');
+        this.scene.load.image('i', directory + '/alphabet/i.png');
 
-        this.scene.load.image('z', '../common/pics/alphabet/z.png');
+        this.scene.load.image('m', directory + '/alphabet/m.png');
+
+        this.scene.load.image('o', directory + '/alphabet/o.png');
+        this.scene.load.image('p', directory + '/alphabet/p.png');
+        this.scene.load.image('r', directory + '/alphabet/r.png');
+        this.scene.load.image('u', directory + '/alphabet/u.png');
+
+        this.scene.load.image('z', directory + '/alphabet/z.png');
     }
 
     createCaption(text, xStart, yStart, distanceFactor=1){
