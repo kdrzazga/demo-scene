@@ -61,7 +61,7 @@ class Scene2 extends DigDugScene {
         this.digdug.sprite.setScale(0.5);
         this.digdug.walkingLeft = false;
 
-        this.sandra = this.add.sprite(Constants.SCREEN_WIDTH/2, Constants.SCREEN_HEIGHT/2 + 1070, 'sandra');
+        this.sandra = this.add.sprite(Constants.SCREEN_WIDTH/2, 3*Constants.SCREEN_HEIGHT/2, 'sandra');
         this.saboteur.y += 7;
     }
 
@@ -112,11 +112,16 @@ class Scene2 extends DigDugScene {
                 console.error("this.demoCaption or this.demoCaption.children is undefined");
             }
         }
-        if (this.demoCounter > 2400 && this.demoCounter < 2600){
-            this.sandra.y = Constants.SCREEN_HEIGHT/2 + 70;
+        if (this.demoCounter > 2400 && this.demoCounter < 3500){
+            if (this.sandra.y > Constants.SCREEN_HEIGHT/2 +70)
+                this.sandra.y -= 0.7;
             this.sandra.setDepth(4);
+        }
+
+        if (this.demoCounter > 3500){
             this.saboteur.y = 5000;
             this.c64.y = 5000;
+
         }
     }
 
