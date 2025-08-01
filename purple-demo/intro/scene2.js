@@ -8,13 +8,14 @@ class Scene2 extends DigDugScene {
     }
 
     preload() {
+        this.load.image('sandra', 'pics/sandracretu.png');
         this.load.image('c64', 'c64.png');
 
         this.load.image('saboteur1', 'pics/sab1.png');
         this.load.image('saboteur2', 'pics/sab2.png');
         this.load.image('saboteur3', 'pics/sab3.png');
 
-        this.alphabet = new Alphabet(this);
+        this.alphabet = new Alphabet(this, '../../common/pics');
     }
 
     create() {
@@ -59,6 +60,9 @@ class Scene2 extends DigDugScene {
         this.digdug.sprite.y = 34;
         this.digdug.sprite.setScale(0.5);
         this.digdug.walkingLeft = false;
+
+        this.sandra = this.add.sprite(Constants.SCREEN_WIDTH/2, 3*Constants.SCREEN_HEIGHT/2, 'sandra');
+        this.saboteur.y += 7;
     }
 
     updateLine() {
@@ -108,11 +112,17 @@ class Scene2 extends DigDugScene {
                 console.error("this.demoCaption or this.demoCaption.children is undefined");
             }
         }
-        /*if (this.demoCounter > 1400 && this.demoCounter < 1600){
-            this.demoCaption.children.iterate(function (child) {
-                            child.y ++;
-                        });
-        }*/
+        if (this.demoCounter > 2400 && this.demoCounter < 3500){
+            if (this.sandra.y > Constants.SCREEN_HEIGHT/2 +70)
+                this.sandra.y -= 0.7;
+            this.sandra.setDepth(4);
+        }
+
+        if (this.demoCounter > 3500){
+            this.saboteur.y = 5000;
+            this.c64.y = 5000;
+
+        }
     }
 
     createDemoCaption(){
