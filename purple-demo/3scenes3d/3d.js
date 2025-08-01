@@ -74,19 +74,6 @@ class MyScene {
             loader.load(
                 path,
                 (texture) => {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-
-                    const width = texture.image.width;
-                    const height = texture.image.height;
-                    canvas.width = width;
-                    canvas.height = height;
-
-                    ctx.drawImage(texture.image,0 ,0);
-
-                    texture.image = canvas;
-                    texture.needsUpdate = true;
-
                     this.textures[index] = texture;
                     loadedCount++;
                     if (loadedCount === imagePaths.length) {
@@ -138,14 +125,6 @@ myScene.init();
 
 function tick1Second(){
     globalCounter++;
-
-        const context = myScene.textures[0].image.getContext('2d');
-
-        const img = new Image();
-        img.onload = () => {
-          context.drawImage(img, 0, 0);
-        };
-        img.src = 'rick-astley.png';
 
     if (globalCounter % 25 == 0){
         myScene.planes[0].rotation.x = 0;
