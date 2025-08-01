@@ -5,8 +5,23 @@
     <title>3d</title>
 </head>
 <body>
+    <img id = 'rick' src="rick-astleyPurple.png" style="position:absolute; ">
     <div id="scene-container"></div>
     <script src="../../common/three.min.js"></script>
     <script src="3d.js"></script>
+    <script>
+        function positionImageAtBottom() {
+            const img = document.getElementById('rick');
+            // Set left to 0
+            img.style.left = '0px';
+            // Set bottom to 0 to position at bottom of window
+            img.style.bottom = '0px';
+        }
+
+        // Call after load
+        window.addEventListener('load', positionImageAtBottom);
+        // Optional: update on resize
+        window.addEventListener('resize', positionImageAtBottom);
+    </script>
 </body>
 </html>
