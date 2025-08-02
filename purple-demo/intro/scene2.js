@@ -129,7 +129,7 @@ class Scene2 extends DigDugScene {
         if (this.demoCaption != undefined)
             return;
 
-        this.demoCaption = this.alphabet.createCaption('demo', 100, 100);
+        this.demoCaption = this.alphabet.createCaption('sandra', 100, 100, 0.7);
         this.alphabet.waveSinusoidally(this.demoCaption, 15);
     }
 
