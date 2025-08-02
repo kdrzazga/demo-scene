@@ -18,20 +18,21 @@ function conditionallySwitchStage(){
     let audio = new Audio('../common/sfx/dig.mp3');
 
     if (secondsElapsed == 90){
-        contentFrame.src = 'anims/index.html';
-
-        audio = new Audio('../common/sfx/dig.mp3');
-        audio.play();
-    }
-    else if (secondsElapsed == 90+ 30){
         contentFrame.src = '3scenes3d/index.html';
 
         audio = new Audio('../common/sfx/NeverGonnaGive.mp3');
         audio.play();
     }
-    else if (secondsElapsed == 90+ 30 + 45){
+    else if (secondsElapsed == 90+ 45){
         contentFrame.src = 'fractals/index.html';
         audio = new Audio('../common/sfx/Lambada.mp3');
+        audio.play();
+    }
+
+    else if (secondsElapsed == 90 + 45 + 23){
+        contentFrame.src = 'anims/index.html';
+
+        audio = new Audio('../common/sfx/dig.mp3');
         audio.play();
     }
 }
