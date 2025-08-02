@@ -4,6 +4,7 @@ class Alphabet {
         this.scene = scene;
         if (directory)
             this.directory = directory;
+        this.scale = 0.5;
         this.loadAlphabet()
     }
 
@@ -20,10 +21,12 @@ class Alphabet {
         this.scene.load.image('i', directory + '/alphabet/i.png');
 
         this.scene.load.image('m', directory + '/alphabet/m.png');
+        this.scene.load.image('n', directory + '/alphabet/n.png');
 
         this.scene.load.image('o', directory + '/alphabet/o.png');
         this.scene.load.image('p', directory + '/alphabet/p.png');
         this.scene.load.image('r', directory + '/alphabet/r.png');
+        this.scene.load.image('s', directory + '/alphabet/s.png');
         this.scene.load.image('u', directory + '/alphabet/u.png');
 
         this.scene.load.image('z', directory + '/alphabet/z.png');
@@ -39,7 +42,7 @@ class Alphabet {
             const texture = this.scene.textures.get(letter);
             xStart += previousLetterWidth * distanceFactor;
             let letterSprite = this.scene.add.sprite(xStart, yStart, texture);
-            letterSprite.setScale(0.5);
+            letterSprite.setScale(this.scale);
             spriteGroup.add(letterSprite);
             previousLetterWidth = texture.getSourceImage().width;
         }
