@@ -1,3 +1,5 @@
+// TODO is this file used anywhere?
+
 class Creator {
 
     static createKarateka(scene){

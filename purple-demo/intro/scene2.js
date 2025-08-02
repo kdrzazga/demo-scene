@@ -9,7 +9,7 @@ class Scene2 extends DigDugScene {
 
     preload() {
         this.load.image('sandra', 'pics/sandracretu.png');
-        this.load.image('c64', 'c64.png');
+        this.load.image('80s', '80s.png');
 
         this.load.image('saboteur1', 'pics/sab1.png');
         this.load.image('saboteur2', 'pics/sab2.png');
@@ -36,7 +36,7 @@ class Scene2 extends DigDugScene {
             loop: true
         });
         this.circle = this.add.circle(400, 300, 100, 0xaa00aa);
-        this.c64 = this.add.sprite(400, 300, 'c64');
+        this.eighties = this.add.sprite(400, 300, '80s');
         const colors = [0xff00f8, 0xdd00dd, 0xbb00bb, 0x990092, 0x770077
                        ,0xff00f9, 0xdd00dd, 0xbb00bb, 0x990093, 0x770076
                        ,0xff00fa, 0xdd00dd, 0xbb00bb, 0x990094, 0x770075
@@ -120,7 +120,7 @@ class Scene2 extends DigDugScene {
 
         if (this.demoCounter > 3500){
             this.saboteur.y = 5000;
-            this.c64.y = 5000;
+            this.eighties.y = 5000;
 
         }
     }
@@ -135,12 +135,12 @@ class Scene2 extends DigDugScene {
 
     logoToFront(){
         this.circle.setDepth(-3);
-        this.c64.setDepth(-3);
+        this.eighties.setDepth(-3);
     }
 
     logoToBack(){
         this.circle.setDepth(3);
-        this.c64.setDepth(3);
+        this.eighties.setDepth(3);
         console.log('Logo moved to back');
     }
 }
