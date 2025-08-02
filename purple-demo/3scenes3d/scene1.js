@@ -12,7 +12,7 @@ class Scene1 extends DigDugScene {
     create(){
 
         this.alphabet = new Alphabet(this, '../../common/pics');
-        //this.alphabet.scale = 0.3;
+        this.alphabet.loadAlphabet();
         this.createDemoCaption();
     }
 
