@@ -4,6 +4,7 @@ class Alphabet {
         this.scene = scene;
         if (directory)
             this.directory = directory;
+        this.scale = 0.5;
         this.loadAlphabet()
     }
 
@@ -41,7 +42,7 @@ class Alphabet {
             const texture = this.scene.textures.get(letter);
             xStart += previousLetterWidth * distanceFactor;
             let letterSprite = this.scene.add.sprite(xStart, yStart, texture);
-            letterSprite.setScale(0.5);
+            letterSprite.setScale(this.scale);
             spriteGroup.add(letterSprite);
             previousLetterWidth = texture.getSourceImage().width;
         }
