@@ -4,6 +4,7 @@ class Alphabet {
         this.scene = scene;
         if (directory)
             this.directory = directory;
+        this.scale = 0.5;
         this.loadAlphabet()
     }
 
@@ -11,22 +12,11 @@ class Alphabet {
 
         const directory = this.directory ? this.directory : ''
 
-        this.scene.load.image('a', directory + '/alphabet/a.png');
-        this.scene.load.image('b', directory + '/alphabet/b.png');
-        this.scene.load.image('c', directory + '/alphabet/c.png');
-        this.scene.load.image('d', directory + '/alphabet/d.png');
-        this.scene.load.image('e', directory + '/alphabet/e.png');
+        const assets = ['a', 'b', 'c', 'd', 'e', 'i', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u', 'y', 'z', 'space'];
 
-        this.scene.load.image('i', directory + '/alphabet/i.png');
-
-        this.scene.load.image('m', directory + '/alphabet/m.png');
-
-        this.scene.load.image('o', directory + '/alphabet/o.png');
-        this.scene.load.image('p', directory + '/alphabet/p.png');
-        this.scene.load.image('r', directory + '/alphabet/r.png');
-        this.scene.load.image('u', directory + '/alphabet/u.png');
-
-        this.scene.load.image('z', directory + '/alphabet/z.png');
+        assets.forEach(asset => {
+            this.scene.load.image(asset, `${directory}/alphabet/${asset}.png`);
+        });
     }
 
     createCaption(text, xStart, yStart, distanceFactor=1){
@@ -35,11 +25,12 @@ class Alphabet {
 
         let previousLetterWidth = 0;
         for (let i = 0; i < letters.length;i ++) {
-            const letter = letters[i];
+            let letter = letters[i];
+            if (letter === ' ') letter = 'space';
             const texture = this.scene.textures.get(letter);
             xStart += previousLetterWidth * distanceFactor;
             let letterSprite = this.scene.add.sprite(xStart, yStart, texture);
-            letterSprite.setScale(0.5);
+            letterSprite.setScale(this.scale);
             spriteGroup.add(letterSprite);
             previousLetterWidth = texture.getSourceImage().width;
         }
