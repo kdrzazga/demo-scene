@@ -9,10 +9,11 @@ class Scene1 extends DigDugScene {
         this.demoCaption = null;
     }
 
-    create(){
+    preload(){
+        this.alphabet = new Alphabet(this, 'http://localhost:63342/demo-scene/common/pics');
+    }
 
-        this.alphabet = new Alphabet(this, '../../common/pics');
-        this.alphabet.loadAlphabet();
+    create(){
         this.createDemoCaption();
     }
 
@@ -20,6 +21,7 @@ class Scene1 extends DigDugScene {
         if (this.demoCaption != undefined)
             return;
 
+        this.alphabet.scale = 0.18;
         this.demoCaption = this.alphabet.createCaption('rick astley', 15, 15, 0.5);
         this.alphabet.waveSinusoidally(this.demoCaption, 15);
     }
