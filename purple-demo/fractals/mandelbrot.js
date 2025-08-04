@@ -75,5 +75,5 @@ const config = {
     scene: MandelbrotScene
 };
 
-const game = new Phaser.Game(config);
+const maldenbrot = new Phaser.Game(config);
 
