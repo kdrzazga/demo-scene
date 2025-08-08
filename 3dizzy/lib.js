@@ -1,6 +1,6 @@
 class DizzyGlobals {
 
-    static PLAYER_SPEED = 13;
+    static PLAYER_SPEED = 5;
 
     static FLOOR_LEVELS_1 = [
                        { range: [0, 120], level: 419 },
