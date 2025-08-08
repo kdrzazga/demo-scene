@@ -10,7 +10,7 @@ class Scene1 extends DigDugScene {
     }
 
     preload(){
-        this.alphabet = new Alphabet(this, 'http://localhost:63342/demo-scene/common/pics');
+        this.alphabet = new Alphabet(this, '../../common/pics');
     }
 
     create(){
