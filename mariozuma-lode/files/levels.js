@@ -20,7 +20,7 @@ class SceneIntro extends MainScene{
 
     preload(){
         super.preload();
-        this.alphabet = new Alphabet(this, '../../common/pics');
+        this.alphabet = new Alphabet(this, '../common/pics');
     }
 
     createSpriteGroup() {

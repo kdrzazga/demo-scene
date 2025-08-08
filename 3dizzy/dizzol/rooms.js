@@ -78,7 +78,7 @@ class Room12 extends Room{
 
     draw(){
         super.draw();
-        this.enemyLoader.load('../../common/pics/aldir.png', 115, 340);
+        this.enemyLoader.load('../common/pics/aldir.png', 115, 340);
     }
 
     movePlayerLeft(player){
