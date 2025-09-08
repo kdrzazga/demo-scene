@@ -1,0 +1,33 @@
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+</head>
+<body>
+    <div id="game-container"></div>
+    <script>
+        const config = {
+          type: Phaser.AUTO, // rendering style (WebGL or Canvas)
+          width: 800,
+          height: 600,
+          parent: 'game-container',
+          scene: {
+            preload: preload,
+            create: create,
+            update: update
+          }
+        };
+
+        const game = new Phaser.Game(config);
+
+        function preload() {
+        }
+
+        function create() {
+          this.add.text(20, 20, 'Super fajna gra!', { font: '24px Arial', fill: '#ffffff' });
+        }
+
+        function update() {
+        }
+    </script>
+</body>
+</html>
