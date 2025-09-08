@@ -18,15 +18,28 @@
         };
 
         const game = new Phaser.Game(config);
+        let sprites = [];
 
         function preload() {
+            this.load.image('balloon', 'balloon.png');
         }
 
         function create() {
-          this.add.text(20, 20, 'Super fajna gra!', { font: '24px Arial', fill: '#ffffff' });
+            this.add.text(20, 20, 'Super fajna gra!', { font: '24px Arial', fill: '#ffffff' });
+
+            for (let i = 0; i < 50; i++){
+                let s = this.add.sprite(12 * i, 13*i, 'balloon');
+                sprites.push(s);
+            }
         }
 
         function update() {
+            for (let i = 0; i < 50; i++){
+                if (sprites[i].x < 800)
+                    sprites[i].x += i;
+                else
+                    sprites[i].x = 0;
+            }
         }
     </script>
 </body>
