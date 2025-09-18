@@ -1,0 +1,53 @@
+<html>
+<head><script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script></head>
+<body>
+<div id="game-container"></div>
+
+<script>
+    const config = {
+    type: Phaser.CANVAS,
+    width: 800,
+    height: 600,
+    parent: 'game-container',
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+    const game = new Phaser.Game(config);
+    let background;
+    let player;
+
+
+
+    function preload(){
+        this.load.image('background', 'board.png');
+        this.load.image('aircraft', 'aircraft.png');
+    }
+
+    function create(){
+        background = this.add.sprite(300, 0, 'background');
+        player = this.add.sprite(300, 550, 'aircraft');
+        this.renderTexture = this.make.renderTexture({
+            width: background.width,
+            height: background.height
+        }, false);
+
+        this.renderTexture.draw(background, 0, 0);
+    }
+
+    function update(time, delta){
+        background.y += 1;
+
+        const ctx = this.sys.game.canvas.getContext('2d');
+        const leftTopPixel = ctx.getImageData(player.x - Math.floor(79/2), 600-100, 1, 1).data;
+        const rightTopPixel = ctx.getImageData(player.x + Math.floor(79/2), 600-100, 1, 1).data;
+
+        console.log(`RGBA: (${leftTopPixel[0]}, ${leftTopPixel[1]}, ${leftTopPixel[2]}, ${leftTopPixel[3]})  (${rightTopPixel[0]}, ${rightTopPixel[1]}, ${rightTopPixel[2]}, ${rightTopPixel[3]})`);
+    }
+
+</script>
+</body>
+</html>
