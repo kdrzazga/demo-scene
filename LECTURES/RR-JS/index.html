@@ -30,22 +30,32 @@
     function create(){
         background = this.add.sprite(300, 0, 'background');
         player = this.add.sprite(300, 550, 'aircraft');
-        this.renderTexture = this.make.renderTexture({
-            width: background.width,
-            height: background.height
-        }, false);
-
-        this.renderTexture.draw(background, 0, 0);
     }
 
     function update(time, delta){
         background.y += 1;
+        checkBackgroundCollision();
+    }
 
-        const ctx = this.sys.game.canvas.getContext('2d');
+    function checkBackgroundCollision(){
+        const ctx = game.canvas.getContext('2d');
         const leftTopPixel = ctx.getImageData(player.x - Math.floor(79/2), 600-100, 1, 1).data;
         const rightTopPixel = ctx.getImageData(player.x + Math.floor(79/2), 600-100, 1, 1).data;
 
-        console.log(`RGBA: (${leftTopPixel[0]}, ${leftTopPixel[1]}, ${leftTopPixel[2]}, ${leftTopPixel[3]})  (${rightTopPixel[0]}, ${rightTopPixel[1]}, ${rightTopPixel[2]}, ${rightTopPixel[3]})`);
+        const groundColor = [136, 0, 21];
+        const riverColor = [63, 72, 204];
+
+        const pixelsToCheck = [leftTopPixel, rightTopPixel];
+
+        pixelsToCheck.forEach(pixelColor =>{
+            if (pixelColor[0] === groundColor[0] && pixelColor[1] === groundColor[1] && pixelColor[2] === groundColor[2])
+                gameOver();
+        });
+    }
+
+    function gameOver(){
+        window.alert('GAME OVER!');
+        location.reload();
     }
 
 </script>
