@@ -20,15 +20,13 @@
     let background;
     let player;
 
-
-
     function preload(){
         this.load.image('background', 'empty-project/board.png');
         this.load.image('aircraft', 'empty-project/aircraft.png');
     }
 
     function create(){
-        background = this.add.sprite(300, 0, 'background');
+        background = this.add.sprite(400, -1500 + 600, 'background');//pic size: 800x3000
         player = this.add.sprite(300, 550, 'aircraft');
     }
 
