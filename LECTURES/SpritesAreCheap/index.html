@@ -1,108 +1,119 @@
 <html>
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+    <script src = "https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
 </head>
 <body>
 <div id="score">SCORE: 0</div>
-<div id="game-container"></div>
+<div id = "game-container"></div>
 <script>
-    const config = {
-        type: Phaser.CANVAS, // rendering style (WebGL or Canvas)
+    const config={
+        type: Phaser.CANVAS,
         width: 800,
         height: 600,
         parent: 'game-container',
+
         scene: {
-            preload: preloadGame,
+            preload: preload,
             create: create,
             update: update
         }
-    }
+    };
 
     const game = new Phaser.Game(config);
+    const spritesCount = 12;
     let sprites = [];
-    let player = null;
-    let ddAnim = null;
+    let player;
     let cursors;
     let score = 0;
 
-    const spriteCount = 9;
-
-    function preloadGame(){
+    function preload(){
         this.load.image('balloon', 'balloon.png');
 
-        this.load.spritesheet('digdug', 'empty-project/dig-dug.png', {
+        this.load.spritesheet('digdug', 'dig-dug.png', {
             frameWidth: 75,
             frameHeight: 75
         });
+
+        this.load.audio('msx', 'msx.mp3');
     }
 
     function create(){
-        this.add.text(20, 20, 'Super fajna gra!', { font: '24px Arial', fill: '#ffffff' });
-
-        for (let i = 0; i < spriteCount; i++){
-            const x = (30*i + 50) % 800;
-            const y = (40*i + 50) % 600;
-            const s = this.add.sprite(x, y, 'balloon');
-            sprites.push(s);
+        for(let i = 0; i < spritesCount; i++){
+            let sprite = this.add.sprite(i*60, 50*i, 'balloon');
+            sprites.push(sprite);
         }
 
         player = this.add.sprite(400, 300, 'digdug');
 
-        ddAnim = this.anims.create({
+        this.anims.create({
             key: 'walk',
-            frames: this.anims.generateFrameNumbers('digdug', { start: 0, end: 2 }),
-            frameRate: 3,
+            frames: this.anims.generateFrameNumbers('digdug',{start:0, end:2}),
+            frameRate: 5,
             repeat: -1
         });
 
         player.play('walk');
 
         cursors = this.input.keyboard.createCursorKeys();
+
+        const music = this.sound.add('msx', {
+            loop: true,
+            volume: 0.5
+        });
+
+        music.play();
     }
 
     function update(){
-         for (let i = 0; i < spriteCount; i++){
+        for(let i = 0; i < spritesCount; i++){
             if (sprites[i].x < 800){
-                sprites[i].x += i + 1;
+                sprites[i].x += i;
                 checkHit(sprites[i]);
-            }
-            else{
+                }
+            else
                 sprites[i].x = 0;
-            }
-         }
-
-         checkKeys();
-    }
-
-
-    function checkKeys(){
-       if (cursors.left.isDown) {
-            player.x -= 1;
-        } else if (cursors.right.isDown) {
-            player.x += 1;
         }
 
-        if (cursors.up.isDown) {
-            player.y -= 1;
-        } else if (cursors.down.isDown) {
-            player.y += 1;
+        checkKeys();
+    }
+
+    function checkKeys(){
+        const speed = 4;
+        if (cursors.left.isDown){
+            player.x -= speed;
+        } else if (cursors.right.isDown){
+            player.x += speed;
+        }
+
+        if (cursors.up.isDown){
+            player.y -= speed;
+        } else if (cursors.down.isDown){
+            player.y += speed;
         }
     }
 
     function checkHit(sprite){
-        let d = Phaser.Math.Distance.Between(sprite.x + sprite.width/2, sprite.y + sprite.height/2
-            , player.x + player.width/2, player.y + player.height/2);
+        let d = Phaser.Math.Distance.Between(sprite.x, sprite.y, player.x, player.y);
 
         if (d < 20){
             sprite.y = Math.pow(10,16);
             increaseScore();
+            checkWin();
         }
     }
 
     function increaseScore(){
         score++;
+
         const scoreDiv = document.getElementById('score');
         scoreDiv.innerText = 'SCORE: ' + score;
+    }
+
+    function checkWin(){
+        if (score >= spritesCount){
+            window.alert('You win');
+            location.reload();
+        }
     }
 </script>
 </body>
