@@ -1,0 +1,5 @@
+.label colorRam2=$4000
+.label start=$80e
+.label loop2=$9d4
+.label loop1=$829
+.label colorRam=$1c00
