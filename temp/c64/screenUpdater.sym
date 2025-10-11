@@ -1,0 +1,6 @@
+.label start=$80e
+.label loop2=$856
+.label loop3=$86d
+.label main=$875
+.label loop1=$854
+.label out=$86a
