@@ -19,7 +19,9 @@
     const game = new Phaser.Game(config);
     let background;
     let player;
-    let boat;
+    let boat1;
+    let boat2;
+    let boat3;
     let cursors;
 
     function preload(){
@@ -31,16 +33,27 @@
     function create(){
         background = this.add.sprite(400, -1500 + 600, 'background');//pic size: 800x3000
         player = this.add.sprite(300, 550, 'aircraft');
-        boat = this.add.sprite(300, 950, 'boat');
+        boat1 = this.add.sprite(210, -10, 'boat');
+        boat2 = this.add.sprite(0, -510, 'boat');
+        boat3 = this.add.sprite(151, -320, 'boat');
 
         cursors = this.input.keyboard.createCursorKeys();
     }
 
     function update(time, delta){
         background.y += 1;
-        boat.y--;
         checkBackgroundCollision();
         checkKeys();
+        moveBoats();
+    }
+
+    function moveBoats(){
+        boat1.y++;
+        boat1.x += 0.2;
+        boat2.y++;
+        boat2.x += 0.5;
+        boat3.y++;
+        boat3.x += 0.3;
     }
 
     function checkBackgroundCollision(){
