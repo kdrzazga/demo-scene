@@ -26,6 +26,10 @@ sprite  db 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
         db 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         db 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         db 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+X EQU 50
+Y EQU 50
+
 DATA ENDS
 
 CODE SEGMENT
@@ -36,10 +40,10 @@ start:
 
     ; Copy sprite data into video memory at segment 0xA000
     lea si, [sprite]
-    mov di, 0           ; Start at offset 0 in video memory
+    mov di, X*320 + Y           ; Start at offset 320*x+y in video memory
     mov ax, 0A000h
     mov es, ax
-    mov cx, 24*24    ; total number of pixels (rows * columns).
+    mov cx, 24*24    ; one row (24 pixels)
 
     ; Copy data directly
     rep movsb
