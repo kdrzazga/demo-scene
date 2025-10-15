@@ -38,6 +38,7 @@
         for (let i = 0; i < boatsCount; i++){
             let b = this.add.sprite(boatcoords[i][0], boatcoords[i][1], 'boat');
             b.speed = boatcoords[i][2];
+            b.active = true;
             boats.push(b);
         }
 
@@ -58,16 +59,38 @@
         if (fire){
             if (bullet.y>0){
                 bullet.y -=6;
+                checkCollision();
             }
             else{
-                fire = false;
-                bullet.y = 550 + 15;
+                resetBullet();
             }
         }
     }
 
+    function checkCollision(){
+        for(let i = 0; i < boatsCount; i++){
+            if (boats[i].active){
+                const d = Phaser.Math.Distance.Between(boats[i].x + 136/4, boats[i].y, bullet.x, bullet.y);
+
+                console.log(i, d);
+                if (d < 40){
+                    boats[i].y = Math.pow(10,16);
+                    boats[i].active = false;
+                    resetBullet();
+                }
+            }//end if active
+        }//end for
+    }
+
+    function resetBullet(){
+        fire = false;
+        bullet.y = 550 + 15;
+    }
+
     function moveBoats(){
         for(let i = 0; i < boatsCount; i++){
+            if (!boats[i].active)
+                continue;
             boats[i].x += boats[i].speed;
             boats[i].y++;
         }
