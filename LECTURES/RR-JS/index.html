@@ -19,23 +19,29 @@
     const game = new Phaser.Game(config);
     let background;
     let player;
-    let boat1;
-    let boat2;
-    let boat3;
+    let bullet;
+    const boatsCount = 3;
+    let boats = [];
     let cursors;
+    let fire = false;
 
     function preload(){
         this.load.image('background', 'empty-project/board.png');
         this.load.image('aircraft', 'empty-project/aircraft.png');
         this.load.image('boat', 'empty-project/enemy.png');
+        this.load.image('bullet', 'empty-project/bullet.png');
     }
 
     function create(){
         background = this.add.sprite(400, -1500 + 600, 'background');//pic size: 800x3000
-        boat1 = this.add.sprite(210, -10, 'boat');
-        boat2 = this.add.sprite(0, -510, 'boat');
-        boat3 = this.add.sprite(151, -320, 'boat');
+        const boatcoords = [[210,-10, 0.2], [151,-320, 0.3], [0,-510, 0.5]];
+        for (let i = 0; i < boatsCount; i++){
+            let b = this.add.sprite(boatcoords[i][0], boatcoords[i][1], 'boat');
+            b.speed = boatcoords[i][2];
+            boats.push(b);
+        }
 
+        bullet = this.add.sprite(300, 550+15, 'bullet');
         player = this.add.sprite(300, 550, 'aircraft');
         cursors = this.input.keyboard.createCursorKeys();
     }
@@ -45,15 +51,26 @@
         checkBackgroundCollision();
         checkKeys();
         moveBoats();
+        fireConditionally();
+    }
+
+    function fireConditionally(){
+        if (fire){
+            if (bullet.y>0){
+                bullet.y -=6;
+            }
+            else{
+                fire = false;
+                bullet.y = 550 + 15;
+            }
+        }
     }
 
     function moveBoats(){
-        boat1.y++;
-        boat1.x += 0.2;
-        boat2.y++;
-        boat2.x += 0.5;
-        boat3.y++;
-        boat3.x += 0.3;
+        for(let i = 0; i < boatsCount; i++){
+            boats[i].x += boats[i].speed;
+            boats[i].y++;
+        }
     }
 
     function checkBackgroundCollision(){
@@ -81,8 +98,13 @@
         const speed = 4;
         if (cursors.left.isDown){
             player.x -= speed;
+            bullet.x -= speed;
         } else if (cursors.right.isDown){
             player.x += speed;
+            bullet.x += speed;
+        }
+        if (cursors.up.isDown){
+            fire = true;
         }
     }
 
