@@ -10,7 +10,7 @@ python -m arcade.examples.line_of_sight
 import arcade
 import random
 
-SPRITE_SCALING = 0.5
+SPRITE_SCALING = 2.5
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -78,18 +78,13 @@ class GameView(arcade.View):
         self.enemy_list = arcade.SpriteList()
 
         # Set up the player
-        self.player = arcade.Sprite(
-            ":resources:images/animated_characters/female_person/femalePerson_idle.png",
-            scale=SPRITE_SCALING,
-        )
+        self.player = arcade.Sprite("tank.bmp", scale=SPRITE_SCALING,)
         self.player.center_x = 50
         self.player.center_y = 350
         self.player_list.append(self.player)
 
         # Set enemies
-        enemy = arcade.Sprite(
-            ":resources:images/animated_characters/zombie/zombie_idle.png",
-            scale=SPRITE_SCALING,
+        enemy = arcade.Sprite("monster.bmp",scale=SPRITE_SCALING,
         )
         enemy.center_x = 350
         enemy.center_y = 350
@@ -100,7 +95,7 @@ class GameView(arcade.View):
             for row in range(10):
                 sprite = arcade.Sprite(
                     ":resources:images/tiles/grassCenter.png",
-                    scale=SPRITE_SCALING,
+                    scale=0.5,
                 )
 
                 x = (column + 1) * spacing
