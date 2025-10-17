@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JS Phaser</title>
+    <script src = "https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+</head>
+<body>
+    <div id = "game-container"></div>
+    <script>
+        const config={
+            type: Phaser.CANVAS,
+            width: 640,
+            height: 480,
+            parent: 'game-container',
+
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
+
+        const game = new Phaser.Game(config);
+
+        let sprites = [];
+
+        function preload(){
+            this.load.image('skull', '../pics/skull.bmp');
+            this.load.image('tank', '../pics/tank.bmp');
+            this.load.image('monster', '../pics/monster.bmp');
+        }
+
+        function create(){
+            let skull = this.add.sprite(50, 100, 'skull');
+            let tank = this.add.sprite(100, 150, 'tank');
+            let monster = this.add.sprite(150, 250, 'monster');
+
+            skull.scaleY = 7;
+            tank.setFlipY(true);
+        }
+
+        function update(){
+        }
+    </script>
+</body>
+</html>

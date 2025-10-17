@@ -34,6 +34,12 @@ public class MyGdxGame extends ApplicationAdapter {
             sprite.setScale(2.0f);
             sprites.add(sprite);
         });
+
+        var monster = sprites.get(1);
+        //monster.rotate90(true);
+        //monster.setFlip(false,true);
+        //monster.setAlpha(0.5f); //whole sprite becomes partly transparent, not only backgound
+        //monster.setScale(10,3);
     }
 
     @Override
@@ -43,6 +49,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
         batch.begin();
         sprites.forEach(s -> s.draw(batch));
+
         var skull = sprites.get(0);
         skull.setPosition(skull.getX()+1, skull.getY());
         batch.end();
