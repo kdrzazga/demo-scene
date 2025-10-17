@@ -36,7 +36,7 @@ public class MyGdxGame extends ApplicationAdapter {
         });
 
         var monster = sprites.get(1);
-        //monster.rotate90(true);
+        //monster.rotate90(false);
         //monster.setFlip(false,true);
         //monster.setAlpha(0.5f); //whole sprite becomes partly transparent, not only backgound
         //monster.setScale(10,3);
