@@ -12,8 +12,8 @@ import random
 
 SPRITE_SCALING = 2.5
 
-WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600
 WINDOW_TITLE = "Line of Sight"
 
 MOVEMENT_SPEED = 5
@@ -78,13 +78,13 @@ class GameView(arcade.View):
         self.enemy_list = arcade.SpriteList()
 
         # Set up the player
-        self.player = arcade.Sprite("tank.bmp", scale=SPRITE_SCALING,)
+        self.player = arcade.Sprite("../pics/tank.bmp", scale=SPRITE_SCALING,)
         self.player.center_x = 50
         self.player.center_y = 350
         self.player_list.append(self.player)
 
         # Set enemies
-        enemy = arcade.Sprite("monster.bmp",scale=SPRITE_SCALING,
+        enemy = arcade.Sprite("../pics/monster.bmp",scale=SPRITE_SCALING,
         )
         enemy.center_x = 350
         enemy.center_y = 350
