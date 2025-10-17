@@ -1,12 +1,3 @@
-"""
-Line of Sight
-
-Artwork from https://kenney.nl
-
-If Python and Arcade are installed, this example can be run from the command line with:
-python -m arcade.examples.line_of_sight
-"""
-
 import arcade
 import random
 
