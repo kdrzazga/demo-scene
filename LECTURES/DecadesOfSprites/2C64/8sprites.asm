@@ -9,7 +9,7 @@
 	jsr init_sprites
 	jsr $E544  //clear screen
 	jsr write_info
-	
+
     // enable all sprites
     lda #%11111111
     sta $d015
@@ -26,7 +26,22 @@
     lda #$c0
     sta $d004
     sta $d005
-	
+    lda #110
+    sta $d006
+    sta $d007
+    lda #45
+    sta $d008
+    sta $d009
+    lda #60
+    sta $d00a
+    sta $d00b
+    lda #75
+    sta $d00c
+    sta $d00d
+    lda #90
+    sta $d00e
+    sta $d00f
+
 end:
     rts
 //------------------------
@@ -34,15 +49,15 @@ end:
 
 write_info:
 	ldx #$00
-petla2:	
+petla2:
 	lda message, x
 	sta $0400 + 3*40, x
 	inx
-	cpx #53
+	cpx #54
 	bne petla2
 	rts
 
 message:
-.text "sprite 0 (skull), sprite 1 (tank), spri-te 2 (monster)" 
+.text "sprite 0 (skull), sprite 1 (tank), spri-tes 2-7 (monster)"
 
 #import "default-sprites.asm"
