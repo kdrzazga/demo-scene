@@ -20,15 +20,14 @@ public class MyGdxGame extends ApplicationAdapter {
     @Override
     public void create() {
         this.sprites = new ArrayList<>(3);
-        batch = new SpriteBatch();
-        // Load the texture from a file in the assets folder
+        batch = new SpriteBatch(); //SpriteBatch is a renderer, used to effectively draw sprites
         var positions = Arrays.asList(50, 50, 250, 50, 250, 250);
         AtomicInteger index = new AtomicInteger(0);
         Arrays.asList("skull.bmp", "monster.bmp", "tank.bmp").forEach(file -> {
             texture = new Texture(Gdx.files.internal(file));
-            // Create a sprite from the texture
+
             var sprite = new Sprite(texture);
-            // Optionally set position, scale, rotation
+
             sprite.setPosition(positions.get(index.get()), positions.get(index.get() +1));
             index.addAndGet(2);
             sprite.setScale(2.0f);
