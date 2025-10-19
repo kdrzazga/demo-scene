@@ -9,22 +9,28 @@ void pointers(){
 	printf("%s", s);
 }
 
-char* reverseString(char* s){
-	char* sEnd;
-	sEnd = s + strlen(s);
-	printf("Len=%d begin adddress=%d, end addess=%d", strlen(s), &s, &sEnd);
 
-	for(int i=0; i<strlen(s)/2; i++){
-		s++;
-		sEnd--;
-	}
+char* reverseString(char* s) {
+    char *start = s;
+    char *end = s + strlen(s) - 1;
 
-	return s;
+    while (start < end) {
+	    char temp = *start;
+	    *start = *end;
+	    *end = temp;
 
+	    start++;
+	    end--;
+    }
+    return s;
 }
 
 void main(){
+	clrscr();
 	pointers();
-	reverseString("Kamil Slimak");
+	printf("\n");
+
+	char* rev = reverseString("Kamil Slimak");
+	printf("%s", rev);
 	getch();
 }
