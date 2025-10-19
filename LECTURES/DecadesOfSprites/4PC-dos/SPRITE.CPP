@@ -35,6 +35,7 @@ void draw_sprite(int x0, int y0) {
 void main(){
     int gd = DETECT, gm;
     initgraph(&gd, &gm, "c:\\borlandc\\bgi");
+    //https://home.cs.colorado.edu/~main/bgi/doc/initgraph.html
     setgraphmode(0);
 
     int xPos = 0;
@@ -59,7 +60,7 @@ void main(){
     int maxColors = getmaxcolor() + 1;
 
     int text_x = 10;
-    int text_y = 200;
+    int text_y = 45;
 
 
     setcolor(WHITE);
