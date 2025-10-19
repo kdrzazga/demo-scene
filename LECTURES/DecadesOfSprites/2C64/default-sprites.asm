@@ -5,7 +5,7 @@ petla:	lda sprite_colors, x
 	inx
 	cpx #$8
 	bne petla
-	
+
     // set sprite pointer index
     // this, multiplied by $40, is the address
     // in this case, the address is $2000
@@ -23,11 +23,17 @@ petla:	lda sprite_colors, x
     // $82 * $40 = $2080
     lda #$82
     sta $07fa
-	
+    //sprites3-7:
+    sta $07fb
+    sta $07fc
+    sta $07fd
+    sta $07fe
+    sta $07ff
+
 	rts
 
 sprite_colors:
-.byte $01,$05,$07,$01,$01,$01,$01,$01
+.byte $01,$05,$07,$01,$02,$03,$04,$05
 
 *=$2000 "sprite 0 skull"
 sprite0:
@@ -53,7 +59,7 @@ sprite1:
 .byte $30,%00000000,00000100,$1f,%11111111,$f8,%00000000,%00000000
 .byte %00000000,%00000000,%00000000,%00000000,%00000000,%00000000,%00000000,%00000001
 
-*=$2080 "sprite 2 monster"
+*=$2080 "sprites 2-7: monster"
 sprite2:
 
 .byte %00000000,%00000000,%00000000,%00000000,$1f,$80,%00000001,%11111111

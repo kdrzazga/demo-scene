@@ -1,12 +1,3 @@
-"""
-Line of Sight
-
-Artwork from https://kenney.nl
-
-If Python and Arcade are installed, this example can be run from the command line with:
-python -m arcade.examples.line_of_sight
-"""
-
 import arcade
 import random
 
@@ -14,9 +5,9 @@ SPRITE_SCALING = 2.5
 
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
-WINDOW_TITLE = "Line of Sight"
+WINDOW_TITLE = "Arcade Python Sprites"
 
-MOVEMENT_SPEED = 5
+MOVEMENT_SPEED = 2
 
 VIEWPORT_MARGIN = 250
 HORIZONTAL_BOUNDARY = WINDOW_WIDTH / 2.0 - VIEWPORT_MARGIN
@@ -32,24 +23,14 @@ CAMERA_BOUNDARY = arcade.LRBT(
 
 
 class GameView(arcade.View):
-    """
-    Main application class.
-    """
 
     def __init__(self):
-        """
-        Initializer
-        """
-
-        # Call the parent class initializer
         super().__init__()
 
         # Variables that will hold sprite lists
         self.player_list = None
-        self.wall_list = None
         self.enemy_list = None
 
-        # Set up the player info
         self.player = None
 
         # Track the current state of what key is pressed
@@ -64,72 +45,42 @@ class GameView(arcade.View):
         self.camera = None
 
         # Set the background color
-        self.background_color = arcade.color.AMAZON
+        self.background_color = arcade.color.BLACK
 
     def setup(self):
-        """ Set up the game and initialize the variables. """
-
-        # Camera
         self.camera = arcade.Camera2D()
 
-        # Sprite lists
         self.player_list = arcade.SpriteList()
-        self.wall_list = arcade.SpriteList(use_spatial_hash=True)
         self.enemy_list = arcade.SpriteList()
 
-        # Set up the player
-        self.player = arcade.Sprite("../pics/tank.bmp", scale=SPRITE_SCALING,)
+        self.player = arcade.Sprite("../pics/tank.bmp")
         self.player.center_x = 50
         self.player.center_y = 350
         self.player_list.append(self.player)
 
-        # Set enemies
-        enemy = arcade.Sprite("../pics/monster.bmp",scale=SPRITE_SCALING,
-        )
+        enemy = arcade.Sprite("../pics/monster.bmp",scale=SPRITE_SCALING,)
         enemy.center_x = 350
         enemy.center_y = 350
         self.enemy_list.append(enemy)
 
-        spacing = 200
-        for column in range(10):
-            for row in range(10):
-                sprite = arcade.Sprite(
-                    ":resources:images/tiles/grassCenter.png",
-                    scale=0.5,
-                )
-
-                x = (column + 1) * spacing
-                y = (row + 1) * sprite.height
-
-                sprite.center_x = x
-                sprite.center_y = y
-                if random.randrange(100) > 20:
-                    self.wall_list.append(sprite)
+        enemySkull = arcade.Sprite("../pics/skull.bmp",scale=SPRITE_SCALING,)
+        enemySkull.center_x = 500
+        enemySkull.center_y = 200
+        self.enemy_list.append(enemySkull)
 
         self.physics_engine = arcade.PhysicsEngineSimple(
             self.player,
-            self.wall_list,
         )
 
     def on_draw(self):
-        """
-        Render the screen.
-        """
-        # This command has to happen before we start drawing
         self.clear()
 
         # Draw all the sprites.
         self.player_list.draw()
-        self.wall_list.draw()
         self.enemy_list.draw()
 
         for enemy in self.enemy_list:
-            if arcade.has_line_of_sight(
-                self.player.position, enemy.position, self.wall_list
-            ):
-                color = arcade.color.RED
-            else:
-                color = arcade.color.WHITE
+            color = arcade.color.RED
             arcade.draw_line(self.player.center_x,
                              self.player.center_y,
                              enemy.center_x,
@@ -162,7 +113,6 @@ class GameView(arcade.View):
         self.camera.use()
 
     def on_key_press(self, key, modifiers):
-        """Called whenever a key is pressed. """
 
         if key == arcade.key.UP:
             self.up_pressed = True
@@ -174,7 +124,6 @@ class GameView(arcade.View):
             self.right_pressed = True
 
     def on_key_release(self, key, modifiers):
-        """Called when the user releases a key. """
 
         if key == arcade.key.UP:
             self.up_pressed = False
@@ -187,18 +136,12 @@ class GameView(arcade.View):
 
 
 def main():
-    """ Main function """
-    # Create a window class. This is what actually shows up on screen
     window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
 
-    # Create and setup the GameView
     game = GameView()
     game.setup()
 
-    # Show GameView on screen
     window.show_view(game)
-
-    # Start the arcade game loop
     arcade.run()
 
 
