@@ -4,7 +4,6 @@
 #include<conio.h>
 #include<dos.h>
 
-
 const sprite_width = 9;
 const sprite_height = 13;
 const screen_width = 320;
@@ -54,11 +53,11 @@ void flip_vertical(int arr[][sprite_width], int height) {
 
 void flip_horizontal(int arr[][sprite_width], int width) {
     for (int i = 0; i < sprite_height; i++) {
-	for (int j = 0; j < width / 2; j++) {
-	    int temp = arr[i][j];
-	    arr[i][j] = arr[i][width - j - 1];
-	    arr[i][width - j - 1] = temp;
-	}
+	    for (int j = 0; j < width / 2; j++) {
+	        int temp = arr[i][j];
+	        arr[i][j] = arr[i][width - j - 1];
+	        arr[i][width - j - 1] = temp;
+	    }
     }
 }
 
@@ -91,37 +90,36 @@ void main(){
     flip_horizontal(flipped, sprite_width);
 
     while(1) {
-	if (kbhit()) {
-	    break;
-	}
+	    if (kbhit()) {
+	        break;
+	    }
 
 	    draw_background();
 	    draw_sprite(x_pos, y_pos, flipped);
 	    delay(50);
 	    if (x_pos > screen_width - sprite_width) {
-		x_pos = 0;
+		    x_pos = 0;
 	    }
-	x_pos++;
+	    x_pos++;
 
+        int width = getmaxx() + 1;
+        int height = getmaxy() + 1;
+        int maxColors = getmaxcolor() + 1;
 
-    int width = getmaxx() + 1;
-    int height = getmaxy() + 1;
-    int maxColors = getmaxcolor() + 1;
+        int text_x = 10;
+        int text_y = initial_text_y;
 
-    int text_x = 10;
-    int text_y = initial_text_y;
+        setcolor(RED);
+        outtextxy(text_x, text_y, "Graphics mode:");
+        text_y += 20;
+        char buffer[100];
 
-    setcolor(RED);
-    outtextxy(text_x, text_y, "Graphics mode:");
-    text_y += 20;
-    char buffer[100];
+        sprintf(buffer, "Resolution: %d x %d pixels", width, height);
+        outtextxy(text_x, text_y, buffer);
+        text_y += 20;
 
-    sprintf(buffer, "Resolution: %d x %d pixels", width, height);
-    outtextxy(text_x, text_y, buffer);
-    text_y += 20;
-
-    sprintf(buffer, "Colors supported: %d", maxColors);
-    outtextxy(text_x, text_y, buffer);
+        sprintf(buffer, "Colors supported: %d", maxColors);
+        outtextxy(text_x, text_y, buffer);
     }
     closegraph();
 }
