@@ -1,7 +1,9 @@
 #include<graphics.h>
+#include<string.h>
+#include<stdio.h>
 #include<conio.h>
 #include<dos.h>
-#include<stdio.h>
+
 
 const sprite_width = 9;
 const sprite_height = 13;
@@ -24,10 +26,10 @@ int sprite[sprite_height][sprite_width] = {
     {0,     0,     0,      0,    0,     0,     0,     0,     0},
 };
 
-void draw_sprite(int x0, int y0) {
+void draw_sprite(int x0, int y0, int arr[sprite_height][sprite_width]) {
     for(int y = 0; y < sprite_height; y++) {
 	    for(int x = 0; x < sprite_width; x++) {
-		    int color = sprite[y][x];
+		    int color = arr[y][x];
 
 		    if (color == 0)
 			continue;
@@ -37,6 +39,26 @@ void draw_sprite(int x0, int y0) {
 		    putpixel(x0 + 3*x+1, y0 + y, color);
 		    putpixel(x0 + 3*x+2, y0 + y, color);
 	    }
+    }
+}
+
+void flip_vertical(int arr[][sprite_width], int height) {
+    for (int i = 0; i < height / 2; i++) {
+        for (int j = 0; j < sprite_width; j++) {
+            int temp = arr[i][j];
+            arr[i][j] = arr[height - i - 1][j];
+            arr[height - i - 1][j] = temp;
+        }
+    }
+}
+
+void flip_horizontal(int arr[][sprite_width], int width) {
+    for (int i = 0; i < sprite_height; i++) {
+	for (int j = 0; j < width / 2; j++) {
+	    int temp = arr[i][j];
+	    arr[i][j] = arr[i][width - j - 1];
+	    arr[i][width - j - 1] = temp;
+	}
     }
 }
 
@@ -64,13 +86,17 @@ void main(){
     int x_pos = 0;
     int y_pos = 41;
 
+    int flipped[sprite_height][sprite_width];
+    memcpy(flipped, sprite, sizeof(sprite));
+    flip_horizontal(flipped, sprite_width);
+
     while(1) {
 	if (kbhit()) {
 	    break;
 	}
 
 	    draw_background();
-	    draw_sprite(x_pos, y_pos);
+	    draw_sprite(x_pos, y_pos, flipped);
 	    delay(50);
 	    if (x_pos > screen_width - sprite_width) {
 		x_pos = 0;
