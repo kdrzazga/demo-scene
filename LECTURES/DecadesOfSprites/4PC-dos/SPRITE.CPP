@@ -20,7 +20,7 @@ int sprite[sprite_height][sprite_width] = {
     {WHITE, WHITE, 0,     0,     0,     0,     WHITE, WHITE, 0},
     {WHITE, 0,     0,     WHITE, WHITE, 0,     0,     WHITE, 0}, //10
     {WHITE, WHITE, 0,     0,     0,     0,     WHITE, WHITE, 0},
-    {0,     0,     WHITE, WHITE, WHITE, WHITE, 0,     WHITE, 0},
+    {0,     0,     WHITE, WHITE, WHITE, WHITE, 0,     0    , 0},
     {0,     0,     0,      0,    0,     0,     0,     0,     0},
 };
 
@@ -33,10 +33,9 @@ void draw_sprite(int x0, int y0) {
 			continue;
 
 		    //putpixel(x0 + x, y0 + y, color);
-		    putpixel(x0 + 2*x, y0 + 2*y, color);
-		    putpixel(x0 + 2*x+1, y0 + 2*y, color);
-		    putpixel(x0 + 2*x, y0 + 2*y+1, color);
-		    putpixel(x0 + 2*x+1, y0 + 2*y+1, color);
+		    putpixel(x0 + 3*x, y0 + y, color);
+		    putpixel(x0 + 3*x+1, y0 + y, color);
+		    putpixel(x0 + 3*x+2, y0 + y, color);
 	    }
     }
 }
@@ -63,7 +62,7 @@ void main(){
     setgraphmode(0);
 
     int x_pos = 0;
-    int y_pos = 30;
+    int y_pos = 41;
 
     while(1) {
 	if (kbhit()) {
