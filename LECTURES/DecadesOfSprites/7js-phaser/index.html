@@ -45,9 +45,10 @@
             const arm = 90;
 
             monster.x = 300 + arm * Math.cos(alpha);
-            monster.y = 300 + arm * Math.sin(alpha);
+            monster.y = 200 + arm * Math.sin(alpha);
 
             alpha += 0.05;
+            monster.setFlipX(monster.x > 300);
         }
     </script>
 </body>
