@@ -2,7 +2,8 @@
 20 GRAPHICS 8
 30 POKE 559,62          :REM SDMCTL Direct Memory Access (DMA) enable
 40 POKE 53248,20       :REM 53248 HPOSP0 (W) Horizontal position of player 0
-50 POKE 704,11          :REM Locations 704 to 712 ($2C0 to $2C8) are the color registers for players, missiles,and playfields
+45 WHT=15
+50 POKE 704,WHT         :REM Locations 704 to 712 ($2C0 to $2C8) are the color registers for players, missiles,and playfields
 60 I=PEEK(106)-8        :REM RAMTOP - RAM size, defined by powerup
 70 POKE 54279,I         :REM CONSOL (W/R) Used to see if one of the three yellow console buttons has been pressed (not the RESET button!).
 80 POKE 53277,3         :REM GRACTL (W) Used to turn on players and to turn on missiles.

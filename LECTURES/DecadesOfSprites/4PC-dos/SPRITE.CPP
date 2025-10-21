@@ -67,7 +67,7 @@ void flip_horizontal(int arr[][sprite_width], int width) {
 
 void draw_background(i){
     setfillstyle(SOLID_FILL, BLACK);
-    bar(0, y_pos-1, getmaxx(), initial_text_y-1);
+    bar(0, y_pos-1, 3*getmaxx()/5, initial_text_y-1);
 
     setfillstyle(SOLID_FILL, CYAN);
     bar(0,initial_text_y-3, getmaxx(), initial_text_y-1);

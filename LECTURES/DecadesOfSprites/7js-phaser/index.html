@@ -23,7 +23,8 @@
 
         const game = new Phaser.Game(config);
 
-        let sprites = [];
+        let monster;
+        let alpha = 0;
 
         function preload(){
             this.load.image('skull', '../pics/skull.bmp');
@@ -34,13 +35,19 @@
         function create(){
             let skull = this.add.sprite(50, 100, 'skull');
             let tank = this.add.sprite(100, 150, 'tank');
-            let monster = this.add.sprite(150, 250, 'monster');
+            monster = this.add.sprite(150, 250, 'monster');
 
             skull.scaleY = 7;
             tank.setFlipY(true);
         }
 
         function update(){
+            const arm = 90;
+
+            monster.x = 300 + arm * Math.cos(alpha);
+            monster.y = 300 + arm * Math.sin(alpha);
+
+            alpha += 0.05;
         }
     </script>
 </body>
