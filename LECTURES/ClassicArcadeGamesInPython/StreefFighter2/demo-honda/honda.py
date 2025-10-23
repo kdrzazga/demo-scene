@@ -1,6 +1,5 @@
 import arcade
 
-# Constants
 SCREEN_WIDTH = 527
 SCREEN_HEIGHT = 800
 SCREEN_TITLE = "HONDA Demo"
@@ -14,8 +13,8 @@ class MyGame(arcade.Window):
         self.frames = [
             arcade.load_texture("resources/honda_punch.png"),
             arcade.load_texture("resources/honda_punch_hl.png"),
-            arcade.load_texture("resources/honda_punch_hr.png"),
             arcade.load_texture("resources/honda_punch_lr.png"),
+            arcade.load_texture("resources/honda_punch_hr.png"),
             arcade.load_texture("resources/honda_punch_ll.png"),
         ]
 
