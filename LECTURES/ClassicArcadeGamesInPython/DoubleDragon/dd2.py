@@ -10,8 +10,6 @@ SCREEN_TITLE = "Double Python"
 class DoubleDragonPython(arcade.Window):
     def __init__(self):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-        self.counter = 0
-
         self.background =  background.Background.from_file("resources/Mission1.png")
 
         self.garage_door_y = 175
@@ -30,18 +28,12 @@ class DoubleDragonPython(arcade.Window):
         self.bg_sprite_list.append(over_garage)
 
     def on_update(self, delta_time):
-        self.counter += 1
-        print("update ", self.counter)
-        self.conditionally_move_garage_door()
+        print("update ")
 
     def on_draw(self):
         print("draw")
         self.background.draw()
         self.bg_sprite_list.draw()
-
-    def conditionally_move_garage_door(self):
-        if self.counter > 300 and self.counter < 800:
-            self.bg_sprite_list[0].center_y += 0.3
 
 def main():
     game = DoubleDragonPython()
