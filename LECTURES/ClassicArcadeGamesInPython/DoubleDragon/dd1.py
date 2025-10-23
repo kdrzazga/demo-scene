@@ -1,0 +1,43 @@
+#https://www.youtube.com/watch?v=R7TnIkTOSO8
+import arcade
+
+import arcade.future.background as background
+
+SCREEN_WIDTH = 2048//4
+SCREEN_HEIGHT = 400
+SCREEN_TITLE = "Double Python"
+
+class DoubleDragonPython(arcade.Window):
+    def __init__(self):
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        self.background =  background.Background.from_file("resources/Mission1.png")
+
+        over_garage = arcade.Sprite()
+        over_garage.texture = arcade.load_texture("resources/overGarage.png")
+        over_garage.center_x = 85
+        over_garage.center_y = 320
+
+        door = arcade.Sprite()
+        door.texture = arcade.load_texture("resources/door.png")
+        door.center_x = 109
+        door.center_y = 175
+
+        self.bg_sprite_list = arcade.SpriteList()
+        self.bg_sprite_list.append(over_garage)
+        self.bg_sprite_list.append(door)
+
+    def on_update(self, delta_time):
+        print("update")
+
+    def on_draw(self):
+        print("draw")
+        self.background.draw()
+        self.bg_sprite_list.draw()
+
+
+def main():
+    game = DoubleDragonPython()
+    arcade.run()
+
+if __name__ == "__main__":
+    main()
