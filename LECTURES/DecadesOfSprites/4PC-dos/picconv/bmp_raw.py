@@ -1,6 +1,6 @@
 import struct
 
-# Color mapping based on pixel value
+
 color_map = {
     0: '0',   # black
     1: '6',   # blue
@@ -19,24 +19,22 @@ color_map = {
     15: 'f'   # white
 }
 
+
 def read_4bit_bmp_and_convert(input_file, output_file):
     with open(input_file, 'rb') as f:
-        # Read BMP header
+
         f.seek(0)
         header_field = f.read(2)
         if header_field != b'BM':
             print("Not a BMP file.")
             return
 
-        # Read file size and pixel data offset
         f.seek(10)
         pixel_offset = struct.unpack('<I', f.read(4))[0]
 
-        # Read DIB header size
         f.seek(14)
         dib_header_size = struct.unpack('<I', f.read(4))[0]
 
-        # Read image width and height
         f.seek(18)
         width = struct.unpack('<I', f.read(4))[0]
         height = struct.unpack('<I', f.read(4))[0]
@@ -48,15 +46,14 @@ def read_4bit_bmp_and_convert(input_file, output_file):
             print("This program only supports 4-bit BMP files.")
             return
 
-        # Read palette (assumed 16 colors)
+        color_count = 16
         palette_offset = 14 + dib_header_size
         f.seek(palette_offset)
         palette = []
-        for _ in range(16):
+        for _ in range(color_count):
             b, g, r, _ = struct.unpack('BBBB', f.read(4))
             palette.append((r, g, b))
 
-        # Read pixel data
         f.seek(pixel_offset)
         row_size = ((width + 1) // 2 + 3) // 4 * 4  # row size in bytes, aligned to 4 bytes
         pixels_data = []
@@ -84,7 +81,7 @@ def read_4bit_bmp_and_convert(input_file, output_file):
                 # Join all pixel color codes for the row
                 out_f.write(''.join(row_colors[:width]) + '\n')
 
-# Usage
+
 input_bmp = 'viking2.bmp'
 output_txt = 'output.txt'
 read_4bit_bmp_and_convert(input_bmp, output_txt)

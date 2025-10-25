@@ -78,7 +78,7 @@ int main() {
     fclose(fp);
     getch();
 
-    save_screen_to_binary("viking.pic", width, height);
+    save_screen_to_binary("picconv\\viking.pic", width, height);
     closegraph();
     getch();
 
