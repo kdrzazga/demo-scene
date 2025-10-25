@@ -33,7 +33,7 @@ int main() {
 
     initgraph(&gd, &gm, "c:\\borlandc\\bgi");
 
-    FILE *fp = fopen("picconv\\output.txt", "r");
+    FILE *fp = fopen("picconv\\output.txt", "rt");
     if (fp == NULL) {
         printf("Error opening file\n");
         getch();
@@ -41,8 +41,8 @@ int main() {
         return 1;
     }
 
-    int width = 627;
-    int height = 252;
+    const width = 627;
+    const height = 252;
     char line[1024];
 
     int y = 0;

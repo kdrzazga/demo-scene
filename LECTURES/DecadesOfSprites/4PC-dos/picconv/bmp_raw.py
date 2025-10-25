@@ -3,19 +3,19 @@ import struct
 # Color mapping based on pixel value
 color_map = {
     0: '0',   # black
-    1: '1',   # blue
-    3: '3',   # cyan
-    4: '4',   # red
+    1: '6',   # blue
+    14: 'e',   # cyan
+    12: '9',   # red
     5: '5',   # purple
-    6: '6',   # brown
-    7: '7',   # lightgray
-    8: '8',   # darkgray
-    9: '9',   # light blue
+    6: '1',   # brown
+    7: '8',   # lightgray
+    8: '7',   # darkgray
+    9: '4',   # light blue
     10: 'a',  # light green
     11: 'b',  # cyan
-    12: 'c',  # pink
+    4: 'c',  # pink
     13: 'd',  # light purple
-    14: 'e',  # yellow
+    3: '3',  # yellow
     15: 'f'   # white
 }
 
