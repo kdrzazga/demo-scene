@@ -26,7 +26,7 @@ int char_to_int(char pixel_char){
 }
 
 void save_screen_to_binary(const char *filename, int width, int height) {
-    unsigned char *buffer = (unsigned char *)malloc(width * height * 3);
+    char *buffer = (char *)malloc((width * height) / 2);
     if (buffer == NULL) {
         printf("Memory allocation failed.\n");
         return;
@@ -38,7 +38,8 @@ void save_screen_to_binary(const char *filename, int width, int height) {
         free(buffer);
         return;
     }
-    fwrite(buffer, 1, width * height * 3, fp);
+    getch();
+    fwrite(buffer, 1, width * height/2, fp);
     fclose(fp);
     free(buffer);
 }
