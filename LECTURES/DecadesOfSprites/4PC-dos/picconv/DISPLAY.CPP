@@ -1,64 +1,36 @@
 #include <graphics.h>
 #include <stdio.h>
-#include <direct.h>
-#include <conio.h>
-#include <alloc.h>
 #include <stdlib.h>
+#include <conio.h>
 
-void print_cwd() {
-    char cwd[260]; // Buffer for current directory path
-
-    if (getcwd(cwd, sizeof(cwd)) != NULL) {
-        printf("Current directory: %s\n", cwd);
-    } else {
-        printf("Failed to get current directory.\n");
+void load_image_and_display(const char *filename, int width, int height) {
+    unsigned char *buffer = (unsigned char *)malloc(width * height * 3);
+    if (buffer == NULL) {
+        printf("Memory allocation failed.\n");
+        return;
     }
+
+    FILE *fp = fopen(filename, "rb");
+    if (fp == NULL) {
+        printf("Failed to open file for reading.\n");
+        free(buffer);
+        return;
+    }
+
+    fread(buffer, 1, width * height * 3, fp);
+    fclose(fp);
+
+    putimage(0, 0, buffer, COPY_PUT);
+    free(buffer);
 }
 
-int char_to_int(char pixel_char){
-    int pixel_value;
-    if (pixel_char >= '0' && pixel_char <= '9') {
-        pixel_value = pixel_char - '0';
-    } else if (pixel_char >= 'a' && pixel_char <= 'f') {
-        pixel_value = pixel_char - 'a' + 10;
-    }
-    return pixel_value;
-}
-
-int main() {
+void main(){
     int gd = DETECT, gm;
-
-    print_cwd();
-    getch();
-
     initgraph(&gd, &gm, "c:\\borlandc\\bgi");
 
-    FILE *fp = fopen("picconv\\output.txt", "rt");
-    if (fp == NULL) {
-        printf("Error opening file\n");
-        getch();
-        closegraph();
-        return 1;
-    }
-
-    const width = 627;
-    const height = 252;
-    char line[1024];
-
-    int y = 0;
-    while (fgets(line, sizeof(line), fp) && y < height) {
-        for (int x = 0; x < width; x++) {
-            char pixel_char = line[x];
-            //int color = (pixel_char == '1') ? WHITE : BLACK;
-            if(pixel_char == '\n')  y++;
-	    putpixel(x, y, char_to_int(pixel_char));
-        }
-        y++;
-    }
-
-    fclose(fp);
+    load_image_and_display("VIKING.PIC", 627, 252);
 
     getch();
     closegraph();
-    return 0;
+
 }

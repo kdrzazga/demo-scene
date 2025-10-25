@@ -5,9 +5,9 @@ color_map = {
     0: '0',   # black
     1: '6',   # blue
     11: 'e',   # cyan
-    12: '9',   # red
+    6: '9',   # red
     5: '5',   # purple
-    6: '1',   # brown
+    12: '1',   # brown
     7: '8',   # lightgray
     8: '7',   # darkgray
     9: '4',   # light blue
