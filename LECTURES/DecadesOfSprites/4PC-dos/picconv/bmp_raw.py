@@ -4,7 +4,7 @@ import struct
 color_map = {
     0: '0',   # black
     1: '6',   # blue
-    14: 'e',   # cyan
+    11: 'e',   # cyan
     12: '9',   # red
     5: '5',   # purple
     6: '1',   # brown
@@ -12,7 +12,7 @@ color_map = {
     8: '7',   # darkgray
     9: '4',   # light blue
     10: 'a',  # light green
-    11: 'b',  # cyan
+    14: 'b',  # cyan
     4: 'c',  # pink
     13: 'd',  # light purple
     3: '3',  # yellow
