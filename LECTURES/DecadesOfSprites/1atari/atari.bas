@@ -1,3 +1,5 @@
+0 REM POKE 710,2
+1 REM POKE 709,11
 10 GRAPHICS 8
 20 POKE 559,62          :REM SDMCTL Direct Memory Access (DMA) enable
 30 POKE 53248,20       :REM 53248 HPOSP0 (W) Horizontal position of player 0
