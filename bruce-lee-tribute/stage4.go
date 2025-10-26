@@ -1,3 +1,4 @@
+//short videos + c64 loading
 package main
 
 import (
@@ -70,7 +71,7 @@ func initStage4(){
     extraDelay = 0
     bigPicY = 2500
     shiftX4 = 0
-    bruceleePosition = -4500
+    bruceleePosition = -2100
 }
 
 func stage4(screen *ebiten.Image, counter float64){
