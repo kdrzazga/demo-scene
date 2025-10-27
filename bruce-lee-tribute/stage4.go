@@ -19,6 +19,7 @@ var (
 	flyingKickPic       *ebiten.Image
 	bleePic             *ebiten.Image
 	fallingHondaPic     *ebiten.Image
+	standingHondaPic    *ebiten.Image
 	bigPicY             int
 	shiftX4             int
 	extraDelay          int
@@ -67,6 +68,10 @@ func initStage4(){
         log.Fatal(err)
     }
     fallingHondaPic, err = loadImage("pics/honda/honda_fall.png")
+    if err != nil {
+        log.Fatal(err)
+    }
+    standingHondaPic, err = loadImage("pics/honda/honda_w1.png")
     if err != nil {
         log.Fatal(err)
     }
@@ -150,19 +155,32 @@ func drawRealBruceLee(screen *ebiten.Image, position float64) {
         translation = 193
     }
 
-    if (position < 850-193 || position > 930){
+    if (position < 850-193){
+        op.GeoM.Translate(position - translation, 350)
+        screen.DrawImage(flyingKickPic, op)
+    } else if (position > 930){
         op.GeoM.Translate(position - translation, 350)
         screen.DrawImage(flyingKickPic, op)
         fallHonda(screen)
     }
+
 }
 
 func fallHonda(screen *ebiten.Image){
+    hondaHeight := 71.0
+    var hondaPic *ebiten.Image
+
+    if hondaY < 154.0 - hondaHeight +3 {
+        hondaY += 1
+        hondaPic = fallingHondaPic
+    } else {
+         hondaPic =standingHondaPic
+    }
+
     hondaOp := &ebiten.DrawImageOptions{}
     hondaOp.GeoM.Reset()
     hondaOp.GeoM.Translate(hondaX, hondaY)
-    screen.DrawImage(fallingHondaPic, hondaOp)
-    hondaY += 1
+    screen.DrawImage(hondaPic, hondaOp)
 }
 
 func drawC64BruceLee(screen *ebiten.Image, position float64) {
@@ -181,4 +199,3 @@ func drawAnimator(screen *ebiten.Image, x, y float64) {
 func drawC64(screen *ebiten.Image) {
     drawBackgroundScaled(screen, c64Pic, 0, 0, 1200, 722, 1)
 }
-
