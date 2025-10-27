@@ -48,7 +48,7 @@ const (
     stage2Timeout = 1900 + stage1Timeout
     stage3Timeout = 24000 + stage2Timeout
     stage4Timeout = 52000 + stage3Timeout
-    stageOutroTimeout = stage4Timeout + 11000
+    stageOutroTimeout = stage4Timeout + 7000 //how long is blue GAME OVER screen displayed
 
     final = stageOutroTimeout + 100
 
