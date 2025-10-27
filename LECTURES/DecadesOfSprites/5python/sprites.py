@@ -27,13 +27,11 @@ class GameView(arcade.View):
     def __init__(self):
         super().__init__()
 
-        # Variables that will hold sprite lists
         self.player_list = None
         self.enemy_list = None
 
         self.player = None
 
-        # Track the current state of what key is pressed
         self.left_pressed = False
         self.right_pressed = False
         self.up_pressed = False

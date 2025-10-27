@@ -47,8 +47,8 @@ const (
     stage1Timeout = 5000
     stage2Timeout = 1900 + stage1Timeout
     stage3Timeout = 24000 + stage2Timeout
-    stage4Timeout = 53000 + stage3Timeout
-    stageOutroTimeout = stage4Timeout + 9000
+    stage4Timeout = 52000 + stage3Timeout
+    stageOutroTimeout = stage4Timeout + 7000 //how long is blue GAME OVER screen displayed
 
     final = stageOutroTimeout + 100
 
@@ -194,6 +194,7 @@ func main() {
 }
 
 func analyzeArguments(){
+    //go run . -stage=4
     name := flag.String("stage", "1", "a number of stage to start with")
     flag.Parse()
     stage := string(*name)
