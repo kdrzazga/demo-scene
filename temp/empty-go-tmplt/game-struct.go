@@ -5,11 +5,11 @@ import (
 )
 
 type Game struct {
-	count int
+	timer float64
 }
 
 func (g *Game) Update() error{
-	g.count++
+	g.timer += 1.0/60.0
 	return nil
 }
 
