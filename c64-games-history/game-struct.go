@@ -13,13 +13,22 @@ type Game struct {
 func (g *Game) Update() error{
 	g.timer += 1.0/60.0
 
-	logo1Gif.Update()
+	if (g.timer < 7.68){
+	    logo1Gif.Update()
+	} else {
+        titleGif.Update()
+    }
+
     log.Println(g.timer)
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-    logo1Gif.Draw(screen, float64(0), 0)
+	if (g.timer < 7.68){
+	    logo1Gif.Draw(screen, float64(0), 0)
+	} else {
+        titleGif.Draw(screen, float64(0), 0)
+    }
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {

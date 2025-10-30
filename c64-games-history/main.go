@@ -12,6 +12,7 @@ import (
 var (
     startTime time.Time
     logo1Gif *GIFAnimator
+    titleGif *GIFAnimator
 )
 
 func main() {
@@ -33,6 +34,11 @@ func init(){
     var err error
 
     logo1Gif, err = NewGIFAnimator("pics/1.gif", false)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    titleGif, err = NewGIFAnimator("pics/2.gif", false)
     if err != nil {
         log.Fatal(err)
     }
