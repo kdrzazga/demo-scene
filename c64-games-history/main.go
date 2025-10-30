@@ -15,6 +15,7 @@ var (
     startTime   time.Time
     logo1Gif    *GIFAnimator
     titleGif    *GIFAnimator
+    timeline    *ebiten.Image
 
     themePlayer *audio.Player
 )
@@ -47,6 +48,11 @@ func init(){
         log.Fatal(err)
     }
 
+    timeline, err = loadImage("pics/timeline.png")
+    if err != nil {
+        log.Fatal(err)
+    }
+
     if themePlayer == nil{
         themePlayer, err = initAudio("sfx/intro1.wav")
         themePlayer.Play()
@@ -64,4 +70,3 @@ func analyzeArguments(){
     stage := string(*name)
     print(stage)
 }
-
