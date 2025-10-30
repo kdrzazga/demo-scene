@@ -10,11 +10,14 @@ type Game struct {
 
 func (g *Game) Update() error{
 	g.count++
+
+	logo1Gif.Update()
+
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-
+    logo1Gif.Draw(screen, float64(0), 0)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {

@@ -11,6 +11,7 @@ import (
 
 var (
     startTime time.Time
+    logo1Gif *GIFAnimator
 )
 
 func main() {
@@ -18,11 +19,23 @@ func main() {
 
     analyzeArguments()
 
+    ebiten.SetFullscreen(false)
+    ebiten.SetWindowSize(800, 600)
     ebiten.SetFullscreen(true)
-	ebiten.SetWindowTitle("BRUCE LEE TRIBUTE")
+
+	ebiten.SetWindowTitle("History of Commodore 64 games")
 	if err := ebiten.RunGame(&Game{}); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func init(){
+    var err error
+
+    logo1Gif, err = NewGIFAnimator("pics/1.gif", false)
+    if err != nil {
+        log.Fatal(err)
+    }
 }
 
 func analyzeArguments(){

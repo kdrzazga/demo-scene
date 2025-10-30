@@ -25,6 +25,10 @@ func main() {
 	}
 }
 
+func init(){
+    log.Println("init")
+}
+
 func analyzeArguments(){
     //go run . -stage=4
     name := flag.String("stage", "1", "a number of stage to start with")
