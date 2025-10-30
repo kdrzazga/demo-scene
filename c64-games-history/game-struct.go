@@ -13,6 +13,11 @@ type Game struct {
 func (g *Game) Update() error{
 	g.timer += 1.0/60.0
 
+	if themePlayer != nil && !themePlayer.IsPlaying() {
+        themePlayer.Rewind()
+        themePlayer.Play()
+    }
+
 	if (g.timer < 7.68){
 	    logo1Gif.Update()
 	} else {

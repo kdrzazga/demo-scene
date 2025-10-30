@@ -7,12 +7,16 @@ import (
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
+    "github.com/hajimehoshi/ebiten/v2/audio"
+    //"github.com/hajimehoshi/ebiten/v2/audio/wav"
 )
 
 var (
-    startTime time.Time
-    logo1Gif *GIFAnimator
-    titleGif *GIFAnimator
+    startTime   time.Time
+    logo1Gif    *GIFAnimator
+    titleGif    *GIFAnimator
+
+    themePlayer *audio.Player
 )
 
 func main() {
@@ -41,6 +45,15 @@ func init(){
     titleGif, err = NewGIFAnimator("pics/2.gif", false)
     if err != nil {
         log.Fatal(err)
+    }
+
+    if themePlayer == nil{
+        themePlayer, err = initAudio("sfx/intro1.wav")
+        themePlayer.Play()
+
+        if err != nil {
+        	log.Fatal(err)
+        }
     }
 }
 
