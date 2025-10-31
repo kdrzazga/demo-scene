@@ -15,7 +15,7 @@ type Game struct {
 }
 
 func (g *Game) Init(){
-    g.timelineX = 2000.0
+    g.timelineX = 0.0
     g.gianaX = 2000.0
     g.lemansX = -939.0
     g.lemansY = -1000.0
