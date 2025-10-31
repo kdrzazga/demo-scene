@@ -20,13 +20,15 @@ func main() {
 
     ebiten.SetFullscreen(true)
 	ebiten.SetWindowTitle("BRUCE LEE TRIBUTE")
-	if err := ebiten.RunGame(&Game{}); err != nil {
+	g := Game{}
+	if err := ebiten.RunGame(&g); err != nil {
 		log.Fatal(err)
 	}
+    g.Init();
 }
 
 func init(){
-    log.Println("init")
+    log.Println("global init")
 }
 
 func analyzeArguments(){

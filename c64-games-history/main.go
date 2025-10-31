@@ -30,7 +30,9 @@ func main() {
     ebiten.SetFullscreen(true)
 
 	ebiten.SetWindowTitle("History of Commodore 64 games")
-	if err := ebiten.RunGame(&Game{}); err != nil {
+	g := Game{}
+	g.Init()
+	if err := ebiten.RunGame(&g); err != nil {
 		log.Fatal(err)
 	}
 }

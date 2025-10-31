@@ -8,6 +8,11 @@ import (
 
 type Game struct {
 	timer float64
+	timelineX float64
+}
+
+func (g *Game) Init(){
+    g.timelineX = 2000.0
 }
 
 func (g *Game) Update() error{
@@ -20,8 +25,10 @@ func (g *Game) Update() error{
 
 	if (g.timer < 7.68){
 	    logo1Gif.Update()
-	} else {
+	} else if (g.timer < 10.2){
         titleGif.Update()
+    } else {
+        g.timelineX--
     }
 
     log.Println(g.timer)
@@ -31,8 +38,12 @@ func (g *Game) Update() error{
 func (g *Game) Draw(screen *ebiten.Image) {
 	if (g.timer < 7.68){
 	    logo1Gif.Draw(screen, float64(0), 0)
-	} else {
+	} else if (g.timer < 10.2){
         titleGif.Draw(screen, float64(0), 0)
+    } else {
+        op := &ebiten.DrawImageOptions{}
+        op.GeoM.Translate(g.timelineX, 50)
+        screen.DrawImage(timeline, op)
     }
 }
 
