@@ -16,6 +16,7 @@ var (
     logo1Gif    *GIFAnimator
     titleGif    *GIFAnimator
     timeline    *ebiten.Image
+    gianaBoard  *ebiten.Image
 
     themePlayer *audio.Player
 )
@@ -51,6 +52,10 @@ func init(){
     }
 
     timeline, err = loadImage("pics/timeline.png")
+    if err != nil {
+        log.Fatal(err)
+    }
+    gianaBoard, err = loadImage("pics/giana.png")
     if err != nil {
         log.Fatal(err)
     }
