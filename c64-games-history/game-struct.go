@@ -12,6 +12,12 @@ type Game struct {
 	gianaX float64
 	lemansX float64
 	lemansY float64
+	ghost1X float64
+	ghost1Y float64
+	ghost2X float64
+	ghost2Y float64
+	ghost3X float64
+	ghost3Y float64
 }
 
 func (g *Game) Init(){
@@ -19,6 +25,12 @@ func (g *Game) Init(){
     g.gianaX = 2000.0
     g.lemansX = -939.0
     g.lemansY = -1000.0
+    g.ghost1X = 0
+    g.ghost1Y = 10
+    g.ghost2X = 0
+    g.ghost2Y = 10
+    g.ghost3X = 0
+    g.ghost3Y = 10
 }
 
 func (g *Game) Update() error{
@@ -35,6 +47,9 @@ func (g *Game) Update() error{
         titleGif.Update()
     } else if (g.timer > 10.2){
         g.timelineX--
+        g.ghost1X = g.timelineX
+        g.ghost2X = g.timelineX
+        g.ghost3X = g.timelineX
         if (g.timer > 11.0){
 
             if (g.lemansX <=0){
@@ -71,6 +86,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
         op.GeoM.Reset()
         op.GeoM.Translate(g.timelineX, 0)
         screen.DrawImage(timeline, op)
+        op.GeoM.Translate(2092, 124)
+        screen.DrawImage(ghost1, op)
+        screen.DrawImage(ghost2, op)
+        screen.DrawImage(ghost3, op)
     }
 }
 
