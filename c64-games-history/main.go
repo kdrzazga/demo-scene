@@ -18,6 +18,7 @@ var (
     dragonGif   *GIFAnimator
     timeline    *ebiten.Image
     gianaBoard  *ebiten.Image
+    leMansRiverRaidBoard  *ebiten.Image
 
     themePlayer *audio.Player
 )
@@ -27,6 +28,7 @@ func main() {
 
     analyzeArguments()
 
+    ebiten.SetCursorMode(ebiten.CursorModeHidden)
     ebiten.SetFullscreen(false)
     ebiten.SetWindowSize(800, 600)
     ebiten.SetFullscreen(true)
@@ -62,6 +64,10 @@ func init(){
         log.Fatal(err)
     }
     gianaBoard, err = loadImage("pics/giana.png")
+    if err != nil {
+        log.Fatal(err)
+    }
+    leMansRiverRaidBoard, err = loadImage("pics/le-mans-river.jpg")
     if err != nil {
         log.Fatal(err)
     }

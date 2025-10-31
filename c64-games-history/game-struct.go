@@ -10,11 +10,13 @@ type Game struct {
 	timer float64
 	timelineX float64
 	gianaX float64
+	lemansY float64
 }
 
 func (g *Game) Init(){
     g.timelineX = 2000.0
     g.gianaX = 2000.0
+    g.lemansY = -1000.0
 }
 
 func (g *Game) Update() error{
@@ -31,11 +33,14 @@ func (g *Game) Update() error{
         titleGif.Update()
     } else if (g.timer > 10.2){
         g.timelineX--
-        if (g.timer > 48.0){
+        if (g.timer > 11.0){
+            g.lemansY++
+        } else if (g.timer > 48.0){
             g.gianaX -= 5
             dragonGif.Update()
         }
     }
+
 
     log.Println(g.timer)
 	return nil
@@ -48,6 +53,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	    logo1Gif.Draw(screen, float64(0), 0)
 	} else if (g.timer < 10.2){
         titleGif.Draw(screen, float64(0), 0)
+    } else if (g.timer > 11.0){
+        lemansRiverraidStageDraw(screen, g)
     } else if (g.timer > 48.0){
         gianaStageDraw(screen, g)
     }
