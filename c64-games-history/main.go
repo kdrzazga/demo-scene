@@ -15,6 +15,7 @@ var (
     startTime   time.Time
     logo1Gif    *GIFAnimator
     titleGif    *GIFAnimator
+    dragonGif   *GIFAnimator
     timeline    *ebiten.Image
     gianaBoard  *ebiten.Image
 
@@ -47,6 +48,11 @@ func init(){
     }
 
     titleGif, err = NewGIFAnimator("pics/2.gif", false)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    dragonGif, err = NewGIFAnimator("pics/GSdragon.gif", true)
     if err != nil {
         log.Fatal(err)
     }

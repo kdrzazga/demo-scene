@@ -33,6 +33,7 @@ func (g *Game) Update() error{
         g.timelineX--
         if (g.timer > 48.0){
             g.gianaX -= 5
+            dragonGif.Update()
         }
     }
 
@@ -48,9 +49,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	} else if (g.timer < 10.2){
         titleGif.Draw(screen, float64(0), 0)
     } else if (g.timer > 48.0){
-        op.GeoM.Reset()
-        op.GeoM.Translate(g.gianaX, 249)
-        screen.DrawImage(gianaBoard, op)
+        gianaStageDraw(screen, g)
     }
 
     if (g.timer > 10.2){
