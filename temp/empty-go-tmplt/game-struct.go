@@ -1,11 +1,17 @@
 package main
 
 import (
+    "log"
+
     "github.com/hajimehoshi/ebiten/v2"
 )
 
 type Game struct {
 	timer float64
+}
+
+func (g *Game) Init(){
+    log.Println("Internal INIT")
 }
 
 func (g *Game) Update() error{
