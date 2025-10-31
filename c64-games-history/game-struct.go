@@ -38,11 +38,12 @@ func (g *Game) Update() error{
         if (g.timer > 11.0){
 
             if (g.lemansX <=0){
-                g.lemansX++
+                g.lemansX +=2
             } else {
-                g.lemansY++
+                g.lemansY += 2
             }
-        } else if (g.timer > 48.0){
+        }
+        if (g.timer > 48.0){
             g.gianaX -= 5
             dragonGif.Update()
         }
@@ -59,9 +60,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	    logo1Gif.Draw(screen, float64(0), 0)
 	} else if (g.timer < 10.2){
         titleGif.Draw(screen, float64(0), 0)
-    } else if (g.timer > 11.0){
+    } else if (g.timer > 11.0 ){
         lemansRiverraidStageDraw(screen, g)
-    } else if (g.timer > 48.0){
+    }
+    if (g.timer > 48.0){
         gianaStageDraw(screen, g)
     }
 
