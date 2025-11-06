@@ -17,6 +17,7 @@ type Game struct {
 	ghost2X float64
 	ghost2Y float64
 	ghost3X float64
+
 	ghost3Y float64
 }
 
