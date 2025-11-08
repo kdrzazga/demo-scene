@@ -105,6 +105,24 @@
 	lda #BLACK
 	sta $d02E
 
+	// set sprite pointers
+	lda #$80
+	sta $07F8
+	lda #$81
+	sta $07F9
+	lda #$82
+	sta $07FA
+	lda #$83
+	sta $07FB
+	lda #$84
+	sta $07FC
+	lda #$85
+	sta $07FD
+	lda #$86
+	sta $07FE
+	lda #$87
+	sta $07ff
+
 	// positioning sprites
 	lda #$78
 	sta $d000	// #0. sprite X low byte
@@ -158,7 +176,7 @@
 	sta $d01b
 
 	// set sprite pointers
-	lda #$28
+	/*lda #$28
 	sta $07F8
 	lda #$29
 	sta $07F9
@@ -173,7 +191,7 @@
 	lda #$2E
 	sta $07FE
 	lda #$2F
-	sta $07FF
+	sta $07FF*/
 
 	// turn on sprites
 	lda #%11111111
@@ -232,14 +250,13 @@ reset_face_sprite_down:
 
 
 // Sprite bitmaps 8 x 64 bytes
-*=$0A00
-// sprite #0
+*=$2000 "sprite #0"
 	.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 	.byte $00, $00, $00, $3E, $00, $7C, $41, $7E, $82, $80, $81, $01, $80, $81, $01, $80, $81, $01, $80, $81, $01
 	.byte $80, $81, $01, $41, $00, $82, $3E, $00, $7C, $00, $82, $00, $01, $FF, $00, $03, $CF, $80, $02, $82, $80
 	.byte 0
 
-// sprite #1
+//sprite #1
 	.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $10, $00, $00, $54, $00
 	.byte $01, $55, $00, $05, $55, $40, $05, $55, $40, $15, $55, $50, $15, $FF, $50, $17, $FF, $D0, $57, $FF, $D0
 	.byte $5F, $FF, $F0, $5F, $FF, $F0, $7F, $FF, $F0, $7F, $FF, $F0, $7F, $FF, $F0, $7F, $FF, $F0, $7F, $FF, $F0
@@ -280,8 +297,6 @@ reset_face_sprite_down:
 	.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $0C, $00, $30, $0C, $00, $30, $03, $00, $C0
 	.byte $00, $FF, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 	.byte 0
-
-
 
 
 // screen character data
