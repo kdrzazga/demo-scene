@@ -17,6 +17,7 @@ type Game struct {
 	ghost2X float64
 	ghost2Y float64
 	ghost3X float64
+
 	ghost3Y float64
 }
 
@@ -24,7 +25,7 @@ func (g *Game) Init(){
     g.timelineX = 0.0
     g.gianaX = 2000.0
     g.lemansX = -939.0
-    g.lemansY = -1000.0
+    g.lemansY = -2000.0
     g.ghost1X = 2082
     g.ghost1Y = 124
     g.ghost2X = 2092
