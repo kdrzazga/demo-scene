@@ -1,4 +1,4 @@
-.var music = LoadSid("Face_It.sid")
+.var music = LoadSid("In_Yer_Face.sid") //only P-SID supported
 .const sys = $9e00
 .const init_basic = $080b
 .const counter = $fa // a zeropage address to be used as a counter
@@ -83,56 +83,54 @@
 
     #import "sprites.asm"
 
-      lda #$00    // reset
-        sta counter // counter
+   //-------
 
-        sei         // disable interrupts
+    ldx #0
+    ldy #0
+    lda #music.startSong-1
+    jsr music.init
+    sei
+    lda #<irq1
+    sta $0314
+    lda #>irq1
+    sta $0315
+    asl $d019   //Interrupt status register
+    lda #%01111011
+    sta $dc0d   //Interrupt control and status register.
+    lda #%10000001
+    sta $d01a   //Interrupt control register
+    lda #$1b
+    sta $d011   //Screen control register #1
+    lda #%10000000
+    sta $d012   //Raster line to generate interrupt at (bits #0-#7).
+    cli
+this:
+	jmp this
 
-delay:  lda #$fb    // wait for vertical retrace
-loop2:  cmp $d012   // until it reaches 251th raster line ($fb)
-        bne loop2   // which is out of the inner screen area
 
-        inc counter // increase frame counter
-        lda counter // check if counter
-        cmp #6      // reached 2
-        bne out     // if not, pass the switching routine
-
-        lda #$00    // reset
-        sta counter // counter
-
-        //LOOP CONTENT
-        inc $d00c
-		dec $d00e
-
-		lda $d00c
-		cmp #180
-		beq reset_face_sprite_up
-
-		lda $d00e
-		cmp #60
-		beq reset_face_sprite_down
-		//END LOOP CONTENT
-
-out:
-        lda $d012 // make sure we reached
-loop3:  cmp $d012 // the next raster line so next time we
-        beq loop3 // should catch the same line next frame
-
-	    lda #YELLOW
-	    sta $d020
-        jmp delay // jump to main loop
+irq1:
+    asl $d019   //Interrupt status register
+    jsr music.play
+    pla
+    tay
+    pla
+    tax
+    pla
+	inc $d00c
+	dec $d00e
+rti
 
 reset_face_sprite_up:
     lda #30
     sta $d00C	// #6. sprite X low byte   sprite Face
 	lda #BLACK
 	sta $d020
-    jmp out
+    jmp this
 
 reset_face_sprite_down:
 	lda #180
 	sta $d00E	// #7. sprite X low byte   sprite Face
-	jmp out
+	jmp this
 
 #import "sprites-data.asm"
 
