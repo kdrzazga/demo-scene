@@ -1,8 +1,15 @@
-// 10 SYS2061
+.const sys = $9e00
+.const init_basic = $080b
+.const counter = $fa // a zeropage address to be used as a counter
+// 206 SYS2061
 *=$0801
-	.byte $0B, $08, $0A, $00, $9E, $32, $30, $36, $31, $00, $00, $00
+    .word init_basic
+	.byte 206
+	.word sys
+	.text "2061"
+	.byte $00, $00
 
-*=$080d
+*=2061
 	// set to 25 line text mode and turn on the screen
 	lda #$1B
 	sta $D011
@@ -16,15 +23,15 @@
 	sta $D018
 
 	// set border color
-	lda #$00
+	lda #BLACK
 	sta $D020	
 	// set background color
-	lda #$07
+	lda #YELLOW
 	sta $D021
 
 	// turn on multicolor mode
-	lda #$D8
-	sta $D016
+	lda #%11011000
+	sta $D016 //Bit #4: 1 = Multicolor mode on, Default: $C8, %11001000.
 
 	// set multicolor 1
 	lda #$01
@@ -73,27 +80,27 @@
 	bne *-24
 
 	// set sprite multicolors
-	lda #$02
+	lda #YELLOW
 	sta $d025
-	lda #$06
+	lda #BROWN
 	sta $d026
 
 	// colorize sprites
-	lda #$07
+	lda #YELLOW
 	sta $d027
-	lda #$00
+	lda #BLACK
 	sta $d028
-	lda #$07
+	lda #YELLOW
 	sta $d029
-	lda #$07
+	lda #YELLOW
 	sta $d02A
-	lda #$00
+	lda #BLACK
 	sta $d02B
-	lda #$00
+	lda #BLACK
 	sta $d02C
-	lda #$00
+	lda #BLACK
 	sta $d02D
-	lda #$00
+	lda #BLACK
 	sta $d02E
 
 	// positioning sprites
@@ -121,10 +128,10 @@
 	sta $d00A	// #5. sprite X low byte
 	lda #$3C
 	sta $d00B	// #5. sprite Y
-	lda #30
-	sta $d00C	// #6. sprite X low byte   sprite Face
-	lda #50
-	sta $d00D	// #6. sprite Y   sprite Face
+    lda #30
+    sta $d00C	// #6. sprite X low byte   sprite Face
+    lda #50
+    sta $d00D	// #6. sprite Y   sprite Face
 	lda #180
 	sta $d00E	// #7. sprite X low byte   sprite Face
 	lda #136
@@ -170,11 +177,52 @@
 	lda #%11111111
 	sta $d015
 
-	// wait for keypress
-	lda $c6
-	beq *-2
+      lda #$00    // reset
+        sta counter // counter
 
-	rts
+        sei         // disable interrupts
+
+delay:  lda #$fb    // wait for vertical retrace
+loop2:  cmp $d012   // until it reaches 251th raster line ($fb)
+        bne loop2   // which is out of the inner screen area
+
+        inc counter // increase frame counter
+        lda counter // check if counter
+        cmp #2      // reached 2
+        bne out     // if not, pass the switching routine
+
+        lda #$00    // reset
+        sta counter // counter
+
+        //LOOP CONTENT
+        inc $d00c
+		dec $d00e
+
+		lda $d00c
+		cmp #180
+		beq reset_face_sprite_up
+
+		lda $d00e
+		cmp #60
+		beq reset_face_sprite_down
+		//END LOOP CONTENT
+
+out:
+        lda $d012 // make sure we reached
+loop3:  cmp $d012 // the next raster line so next time we
+        beq loop3 // should catch the same line next frame
+
+        jmp delay // jump to main loop
+
+reset_face_sprite_up:
+    lda #30
+    sta $d00C	// #6. sprite X low byte   sprite Face
+    jmp out
+
+reset_face_sprite_down:
+	lda #180
+	sta $d00E	// #7. sprite X low byte   sprite Face
+	jmp out
 
 // Sprite bitmaps 8 x 64 bytes
 *=$0A00
