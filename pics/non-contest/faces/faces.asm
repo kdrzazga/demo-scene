@@ -1,4 +1,4 @@
-.var music = LoadSid("In_Yer_Face.sid") //only P-SID supported
+.var music = LoadSid("In_Yer_Face.sid") //only P-SIDs supported
 .const sys = $9e00
 .const init_basic = $080b
 .const counter = $fa // a zeropage address to be used as a counter
@@ -118,6 +118,12 @@ irq1:
     pla
 	inc $d00c
 	dec $d00e
+	lda $d00c
+	cmp #200
+	beq reset_face_sprite_up
+	lda $d00e
+	cmp #60
+	beq reset_face_sprite_down
 rti
 
 reset_face_sprite_up:
@@ -125,12 +131,12 @@ reset_face_sprite_up:
     sta $d00C	// #6. sprite X low byte   sprite Face
 	lda #BLACK
 	sta $d020
-    jmp this
+    rti
 
 reset_face_sprite_down:
 	lda #180
 	sta $d00E	// #7. sprite X low byte   sprite Face
-	jmp this
+	rti
 
 #import "sprites-data.asm"
 
