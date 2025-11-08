@@ -105,6 +105,7 @@
 	lda #BLACK
 	sta $d02E
 
+    init_sprites:
 	// set sprite pointers
 	lda #$80
 	sta $07F8
@@ -174,24 +175,6 @@
 	// set screen-sprite priority flags
 	lda #$00
 	sta $d01b
-
-	// set sprite pointers
-	/*lda #$28
-	sta $07F8
-	lda #$29
-	sta $07F9
-	lda #$2A
-	sta $07FA
-	lda #$2B
-	sta $07FB
-	lda #$2C
-	sta $07FC
-	lda #$2D
-	sta $07FD
-	lda #$2E
-	sta $07FE
-	lda #$2F
-	sta $07FF*/
 
 	// turn on sprites
 	lda #%11111111
