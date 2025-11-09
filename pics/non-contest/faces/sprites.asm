@@ -1,30 +1,13 @@
     init_sprites:
     
 	// set sprite multicolors
-	lda #YELLOW
+	lda main_color1
 	sta $d025
-	lda #BLACK
+	lda bkg_color1
 	sta $d026
 
     
-	// colorize sprites
-	lda #YELLOW
-	sta $d027
-	lda #BLACK
-	sta $d028
-	lda #YELLOW
-	sta $d029
-	lda #YELLOW
-	sta $d02A
-	lda #BLACK
-	sta $d02B
-	lda #BLACK
-	sta $d02C
-	lda #BLACK
-	sta $d02D
-	lda #BLACK
-	sta $d02E
-
+	jsr colorize_sprites
     
 	// set sprite pointers
 	lda #$80
@@ -100,3 +83,23 @@
 	lda #%11111111
 	sta $d015
 
+    rts
+
+colorize_sprites:
+	lda main_color1
+	sta $d027
+	lda bkg_color1
+	sta $d028
+	lda main_color1
+	sta $d029
+	lda main_color1
+	sta $d02A
+	lda bkg_color1
+	sta $d02B
+	lda bkg_color1
+	sta $d02C
+	lda bkg_color1
+	sta $d02D
+	lda bkg_color1
+	sta $d02E
+    rts

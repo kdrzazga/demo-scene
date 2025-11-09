@@ -25,11 +25,8 @@
 	//sta $D018
 
 	// set border color
-	lda #BLACK
+	lda bkg_color1
 	sta $D020
-	// set background color
-	lda #YELLOW
-	sta $D021
 
 	// turn on multicolor mode
 	lda #%11011000
@@ -43,45 +40,8 @@
 	lda #$00
 	sta $D023
 
-	// draw screen
-	lda #$00
-	sta $fb
-	sta $fd
-	sta $f7
-
-	lda #$28
-	sta $fc
-
-	lda #$04
-	sta $fe
-
-	lda #$e8
-	sta $f9
-	lda #$2b
-	sta $fa
-
-	lda #$d8
-	sta $f8
-
-	ldx #$00
-	ldy #$00
-	lda ($fb),y
-	sta ($fd),y
-	lda ($f9),y
-	sta ($f7),y
-	iny
-	bne *-9
-
-	inc $fc
-	inc $fe
-	inc $fa
-	inc $f8
-
-	inx
-	cpx #$04
-	bne *-24
-
-    #import "sprites.asm"
+    jsr draw_screen
+    jsr init_sprites
 
    //-------
 
@@ -129,14 +89,120 @@ rti
 reset_face_sprite_up:
     lda #30
     sta $d00C	// #6. sprite X low byte   sprite Face
-	lda #BLACK
+	lda bkg_color1
 	sta $d020
     rti
 
 reset_face_sprite_down:
 	lda #180
 	sta $d00E	// #7. sprite X low byte   sprite Face
+
+	inc color_chg_counter
+	lda color_chg_counter
+	cmp #10
+	beq color_set1
+	cmp #(10+3)
+	beq default_color_set
+	cmp #(10+3+6)
+	beq color_set2
+	cmp #(10+3+6+3)
+	beq yellow_color_set
+	cmp #(10+3+6+3+3)
+	beq color_chg_counter_reset
 	rti
+
+default_color_set:
+    lda #BLACK
+    sta $d020
+    lda #YELLOW
+    sta main_color1
+    jsr colorize_sprites
+    jsr draw_screen
+    rti
+
+yellow_color_set:
+    lda #YELLOW
+    sta $d020
+    sta main_color1
+    jsr colorize_sprites
+    jsr draw_screen
+    rti
+
+color_set1:
+    lda #BLACK
+    sta $d020
+    lda #CYAN
+    sta main_color1
+    jsr colorize_sprites
+    jsr draw_screen
+    rti
+
+color_set2:
+    lda #BLACK
+    sta $d020
+    lda #WHITE
+    sta main_color1
+    jsr colorize_sprites
+    jsr draw_screen
+    rti
+
+color_chg_counter_reset:
+    lda #0
+    sta color_chg_counter
+    rti
+
+color_chg_counter:
+    .byte 0
+main_color1:
+    .byte YELLOW
+bkg_color1:
+    .byte BLACK //better don't change it
+
+draw_screen:
+
+	// set background color
+	lda main_color1
+	sta $D021
+
+	lda #$00
+	sta $fb
+	sta $fd
+	sta $f7
+
+	lda #$28
+	sta $fc
+
+	lda #$04
+	sta $fe
+
+	lda #$e8
+	sta $f9
+	lda #$2b
+	sta $fa
+
+	lda #$d8
+	sta $f8
+
+	ldx #$00
+	ldy #$00
+	lda ($fb),y
+	sta ($fd),y
+	lda ($f9),y
+	sta ($f7),y
+	iny
+	bne *-9
+
+	inc $fc
+	inc $fe
+	inc $fa
+	inc $f8
+
+	inx
+	cpx #$04
+	bne *-24
+
+
+#import "sprites.asm"
 
 #import "sprites-data.asm"
 
@@ -170,7 +236,7 @@ reset_face_sprite_down:
 
 // screen color data
 *=$2be8
-    .fill 1000, 0
+    .fill 1000, BLACK
 
 .pc=music.location "Music"
     .fill music.size, music.getData(i)
