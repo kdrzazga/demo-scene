@@ -25,11 +25,8 @@
 	//sta $D018
 
 	// set border color
-	lda #BLACK
+	lda bkg_color1
 	sta $D020
-	// set background color
-	lda main_color1
-	sta $D021
 
 	// turn on multicolor mode
 	lda #%11011000
@@ -43,7 +40,13 @@
 	lda #$00
 	sta $D023
 
-	// draw screen
+    // draw screen
+
+	// set background color
+	lda main_color1
+	sta $D021
+
+
 	lda #$00
 	sta $fb
 	sta $fd
@@ -81,7 +84,7 @@
 	cpx #$04
 	bne *-24
 
-    #import "sprites.asm"
+    jsr init_sprites
 
    //-------
 
@@ -129,7 +132,7 @@ rti
 reset_face_sprite_up:
     lda #30
     sta $d00C	// #6. sprite X low byte   sprite Face
-	lda #BLACK
+	lda bkg_color1
 	sta $d020
     rti
 
@@ -139,20 +142,40 @@ reset_face_sprite_down:
 
 	inc color_chg_counter
 	lda color_chg_counter
-	cmp 128
+	cmp 150
 	beq color_set1
+	cmp 200
+	beq color_set2
+	cmp 0
+	beq default_color_set
 	rti
 
-color_set1:
+default_color_set:
+    lda #YELLOW
+    sta main_color1
+    jsr colorize_sprites
+    rti
 
+color_set1:
+    lda #CYAN
+    sta main_color1
+    jsr colorize_sprites
+    rti
+
+color_set2:
+    lda #WHITE
+    sta main_color1
+    jsr colorize_sprites
     rti
 
 color_chg_counter:
     .byte 0
 main_color1:
-    .byte WHITE
+    .byte CYAN
 bkg_color1:
-    .byte BLACK
+    .byte BLACK //better don't change it
+
+#import "sprites.asm"
 
 #import "sprites-data.asm"
 
@@ -186,7 +209,7 @@ bkg_color1:
 
 // screen color data
 *=$2be8
-    .fill 1000, 0
+    .fill 1000, BLACK
 
 .pc=music.location "Music"
     .fill music.size, music.getData(i)
