@@ -99,11 +99,11 @@ reset_face_sprite_down:
 
 	inc color_chg_counter
 	lda color_chg_counter
-	cmp 150
+	cmp #150
 	beq color_set1
-	cmp 200
+	cmp #200
 	beq color_set2
-	cmp 0
+	cmp #0
 	beq default_color_set
 	rti
 
@@ -131,7 +131,7 @@ color_set2:
 color_chg_counter:
     .byte 0
 main_color1:
-    .byte CYAN
+    .byte YELLOW
 bkg_color1:
     .byte BLACK //better don't change it
 
