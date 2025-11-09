@@ -40,50 +40,7 @@
 	lda #$00
 	sta $D023
 
-    // draw screen
-
-	// set background color
-	lda main_color1
-	sta $D021
-
-
-	lda #$00
-	sta $fb
-	sta $fd
-	sta $f7
-
-	lda #$28
-	sta $fc
-
-	lda #$04
-	sta $fe
-
-	lda #$e8
-	sta $f9
-	lda #$2b
-	sta $fa
-
-	lda #$d8
-	sta $f8
-
-	ldx #$00
-	ldy #$00
-	lda ($fb),y
-	sta ($fd),y
-	lda ($f9),y
-	sta ($f7),y
-	iny
-	bne *-9
-
-	inc $fc
-	inc $fe
-	inc $fa
-	inc $f8
-
-	inx
-	cpx #$04
-	bne *-24
-
+    jsr draw_screen
     jsr init_sprites
 
    //-------
@@ -154,18 +111,21 @@ default_color_set:
     lda #YELLOW
     sta main_color1
     jsr colorize_sprites
+    jsr draw_screen
     rti
 
 color_set1:
     lda #CYAN
     sta main_color1
     jsr colorize_sprites
+    jsr draw_screen
     rti
 
 color_set2:
     lda #WHITE
     sta main_color1
     jsr colorize_sprites
+    jsr draw_screen
     rti
 
 color_chg_counter:
@@ -174,6 +134,50 @@ main_color1:
     .byte CYAN
 bkg_color1:
     .byte BLACK //better don't change it
+
+draw_screen:
+
+	// set background color
+	lda main_color1
+	sta $D021
+
+	lda #$00
+	sta $fb
+	sta $fd
+	sta $f7
+
+	lda #$28
+	sta $fc
+
+	lda #$04
+	sta $fe
+
+	lda #$e8
+	sta $f9
+	lda #$2b
+	sta $fa
+
+	lda #$d8
+	sta $f8
+
+	ldx #$00
+	ldy #$00
+	lda ($fb),y
+	sta ($fd),y
+	lda ($f9),y
+	sta ($f7),y
+	iny
+	bne *-9
+
+	inc $fc
+	inc $fe
+	inc $fa
+	inc $f8
+
+	inx
+	cpx #$04
+	bne *-24
+
 
 #import "sprites.asm"
 
