@@ -99,22 +99,38 @@ reset_face_sprite_down:
 
 	inc color_chg_counter
 	lda color_chg_counter
-	cmp #150
+	cmp #10
 	beq color_set1
-	cmp #200
-	beq color_set2
-	cmp #0
+	cmp #(10+3)
 	beq default_color_set
+	cmp #(10+3+6)
+	beq color_set2
+	cmp #(10+3+6+3)
+	beq yellow_color_set
+	cmp #(10+3+6+3+3)
+	beq color_chg_counter_reset
 	rti
 
 default_color_set:
+    lda #BLACK
+    sta $d020
     lda #YELLOW
     sta main_color1
     jsr colorize_sprites
     jsr draw_screen
     rti
 
+yellow_color_set:
+    lda #YELLOW
+    sta $d020
+    sta main_color1
+    jsr colorize_sprites
+    jsr draw_screen
+    rti
+
 color_set1:
+    lda #BLACK
+    sta $d020
     lda #CYAN
     sta main_color1
     jsr colorize_sprites
@@ -122,10 +138,17 @@ color_set1:
     rti
 
 color_set2:
+    lda #BLACK
+    sta $d020
     lda #WHITE
     sta main_color1
     jsr colorize_sprites
     jsr draw_screen
+    rti
+
+color_chg_counter_reset:
+    lda #0
+    sta color_chg_counter
     rti
 
 color_chg_counter:

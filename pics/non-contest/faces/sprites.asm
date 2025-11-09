@@ -8,7 +8,6 @@
 
     
 	jsr colorize_sprites
-
     
 	// set sprite pointers
 	lda #$80
@@ -87,7 +86,6 @@
     rts
 
 colorize_sprites:
-// colorize sprites
 	lda main_color1
 	sta $d027
 	lda bkg_color1
