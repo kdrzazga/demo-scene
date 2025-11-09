@@ -1,20 +1,20 @@
     init_sprites:
     
 	// set sprite multicolors
-	lda #YELLOW
+	lda main_color1
 	sta $d025
 	lda #BLACK
 	sta $d026
 
     
 	// colorize sprites
-	lda #YELLOW
+	lda main_color1
 	sta $d027
 	lda #BLACK
 	sta $d028
-	lda #YELLOW
+	lda main_color1
 	sta $d029
-	lda #YELLOW
+	lda main_color1
 	sta $d02A
 	lda #BLACK
 	sta $d02B

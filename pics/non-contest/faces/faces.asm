@@ -28,7 +28,7 @@
 	lda #BLACK
 	sta $D020
 	// set background color
-	lda #YELLOW
+	lda main_color1
 	sta $D021
 
 	// turn on multicolor mode
@@ -136,7 +136,23 @@ reset_face_sprite_up:
 reset_face_sprite_down:
 	lda #180
 	sta $d00E	// #7. sprite X low byte   sprite Face
+
+	inc color_chg_counter
+	lda color_chg_counter
+	cmp 128
+	beq color_set1
 	rti
+
+color_set1:
+
+    rti
+
+color_chg_counter:
+    .byte 0
+main_color1:
+    .byte WHITE
+bkg_color1:
+    .byte BLACK
 
 #import "sprites-data.asm"
 
