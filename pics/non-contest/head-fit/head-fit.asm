@@ -186,8 +186,23 @@ draw_screen:
 	bne *-24
 	rts
 
+reverse:
+	dec $d001
+	dec $d003
+	dec $d005
+	dec $d007
+	dec $d009
+	dec $d00b
+	dec $d00d
+	dec $d00f
+
+	jmp counter_handling
+
 move_bars:
 
+    lda reverse_bool
+    cmp #1
+    beq reverse
 	inc $d001
 	inc $d003
 	inc $d005
@@ -249,24 +264,26 @@ reset_middle_bars:
     inc counter
     lda counter
     // sta 1024 //useful for debaug
-    cmp #20
+    cmp #7
     beq color_set1
-    cmp #40
+    cmp #10
     beq color_set_default
-    cmp #60
+    cmp #15
     beq color_set_white
-    cmp #80
+    cmp #18
     beq color_set_default
-    cmp #100
+    cmp #23
     beq color_set4
-    cmp #120
+    cmp #26
     beq color_set_default
-    cmp #140
+    cmp #31
     beq color_set_cyan
-    cmp #160
+    cmp #35
     beq color_set_default
-    cmp #200
-    beq reset_counter
+    cmp #80
+    beq enable_reverse
+    cmp #100
+    beq reset_counter_reverse
 	rti
 
 color_set1:
@@ -301,13 +318,22 @@ color_set_cyan:
     sta $d021
     rti
 
-reset_counter:
+reset_counter_reverse:
     lda #0
     sta counter
+    lda #0
+    sta reverse_bool
+    rti
+
+enable_reverse:
+    lda #1
+    sta reverse_bool
     rti
 
 .print "End code: $"  + toHexString(*) + "["+ * + "]"
 
 counter:
+    .byte 0
+reverse_bool:
     .byte 0
 #import "data.asm"
