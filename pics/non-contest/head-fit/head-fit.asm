@@ -24,54 +24,10 @@ main:
 	// set background color
 	sta $d021
 
-	// draw screen
-	lda #$00
-	sta $fb
-	sta $fd
-	sta $f7
+    jsr draw_screen
 
-	lda #$28
-	sta $fc
-
-	lda #$04
-	sta $fe
-
-	lda #$e8
-	sta $f9
-	lda #$2b
-	sta $fa
-
-	lda #$d8
-	sta $f8
-
-	ldx #$00
-	ldy #$00
-	lda ($fb),y
-	sta ($fd),y
-	lda ($f9),y
-	sta ($f7),y
-	iny
-	bne *-9
-
-	inc $fc
-	inc $fe
-	inc $fa
-	inc $f8
-
-	inx
-	cpx #$04
-	bne *-24
-
-	// colorize sprites
-	lda #$0
-	sta $d027
-	sta $d028
-	sta $d029
-	sta $d02a
-	sta $d02b
-	sta $d02c
-	sta $d02d
-	sta $d02e
+	lda #BLACK
+	jsr colorize_sprites
 
 	// positioning sprites
 	lda #50
@@ -179,6 +135,56 @@ irq1:
 	jmp move_bars
 rti
 
+colorize_sprites:
+	sta $d027
+	sta $d028
+	sta $d029
+	sta $d02a
+	sta $d02b
+	sta $d02c
+	sta $d02d
+	sta $d02e
+	rts
+
+draw_screen:
+	// draw screen
+	lda #$00
+	sta $fb
+	sta $fd
+	sta $f7
+
+	lda #$28
+	sta $fc
+
+	lda #$04
+	sta $fe
+
+	lda #$e8
+	sta $f9
+	lda #$2b
+	sta $fa
+
+	lda #$d8
+	sta $f8
+
+	ldx #$00
+	ldy #$00
+	lda ($fb),y
+	sta ($fd),y
+	lda ($f9),y
+	sta ($f7),y
+	iny
+	bne *-9
+
+	inc $fc
+	inc $fe
+	inc $fa
+	inc $f8
+
+	inx
+	cpx #$04
+	bne *-24
+	rts
 
 move_bars:
 
