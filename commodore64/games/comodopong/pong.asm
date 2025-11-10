@@ -1,6 +1,15 @@
-//.var music = LoadSid("Modem.sid") //only P-SIDs supported
+.var music = LoadSid("Popcorn.sid") //only P-SIDs supported
 
 #import "basic-code-pong-load.asm"
+.print "basic loader ends " + toHexString(*) + "[" + * + "]"
+
+.const ball_x_address = $d00a
+.const ball_y_address = $d00b
+
+.const UP = 0
+.const DOWN = 1
+.const LEFT = 2
+.const RIGHT = 3
 
 *=2534 "main"
 	// set to 25 line text mode and turn on the screen
@@ -103,9 +112,9 @@
 	lda #$49
 	sta $d009	// #4. sprite y
 	lda #$77
-	sta $d00a	// #5. sprite x low .byte
+	sta ball_x_address	// #5. sprite x low .byte
 	lda #$6a
-	sta $d00b	// #5. sprite y
+	sta ball_y_address	// #5. sprite y
 
 	// x coordinate high bits
 	lda #$00
@@ -147,10 +156,73 @@
 	lda #$3f
 	sta $d015
 
-	// wait for keypress
-	lda $c6
-	beq *-2
+   //-------
 
-	rts
+    ldx #0
+    ldy #0
+    lda #music.startSong-1
+    jsr music.init
+    sei
+    lda #<irq1
+    sta $0314
+    lda #>irq1
+    sta $0315
+    asl $d019   //Interrupt status register
+    lda #%01111011
+    sta $dc0d   //Interrupt control and status register.
+    lda #%10000001
+    sta $d01a   //Interrupt control register
+    lda #$1b
+    sta $d011   //Screen control register #1
+    lda #%10000000
+    sta $d012   //Raster line to generate interrupt at (bits #0-#7).
+    cli
+this:
+	jmp this
+
+
+irq1:
+    asl $d019   //Interrupt status register
+    jsr music.play
+    pla
+    tay
+    pla
+    tax
+    pla
+	//jmp move_ball
+
+move_ball:
+    inc 1024
+    lda ball_movement_vertical
+    cmp #DOWN
+    beq move_ball_down
+    jmp move_ball_up
+check_horizontal_move:
+    lda ball_movement_horizontal
+    cmp #LEFT
+    beq move_ball_left
+    jmp move_ball_right
+
+move_ball_down:
+    inc ball_y_address
+    jmp check_horizontal_move
+move_ball_up:
+    dec ball_y_address
+    jmp check_horizontal_move
+move_ball_left:
+    dec ball_x_address
+    jmp end_movement
+move_ball_right:
+    inc ball_x_address
+
+end_movement:
+    rti
+
+counter:
+    .byte 0
+ball_movement_vertical:
+    .byte UP
+ball_movement_horizontal:
+    .byte LEFT
 
 #import "data.asm"

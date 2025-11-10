@@ -1,37 +1,37 @@
 
 // sprite bitmaps 6 x 64 .bytes
 *=$3000
-// sprite #0
+// sprite #0 K&A+
 	.byte $ff, $ff, $ff, $ff, $ff, $fe, $bf, $bf, $fa, $be, $ff, $fa, $be, $ff, $ea, $bb, $ef, $e2, $bb, $ef, $82
 	.byte $af, $bb, $82, $af, $ba, $02, $bb, $ae, $02, $99, $56, $aa, $96, $56, $02, $96, $56, $42, $95, $96, $42
 	.byte $95, $96, $52, $95, $66, $52, $95, $66, $56, $55, $55, $54, $55, $55, $55, $00, $00, $00, $00, $00, $00
 	.byte 0
 
-// sprite #1
+// sprite #1 LEFT GREEN BAT top
 	.byte $00, $3c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00
 	.byte $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00
 	.byte $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $3c, $00
 	.byte 0
 
-// sprite #2
+// sprite #2 LEFT GREEN BAT bottom
 	.byte $00, $3c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00
 	.byte $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00
 	.byte $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $3c, $00
 	.byte 0
 
-// sprite #3
+// sprite #3 RIGHT WHITE BAT top
 	.byte $00, $3c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00
 	.byte $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00
 	.byte $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $3c, $00
 	.byte 0
 
-// sprite #4
+// sprite #4 RIGHT WHITE BAT bottom
 	.byte $00, $3c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00
 	.byte $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00
 	.byte $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $2c, $00, $00, $34, $00, $00, $3c, $00
 	.byte 0
 
-// sprite #5
+// sprite #5 BALL
 	.byte $00, $3c, $00, $03, $ff, $80, $07, $7e, $e0, $0e, $bd, $70, $1e, $7e, $38, $20, $ff, $3c, $31, $ff, $8c
 	.byte $4b, $ff, $d2, $47, $c3, $e2, $a7, $99, $e5, $87, $bd, $e1, $a7, $99, $e5, $47, $c3, $e2, $4b, $ff, $d2
 	.byte $31, $ff, $8c, $3c, $ff, $3c, $1c, $7e, $38, $0e, $bd, $30, $07, $7e, $e0, $01, $ff, $80, $00, $3c, $00
@@ -352,3 +352,29 @@
 	.byte	$0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e
 	.byte	$0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e
 	.byte	$0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e
+.print "screen color data end " + toHexString(*) + "["+ * + "]"
+
+.pc=music.location "Music"
+    .fill music.size, music.getData(i)
+
+    .print ""
+    .print "SID Data"
+    .print "--------"
+    .print "location=$"+toHexString(music.location)
+    .print "init=$"+toHexString(music.init)
+    .print "play=$"+toHexString(music.play)
+    .print "songs="+music.songs
+    .print "startSong="+music.startSong
+    .print "size=$"+toHexString(music.size)
+    .print "name="+music.name
+    .print "author="+music.author
+    .print "copyright="+music.copyright
+    .print ""
+    .print "Additional tech data"
+    .print "--------------------"
+    .print "header="+music.header
+    .print "header version="+music.version
+    .print "flags="+toBinaryString(music.flags)
+    .print "speed="+toBinaryString(music.speed)
+    .print "startpage="+music.startpage
+    .print "pagelength="+music.pagelength
