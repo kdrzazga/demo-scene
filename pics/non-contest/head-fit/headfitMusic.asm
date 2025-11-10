@@ -122,21 +122,21 @@ main:
 	sta $d01b
 
 	// set sprite pointers
-	lda #$80
+	lda #$c0  //points to $40 * $48 = $3000
 	sta $07F8
-	lda #$81
+	lda #$c1 //points to
 	sta $07F9
-	lda #$82
+	lda #$c2
 	sta $07FA
-	lda #$83
+	lda #$c3
 	sta $07FB
-	lda #$84
+	lda #$c4
 	sta $07FC
-	lda #$85
+	lda #$c5
 	sta $07FD
-	lda #$86
+	lda #$c6
 	sta $07FE
-	lda #$87
+	lda #$c7
 	sta $07ff
 
 	// turn on sprites
@@ -237,58 +237,57 @@ reset_middle_bars:
 	sta $d00d	// #6. sprite y
 	sta $d00f	// #7. sprite y
 	rti
-
+.print "End code: $"  + toHexString(*) + "["+ * + "]"
 
 // sprite bitmaps 6 x 64 .bytes
-*=$2000 "sprite bitmaps"
-// sprite #0 - bar1
+*=$3000 "sprite bitmaps"
+.print "sprite #0 - bar at $" + toHexString(*) + "["+ * + "]"
 	.byte $0a, $fe, $01, $0b, $fc, $03, $1f, $fc, $01, $1f, $f8, $02, $0f, $fb, $80, $07, $fe, $00, $17, $f8, $00
 	.byte $1f, $f9, $02, $06, $fe, $03, $0e, $fc, $00, $08, $f8, $00, $0f, $fe, $00, $07, $f8, $00, $03, $f0, $00
 	.byte $07, $fc, $03, $0f, $f0, $03, $0f, $f8, $03, $07, $fc, $00, $03, $f8, $00, $07, $f8, $00, $07, $fc, $00
 	.byte 0
 
-// sprite #1 - another bar
+.print "sprite #1 - another bar at $ " + toHexString(*)
 	.byte $0a, $fe, $01, $0b, $fc, %10000000, $1f, $fc, $00, $1f, $f8, $00, $0f, $fb, $80, $07, $fe, $00, $17, $f8, $00
 	.byte $1f, $f9, $01, $06, $fe, %10000000, $0e, $fc, $00, $08, $f8, $00, $0f, $fe, $00, $07, $f8, $00, $03, $f0, $00
 	.byte $07, $fc, $01, $0f, $f0, %10000000, $0f, $f8, $00, $07, $fc, $00, $03, $f8, $00, $07, $f8, $00, $07, $fc, $00
 	.byte 0
 
-// sprite #2
+.print "sprite #2 at $ " + toHexString(*)
 	.byte $0a, $fe, $00, $0b, $fc, $00, $1f, $fc, $00, $1f, $f8, $00, $0f, $fb, $80, $07, $fe, $00, $17, $f8, $00
 	.byte $1f, $f9, $00, $06, $fe, $00, $0e, $fc, $00, $08, $f8, $00, $0f, $fe, $00, $07, $f8, $00, $03, $f0, $00
 	.byte $07, $fc, $00, $0f, $f0, $00, $0f, $f8, $00, $07, $fc, $00, $03, $f8, $00, $07, $f8, $00, $07, $fc, $00
 	.byte 0
 
-// sprite #3
+.print "sprite #3 at $ " + toHexString(*)
 	.byte $0f, $f8, $00, $03, $ff, $00, $1f, $fc, $00, $1f, $f8, $00, $0f, $f9, $80, $07, $fe, $00, $07, $f8, $00
 	.byte $07, $fb, $00, $18, $fd, $00, $1f, $fc, $00, $07, $f8, $00, $07, $fe, $00, $0f, $fa, $00, $03, $f8, $00
 	.byte $07, $fe, $00, $03, $fc, $00, $1f, $f8, $00, $06, $fc, $00, $04, $fa, $00, $0f, $f9, $00, $1f, $fb, $00
 	.byte 0
 
-// sprite #4
+.print "sprite #4 at $ " + toHexString(*)
 	.byte $09, $fe, $00, $0b, $fc, $00, $1f, $fc, $00, $1f, $f8, $00, $0e, $fb, $80, $07, $fe, $00, $19, $f8, $00
 	.byte $1f, $f9, $00, $08, $fd, $00, %1110, $fc, $00, $07, $f8, $00, $0f, $fe, $00, $07, $f8, $00, $03, $f0, $00
 	.byte $07, $fc, $00, $0f, $f0, $00, $0f, $f8, $00, $07, $fc, $00, $03, $f8, $00, $07, $f8, $00, $07, $fc, $00
 	.byte 0
 
-// sprite #5
+.print "sprite #5 at $ " + toHexString(*)
 	.byte $0f, $f8, $00, $03, $ff, $00, $1f, $fc, $00, $1f, $f8, $00, $0f, $f9, $80, $07, $fe, $00, $07, $f8, $00
 	.byte $07, $fb, $00, $17, $fd, $00, $1f, $fc, $00, $05, $f8, $00, $07, $fe, $00, $0f, $fa, $00, $03, $f8, $00
 	.byte $07, $fe, $00, $03, $fc, $00, $1f, $f8, $00, $07, $fc, $00, $03, $fa, $00, $0f, $f8, $00, $1f, $fc, $00
 	.byte 0
 
-// sprite #6
+.print "sprite #6 at $ " + toHexString(*)
 	.byte $09, $fe, $00, $0b, $fc, $00, $1f, $fc, $00, $1f, $f8, $00, $0f, $fb, $80, $07, $fe, $00, $17, $f8, $00
 	.byte $1f, $f9, $00, $08, $ff, $00, %1110, $fc, $00, $07, $f8, $00, $0f, $fe, $00, $07, $f8, $00, $03, $f0, $00
 	.byte $07, $fc, $00, $0f, $f0, $00, $0f, $f5, $00, $07, $fc, $00, $03, $f8, $00, $07, $f8, $00, $07, $fc, $00
 	.byte 0
 
-// sprite #7
+.print "sprite #7 at $ " + toHexString(*)
 	.byte $0f, $f8, $00, $03, $ff, $00, $1f, $fc, $00, $1f, $f8, $00, $0f, $f9, $80, $07, $fe, $00, $06, $f8, $00
 	.byte $07, $fb, $00, $18, $fc, $00, $1f, $fc, $00, $08, $f8, $00, $07, $fe, $00, $0f, $fb, $00, $04, $f8, $00
 	.byte $07, $fe, $00, $03, $fc, $00, $1f, $f8, $00, $09, $fc, $00, $03, $fa, $00, $0f, $f7, $00, $1f, $fc, $00
 	.byte 0
-
 
 
 *=$2800 "screen character data"
@@ -317,6 +316,7 @@ reset_middle_bars:
 	.byte	$20, $20, $20, $20, $23, $20, $20, $e6, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 	.byte	$20, $20, $20, $20, $6d, $20, $20, $5d, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 	.byte	$20, $20, $20, $20, $6d, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
+.print "screen character data end " + toHexString(*)
 
 *=$2be8 "screen color data"
 	.byte	$0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b, $0b
@@ -344,6 +344,7 @@ reset_middle_bars:
 	.byte	$0e, $0e, $0e, $0e, $00, $0e, $0e, $00, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e
 	.byte	$0e, $0e, $0e, $0e, $00, $0e, $0e, $00, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e
 	.byte	$0e, $0e, $0e, $0e, $00, $0e, $0e, $00, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e
+.print "screen color data end " + toHexString(*)
 
 .pc=music.location "Music"
     .fill music.size, music.getData(i)
