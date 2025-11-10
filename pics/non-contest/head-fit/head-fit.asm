@@ -1,9 +1,9 @@
 .var music = LoadSid("Modem.sid") //only P-SIDs supported
 
-//#import "basic-code-hf-load.asm"
-:BasicUpstart2(main)
+#import "basic-code-hf-load.asm"
+//:BasicUpstart2(main)
 
-*=2286 "main"
+*=2534 "main"
 main:
 	// set to 25 line text mode and turn on the screen
 	lda #$1b
@@ -122,7 +122,7 @@ main:
 	sta $d01b
 
 	// set sprite pointers
-	lda #$c0  //points to $40 * $48 = $3000
+	lda #$c0  //points to $40 * $c0 = $3000
 	sta $07F8
 	lda #$c1 //points to
 	sta $07F9
