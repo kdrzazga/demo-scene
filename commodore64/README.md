@@ -15,7 +15,11 @@ Faces:
 https://csdb.dk/release/index.php?id=257120
 
 <-Head Shit:
+<<<<<<<< HEAD:commodore64/README.md
 https://csdb.dk/release/?id=257192
+========
+
+>>>>>>>> 5f19338 (moving and Commodopong1):commodore64/pics/README.md
 
 Commodopong:
 
