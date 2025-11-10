@@ -33,31 +33,37 @@
 .byte $00,0,$19
 
 .byte 200, 0
-.byte  print,32, quote, 147, quote
+.byte  print,32, quote, 147
+.text "****************************************"
+.byte quote
 .byte $00,0,$19
 
 .byte 205, 0
 .byte  print,32, quote
-.text "COMMODOPONG - A SIMPLE PONG GAME"
+.text "*   COMMODOPONG - A SIMPLE PONG GAME   *"
 .byte quote
 .byte $00,0,$19
 
 .byte 210, 0
 .byte  print,32, quote
-.text ""
+.text "****************************************"
 .byte quote
 .byte $00,0,$19
 
 
 .byte 215, 0
-.byte  print,32, quote, WHITE
+.byte  print,32, quote
 .text ""
 .byte quote
 .byte $00,0,$19
 
 .byte 220, 0
 .byte  print,32, quote
-.text ""
+.text "KUDOZ TO "
+.byte WHITE
+.text "PAN ARECZEK"
+.byte BLACK
+.text " OF K&A+"
 .byte quote
 .byte $00,0,$19
 
@@ -69,21 +75,23 @@
 
 .byte 225, 0
 .byte  print,32, quote
-.text "KUDOZ TO "
-.byte WHITE
-.text "PAN ARECZEK"
-.byte BLACK
-.text " OF K&A+"
+.text ""
 .byte quote
 .byte $00,0,$19
 
 .byte 230, 0
 .byte  print,32, quote
-.text ""
+.text "MSX: POPCORN BY LYNX"
 .byte quote
 .byte $00,0,$19
 
 .byte 235, 0
+.byte  print,32, quote
+.text "HTTPS://CSDB.DK/SID/?ID=38878"
+.byte quote
+.byte $00,0,$19
+
+.byte 236, 0
 .byte  print,32, quote
 .text ""
 .byte quote
@@ -91,7 +99,7 @@
 
 .byte 240, 0
 .byte  print,32, quote
-.text ""
+.text "(C) KRZYSZTOF D. AND K&A+ 2026"
 .byte quote
 .byte $00,0,$19
 
@@ -99,7 +107,7 @@
 .text " I "
 .byte 178 //2057
 .byte 32, 49, 32, 164, 32  //2063
-.text "5000 : "
+.text "6000 : "
 .byte  next
 .byte 0,0,$19
 

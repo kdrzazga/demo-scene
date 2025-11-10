@@ -192,7 +192,7 @@ irq1:
 	//jmp move_ball
 
 move_ball:
-    inc 1024
+    inc 1024 + 16*40 //TODO: remove
     lda ball_movement_vertical
     cmp #DOWN
     beq move_ball_down
