@@ -159,7 +159,7 @@ draw_screen:
 	lda #$04
 	sta $fe
 
-	lda #$e8
+	lda #$e8 //$2be8 is "screen color data"
 	sta $f9
 	lda #$2b
 	sta $fa
@@ -198,6 +198,8 @@ reverse:
 
 	jmp counter_handling
 
+shrink_bars_intermediate:
+    jmp shrink_bars
 move_bars:
 
     lda reverse_bool
@@ -263,11 +265,13 @@ reset_middle_bars:
  counter_handling:
     inc counter
     lda counter
-    // sta 1024 //useful for debaug
+    // sta 1024 //useful for debug
     cmp #7
     beq color_set1
     cmp #10
     beq color_set_default
+    cmp #11
+    beq shrink_bars_intermediate
     cmp #15
     beq color_set_white
     cmp #18
@@ -276,12 +280,22 @@ reset_middle_bars:
     beq color_set4
     cmp #26
     beq color_set_default
+    cmp #27
+    beq spread_left_bar
     cmp #31
     beq color_set_cyan
     cmp #35
     beq color_set_default
-    cmp #80
+    cmp #37
+    beq shrink_bars
+    cmp #40
     beq enable_reverse
+    cmp #60
+    beq reset_reverse
+    cmp #70
+    beq enable_reverse
+    cmp #90
+    beq reset_reverse
     cmp #100
     beq reset_counter_reverse
 	rti
@@ -321,6 +335,7 @@ color_set_cyan:
 reset_counter_reverse:
     lda #0
     sta counter
+reset_reverse:
     lda #0
     sta reverse_bool
     rti
@@ -328,6 +343,23 @@ reset_counter_reverse:
 enable_reverse:
     lda #1
     sta reverse_bool
+    rti
+
+spread_left_bar:
+    lda #$01010101
+    //ora $d01d
+    sta $d01d
+    rti
+
+spread_right_bar:
+    lda #$10101010
+    ///ora $d01d
+    sta $d01d
+    rti
+
+shrink_bars:
+    lda #$00000000
+    sta $d01d
     rti
 
 .print "End code: $"  + toHexString(*) + "["+ * + "]"
