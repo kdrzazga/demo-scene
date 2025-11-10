@@ -12,55 +12,89 @@
 .const one = 49
 .const colon = 58
 .const left_arrow = 95
-.const poke = $9700
+.const poke = $97
 .const signature_basic = $180d
 .const WHITE = 5
-.const LIGHTBLUE = 154
+.const BLACK = 144
 
 
 *=2049 "basic loader"
 .byte 24, 8
-.byte 245, 0
+
+.byte 53, 0
+.byte poke
+.text " 53280,12"
+.byte colon
+.byte poke
+.text " 53281,15"
+.byte colon
+.byte poke
+.text " 646,0"
+.byte $00,0,$19
+
+.byte 200, 0
 .byte  print,32, quote, 147, quote
 .byte $00,0,$19
 
-.byte 246, 0
+.byte 205, 0
 .byte  print,32, quote
 .text "TRIBUTE TO BLACKBOX CART"
 .byte quote
 .byte $00,0,$19
 
-.byte 247, 0
+.byte 210, 0
 .byte  print,32, quote
 .text ""
 .byte quote
 .byte $00,0,$19
 
-.byte 248, 0
+.byte 212, 0, for
+.text " I "
+.byte 178 //2057
+.byte 32, 49, 32, 164, 32  //2063
+.text "1000 : "
+.byte  next
+.byte 0,0,$19
+
+.byte 215, 0
 .byte  print,32, quote, WHITE, left_arrow
 .text "HF"
-.byte LIGHTBLUE
+.byte BLACK
 .text " IS THE FAMOUS BLACK BOX COMMAND TO "
 .byte quote
 .byte $00,0,$19
 
-.byte 249, 0
+.byte 220, 0
 .byte  print,32, quote
 .text "MANIPULATE DATASSETE HEADER"
 .byte quote
 .byte $00,0,$19
 
-.byte 250, 0
+.byte 222, 0, for
+.text " I "
+.byte 178 //2057
+.byte 32, 49, 32, 164, 32  //2063
+.text "3000 : "
+.byte  next
+.byte 0,0,$19
+
+.byte 223, 0
+.byte  print,32, quote
+.text ""
+.byte quote
+.byte $00,0,$19
+
+.byte 225, 0
 .byte  print,32, quote
 .text "KUDOZ TO "
 .byte WHITE
 .text "PAN ARECZEK"
-.byte LIGHTBLUE
+.byte BLACK
 .text " OF K&A+ AND WOJTEK BRZOSTEK - THE COMPOSER"
 .byte quote
 .byte $00,0,$19
 
-.byte 234, 0
+.byte 230, 0
 .byte  print,32, quote
 .text "LET'S RUN HEAD FIT NOW  !!!!"
 .byte quote
@@ -72,13 +106,13 @@
 .byte quote
 .byte $00,0,$19
 
-.byte 236, 0
+.byte 240, 0
 .byte  print,32, quote, left_arrow
 .text "HF"
 .byte quote
 .byte $00,0,$19
 
-.byte 237, 0, for
+.byte 245, 0, for
 .text " I "
 .byte 178 //2057
 .byte 32, 49, 32, 164, 32  //2063
@@ -86,7 +120,7 @@
 .byte  next
 .byte 0,0,$19
 
-.byte 238, 0
+.byte 250, 0
 .byte sys
 .text " 2534"
 .byte $00,$19

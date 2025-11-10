@@ -222,27 +222,92 @@ reset_initial_bars:
 	lda #(162-42)
 	sta $d001	// #0. sprite y
 	sta $d003	// #1. sprite y
-	rti
+	jmp counter_handling
+
 reset_top_bars:
 
 	lda #(162-42)
 	sta $d005	// #2. sprite y
 	sta $d009	// #4. sprite y
-	rti
+	jmp counter_handling
 
 reset_bottom_bars:
 
 	lda #(162-42)
 	sta $d007	// #3. sprite y
 	sta $d00b	// #5. sprite y
-	rti
+	jmp counter_handling
 
 reset_middle_bars:
 
 	lda #(162-42)
 	sta $d00d	// #6. sprite y
 	sta $d00f	// #7. sprite y
+    rti
+
+ counter_handling:
+    inc counter
+    lda counter
+    // sta 1024 //useful for debaug
+    cmp #20
+    beq color_set1
+    cmp #40
+    beq color_set_default
+    cmp #60
+    beq color_set_white
+    cmp #80
+    beq color_set_default
+    cmp #100
+    beq color_set4
+    cmp #120
+    beq color_set_default
+    cmp #140
+    beq color_set_cyan
+    cmp #160
+    beq color_set_default
+    cmp #200
+    beq reset_counter
 	rti
+
+color_set1:
+    lda #12
+    sta $d020
+    lda #15
+    sta $d021
+    rti
+
+color_set_default:
+    lda #10
+    sta $d020
+    sta $d021
+    rti
+
+color_set_white:
+    lda #WHITE
+    sta $d020
+    sta $d021
+    rti
+
+color_set4:
+    lda #0
+    sta $d020
+    lda #15
+    sta $d021
+    rti
+
+color_set_cyan:
+    lda #CYAN
+    sta $d020
+    sta $d021
+    rti
+
+reset_counter:
+    lda #0
+    sta counter
+    rti
+
 .print "End code: $"  + toHexString(*) + "["+ * + "]"
 
+counter:
+    .byte 0
 #import "data.asm"
