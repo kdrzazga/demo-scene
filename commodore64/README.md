@@ -15,7 +15,7 @@ Faces:
 https://csdb.dk/release/index.php?id=257120
 
 <-Head Shit:
-
+https://csdb.dk/release/?id=257192
 
 Commodopong:
 
