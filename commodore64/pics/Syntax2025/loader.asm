@@ -110,7 +110,15 @@ https://sta.c64.org/cbm64mem.html
 .text " I "
 .byte 178 //2057
 .byte 32, 49, 32, 164, 32  //2063
-.text "8000 : "
+.text "4000 : "
+.byte  next
+.byte 0,0,$19
+
+.byte 254, 0, for
+.text " I "
+.byte 178 //2057
+.byte 32, 49, 32, 164, 32  //2063
+.text "4000 : "
 .byte  next
 .byte 0,0,$19
 
