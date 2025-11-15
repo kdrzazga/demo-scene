@@ -7,25 +7,8 @@
 //*=$080d
 start:
 
-	// set to 25 line text mode and turn on the screen
-	lda #$1b
-	sta $d011
-
-	// disable shift-commodore
-	lda #$80
-	sta $0291
-
-	// set screen memory ($0400) and charset bitmap offset ($2000)
-	lda #$18
-	sta $d018
-
-	// set border color
-	lda #$0b
-	sta $d020
-
-	// set background color
-	lda #$00
-	sta $d021
+    jsr setup
+    jsr draw_screen
 
 	// turn on multicolor mode
 	lda #$d8
@@ -39,21 +22,57 @@ start:
 	lda #$0e
 	sta $d023
 
-	// draw screen
+    jsr handle_sprites
+
+	// wait for keypress
+	lda $c6
+	beq *-2
+
+	rts
+
+//------------------------------------------------
+
+setup:
+	// set to 25 line text mode and turn on the screen
+	lda #%00011011
+	sta $d011
+
+	// disable shift-commodore
+	lda #%10000000
+	sta $0291
+
+	// set screen memory ($0400) and charset bitmap offset ($2000)
+	lda #%00011000
+	sta $d018 //53272
+
+	// set border color
+	lda #DARK_GRAY
+	sta $d020
+
+	// set background color
+	lda #BLACK
+	sta $d021
+    rts
+
+//------------------------------------------------
+
+draw_screen:
 	lda #$00
 	sta $fb
 	sta $fd
+
+	lda #<screenData
 	sta $f7
 
-	lda #$28
+	lda #>screenData
 	sta $fc
 
 	lda #$04
 	sta $fe
 
-	lda #$e8  //color data $2be8
+	lda #<screenColorData
 	sta $f9
-	lda #$2b //color data $2be8
+	lda #>screenColorData
 	sta $fa
 
 	lda #$d8
@@ -61,12 +80,14 @@ start:
 
 	ldx #$00
 	ldy #$00
+
+loop:
 	lda ($fb),y
 	sta ($fd),y
 	lda ($f9),y
 	sta ($f7),y
 	iny
-	bne *-9
+	bne loop //*-9
 
 	inc $fc
 	inc $fe
@@ -75,16 +96,17 @@ start:
 
 	inx
 	cpx #$04
-	bne *-24
+	bne loop //*-24
 
-	// wait for keypress
-	lda $c6
-	beq *-2
+    rts
+//--------------
 
-	rts
+handle_sprites:
+    rts
+
 
 // character bitmap definitions 2k
-*=$2000
+*=charBitmapDataAddress
 	.byte	$1c, $22, $4a, $56, $4c, $20, $1e, $00
 	.byte	$18, $24, $42, $7e, $42, $42, $42, $00
 	.byte	$7c, $22, $22, $3c, $22, $22, $7c, $00
@@ -344,7 +366,7 @@ start:
 .print "town2 END character bitmap definitions 2k = $"+toHexString(*) + "["+ * + "]"
 
 // town2 screen character data
-*=$2800
+*=screenData
 	.byte	$60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60
 	.byte	$60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60
 	.byte	$60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $04, $0f, $17, $0e, $14, $0f, $17, $0e, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60, $60
@@ -373,7 +395,7 @@ start:
 .print "town2 END screen character data = $"+toHexString(*) + "["+ * + "]"
 
 // town2 screen color data
-*=$2be8
+*=screenColorData
 	.byte	$02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
 	.byte	$02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
 	.byte	$02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $01, $01, $01, $01, $01, $01, $01, $01, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
