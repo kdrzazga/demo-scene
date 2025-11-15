@@ -1,27 +1,13 @@
-// 10 sys2061
-*=$0801
-	.byte $0b, $08, $0a, $00, $9e, $32, $30, $36, $31, $00, $00, $00
+.const charBitmapDataAddress = $2000
+.const screenData = $3800
+.const screenColorData = $3be8
+// 10 sys2062
+:BasicUpstart2(start)
 
-*=$080d
-	// set to 25 line text mode and turn on the screen
-	lda #$1b
-	sta $d011
+//*=$080d
+start:
 
-	// disable shift-commodore
-	lda #$80
-	sta $0291
-
-	// set screen memory ($0400) and charset bitmap offset ($2000)
-	lda #$18
-	sta $d018
-
-	// set border color
-	lda #$0b
-	sta $d020
-
-	// set background color
-	lda #$00
-	sta $d021
+    jsr setup
 
 	// turn on multicolor mode
 	lda #$d8
@@ -35,21 +21,58 @@
 	lda #$0e
 	sta $d023
 
-	// draw screen
+    jsr handle_sprites
+
+	// wait for keypress
+	lda $c6
+	beq *-2
+
+	rts
+
+//------------------------------------------------
+
+setup:
+	// set to 25 line text mode and turn on the screen
+	lda #%00011011
+	sta $d011
+
+	// disable shift-commodore
+	lda #%10000000
+	sta $0291
+
+	// set screen memory ($0400) and charset bitmap offset ($2000)
+	lda #%00011000
+	sta $d018 //53272
+
+	// set border color
+	lda #DARK_GRAY
+	sta $d020
+
+	// set background color
+	lda #BLACK
+	sta $d021
+
+
+
+//------------------------------------------------
+
+draw_screen:
 	lda #$00
 	sta $fb
 	sta $fd
+
+	lda #<screenData
 	sta $f7
 
-	lda #$28
+	lda #>screenData
 	sta $fc
 
 	lda #$04
 	sta $fe
 
-	lda #$e8
+	lda #<screenColorData
 	sta $f9
-	lda #$2b
+	lda #>screenColorData
 	sta $fa
 
 	lda #$d8
@@ -57,12 +80,14 @@
 
 	ldx #$00
 	ldy #$00
+
+loop:
 	lda ($fb),y
 	sta ($fd),y
 	lda ($f9),y
 	sta ($f7),y
 	iny
-	bne *-9
+	bne loop //*-9
 
 	inc $fc
 	inc $fe
@@ -71,15 +96,10 @@
 
 	inx
 	cpx #$04
-	bne *-24
+	bne loop //*-24
 
-    jsr handle_sprites
-
-	// wait for keypress
-	lda $c6
-	beq *-2
-
-	rts
+    rts
+//--------------
 
 handle_sprites:
 
@@ -151,7 +171,7 @@ handle_sprites:
 
 
 // character bitmap definitions 2k
-*=$2000
+*=charBitmapDataAddress
 	.byte	$1c, $22, $4a, $56, $4c, $20, $1e, $00
 	.byte	$18, $24, $42, $7e, $42, $42, $42, $00
 	.byte	$7c, $22, $22, $3c, $22, $22, $7c, $00
@@ -410,7 +430,7 @@ handle_sprites:
 	.byte	$0f, $0f, $0f, $0f, $f0, $f0, $f0, $f0
 
 // screen character data
-*=$2800
+*=screenData
 	.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 	.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 	.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $08, $01, $12, $02, $0f, $12, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
@@ -438,7 +458,7 @@ handle_sprites:
 	.byte	$a0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0
 
 // screen color data
-*=$2be8
+*=screenColorData //$2be8
 	.byte	$0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e
 	.byte	$0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e
 	.byte	$0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $01, $01, $01, $01, $01, $01, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e
