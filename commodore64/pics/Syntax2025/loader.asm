@@ -30,6 +30,12 @@ https://sta.c64.org/cbm64mem.html
 
 *=2049 "basic loader"
 .byte 24, 8
+
+.byte 227, 0
+.byte  poke
+
+.byte $00,0,$19
+
 .byte 229, 0
 .byte  print
 .byte $00,0,$19
