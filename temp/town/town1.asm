@@ -8,6 +8,7 @@
 start:
 
     jsr setup
+    jsr draw_screen
 
 	// turn on multicolor mode
 	lda #$d8
@@ -51,8 +52,7 @@ setup:
 	// set background color
 	lda #BLACK
 	sta $d021
-
-
+    rts
 
 //------------------------------------------------
 

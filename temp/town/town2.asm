@@ -1,8 +1,12 @@
-// 10 sys2061
-*=$0801
-	.byte $0b, $08, $0a, $00, $9e, $32, $30, $36, $31, $00, $00, $00
+.const charBitmapDataAddress = $2000
+.const screenData = $3800
+.const screenColorData = $3be8
+// 10 sys2062
+:BasicUpstart2(start)
 
-*=$080d
+//*=$080d
+start:
+
 	// set to 25 line text mode and turn on the screen
 	lda #$1b
 	sta $d011
