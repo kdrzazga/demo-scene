@@ -1,6 +1,6 @@
-.const charBitmapDataAddress = $2000
-.const screenData = $3800
-.const screenColorData = $3be8
+.const charBitmapDataAddress = $3800
+.const screenData = $4000
+.const screenColorData = screenData + 1024
 // 10 sys2062
 :BasicUpstart2(start)
 
@@ -26,12 +26,25 @@ setup:
 	lda #%10000000
 	sta $0291
 
-	// set screen memory ($0400) and charset bitmap offset ($2000)
-	lda #%00011000
+	// set screen memory ($0400) and charset bitmap offset ($3800)
+	lda #%00011111
 	sta $d018 //53272
+	/*
+    Content of $d018 VS charBitmapDataAddress:
+    $d018      | charBitmapDataAddress
+    -----------+----------------------
+    %0001 1001 |	$2000
+    %0001 1000 |	$2000
+    %0001 1010 |	$2800
+    %0001 1011 |	$2800
+    %0001 1100 |	$3000
+    %0001 1101 |	$3000
+    %0001 1110 |	$3800
+    %0001 1111 |	$3800
+	*/
 
 	// set border color
-	lda #BLACK
+	lda #RED
 	sta $d020
 
 	// set background color
@@ -85,9 +98,11 @@ loop:
 
     rts
 
-// character bitmap definitions 2k
+.print "End Code segment $" + toHexString(*) + " [" + * + "]"
+
+// character bitmap definitions
 bitmap_def:
-*=charBitmapDataAddress
+*=charBitmapDataAddress "Character Bitmap Data (standard c64 charset)"
 	.byte	$3c, $66, $6e, $6e, $60, $62, $3c, $00
 	.byte	$18, $3c, $66, $7e, $66, $66, $66, $00
 	.byte	$7c, $66, $66, $7c, $66, $66, $7c, $00
@@ -348,6 +363,7 @@ bitmap_def:
 // screen character data
 screen_data:
 *=screenData
+.print "Begin Character Data $" + toHexString(*) + " [" + * + "]"
 	.byte	$20, $20, $20, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 	.byte	$e9, $a0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $20, $20, $20, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $df, $20, $20, $20, $e0, $e0, $e0, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 	.byte	$5f, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $20, $e0, $e9, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $df, $20, $20, $e0, $e0, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
@@ -373,9 +389,11 @@ screen_data:
 	.byte	$e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $20, $20, $20, $20, $20
 	.byte	$e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $20, $20
 	.byte	$e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0
+.print "End Character  Data $" + toHexString(*) + " [" + * + "]"
 
 // screen color data
 *=screenColorData
+.print "Begin Screen Color Data $" + toHexString(*) + " [" + * + "]"
 	.byte	$0e, $0e, $0e, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $02, $02, $02, $02, $02, $02, $02, $02, $02, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e
 	.byte	$00, $00, $00, $0c, $0c, $0c, $00, $00, $00, $00, $02, $0e, $0e, $0e, $00, $00, $00, $00, $00, $00, $00, $00, $00, $0e, $0e, $0e, $02, $02, $02, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e
 	.byte	$00, $00, $0c, $0c, $00, $00, $00, $00, $02, $02, $0e, $02, $00, $00, $00, $0c, $0c, $0c, $0c, $0c, $0b, $0c, $00, $00, $00, $0e, $0e, $02, $02, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e
@@ -402,4 +420,4 @@ screen_data:
 	.byte	$09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $09, $09, $09, $09, $00, $00, $00, $0e, $0e
 	.byte	$09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $00, $00, $00
 
-.print "End " + toHexString(*)
+.print "End Screen Color Data $" + toHexString(*) + " [" + * + "]"
