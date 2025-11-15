@@ -33,7 +33,7 @@ https://sta.c64.org/cbm64mem.html
 
 .byte 227, 0
 .byte  poke
-
+.text " 657,1" //disable C= key
 .byte $00,0,$19
 
 .byte 229, 0
