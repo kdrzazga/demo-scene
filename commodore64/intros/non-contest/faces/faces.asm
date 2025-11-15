@@ -194,12 +194,14 @@ draw_screen:
 
 	ldx #$00
 	ldy #$00
+
+loop:
 	lda ($fb),y
 	sta ($fd),y
 	lda ($f9),y
 	sta ($f7),y
 	iny
-	bne *-9
+	bne loop //*-9
 
 	inc $fc
 	inc $fe
@@ -208,7 +210,7 @@ draw_screen:
 
 	inx
 	cpx #$04
-	bne *-24
+	bne loop //*-24
 
 
 #import "sprites.asm"
