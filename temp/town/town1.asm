@@ -73,6 +73,16 @@
 	cpx #$04
 	bne *-24
 
+    jsr handle_sprites
+
+	// wait for keypress
+	lda $c6
+	beq *-2
+
+	rts
+
+handle_sprites:
+
 	// set sprite multicolors
 	lda #$02
 	sta $d025
@@ -122,10 +132,6 @@
 	// turn on sprites
 	lda #$03
 	sta $d015
-
-	// wait for keypress
-	lda $c6
-	beq *-2
 
 	rts
 

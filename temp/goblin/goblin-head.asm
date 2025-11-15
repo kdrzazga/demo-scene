@@ -1,11 +1,23 @@
 .const charBitmapDataAddress = $2000
 .const screenData = $3800
 .const screenColorData = $3be8
-// 10 sys2061
+// 10 sys2062
 :BasicUpstart2(start)
 
 //*=$080d
 start:
+    jsr setup
+
+    jsr draw_screen
+
+	// wait for keypress
+	lda $c6
+	beq *-2
+
+	rts
+//------------------------------------------------
+
+setup:
 	// set to 25 line text mode and turn on the screen
 	lda #%00011011
 	sta $d011
@@ -21,18 +33,13 @@ start:
 	// set border color
 	lda #BLACK
 	sta $d020
-	
+
 	// set background color
 	lda #RED
 	sta $d021
 
-    jsr draw_screen
-
-	// wait for keypress
-	lda $c6
-	beq *-2
-
 	rts
+//------------------------------------------------
 
 draw_screen:
 	lda #$00
