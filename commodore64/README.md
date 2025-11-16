@@ -14,8 +14,11 @@ https://csdb.dk/release/?id=256773
 Faces:
 https://csdb.dk/release/index.php?id=257120
 
-<-Head Shit:
+<-Head Shit
 https://csdb.dk/release/?id=257192
 
-Commodopong:
+Tuff Guy
+https://csdb.dk/release/?id=257310
+
+Commodopong
 in progress
