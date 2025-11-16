@@ -1,13 +1,14 @@
 .const screenRamArea = $0c00
 .const colorRamArea = $1c00 //or $1000
 .const bitmapArea = $2000
+
 .const charBitmapDataAddress = $3800
-
-.var screenData1 = $3800
-.var screenColorData1 = screenData1 + 1000
-
+.const screenData = $4000
+.const screenColorData = screenData + 1024
 .const KernalGETIN = $ffe4
+
 BasicUpstart2(start)
+    .var picture = LoadBinary("wolfrider.kla", BF_KOALA)
 
 start:
     ldx #RED
@@ -16,10 +17,10 @@ start:
 
 copy_data_loop:
     .for (var i = 0; i < 4; i++){
-        lda screenData1 +256*i, x
+        lda screenData +256*i, x
         sta 1024 + 256*i, x
 
-        lda screenColorData1 +256*i, x
+        lda screenColorData +256*i, x
         sta $d800 + 256*i, x
     }
     inx
@@ -28,9 +29,39 @@ copy_data_loop:
 WAIT_KEY:
 	jsr KernalGETIN
 	beq WAIT_KEY
+
+            lda #%00111000 //least significant bytes 0011 -> screenRamArea = $0c00 //0110 -> $1800
+			sta $d018
+			lda #11011000
+			sta $d016
+			lda #%00111011
+			sta $d011
+			lda #RED
+			sta $d020
+			lda #picture.getBackgroundColor()
+			sta $d021
+			ldx #0
+
+loop1:		.for (var i=0; i<4; i++) {
+				lda colorRam+i*$100,x
+				sta $d800+i*$100,x
+			}
+			inx
+			bne loop1
+
+WAIT_KEY2:
+			jsr $ffe4        // Calling KERNAL GETIN
+			beq WAIT_KEY2
+
+			rts
+
+.print "End main code $" + toHexString(*) + " [" + * + "]"
+.print "Size: " + (* - start)
+.print "End Code segment $" + toHexString(*) + " [" + * + "]"
+
 // screen character data
 screen_data:
-*=screenData1
+*=screenData
 .print "Begin Character Data $" + toHexString(*) + " [" + * + "]"
 	.byte	$20, $20, $20, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 	.byte	$e9, $a0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $20, $20, $20, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0, $df, $20, $20, $20, $e0, $e0, $e0, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
@@ -60,7 +91,7 @@ screen_data:
 .print "End Character  Data $" + toHexString(*) + " [" + * + "]"
 
 // screen color data
-*=screenColorData1
+*=screenColorData
 .print "Begin Screen Color Data $" + toHexString(*) + " [" + * + "]"
 	.byte	$0e, $0e, $0e, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $02, $02, $02, $02, $02, $02, $02, $02, $02, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e
 	.byte	$00, $00, $00, $0c, $0c, $0c, $00, $00, $00, $00, $02, $0e, $0e, $0e, $00, $00, $00, $00, $00, $00, $00, $00, $00, $0e, $0e, $0e, $02, $02, $02, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e, $0e
@@ -89,3 +120,20 @@ screen_data:
 	.byte	$09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $00, $00, $00
 
 .print "End Screen Color Data $" + toHexString(*) + " [" + * + "]"
+
+.print "Begin ScreenRam 1: $" + toHexString(screenRamArea) + " [" + screenRamArea +"]"
+*=screenRamArea	"ScreenRam"; 			.fill picture.getScreenRamSize(), picture.getScreenRam(i)
+.print "End ScreenRam 1: $" + toHexString(*) + " [" + * +"]"
+.print "Size = " +(*-screenRamArea)
+.print "-----------------"
+
+.print "Begin ColorRam 1: $" + toHexString(colorRamArea) + " [" + colorRamArea +"]"
+*=colorRamArea	"ColorRam:"; colorRam: 	.fill picture.getColorRamSize(), picture.getColorRam(i)
+.print "End ColorRam 1: $" + toHexString(*) + " [" + * +"]"
+.print "Size = " +(*-colorRamArea)
+.print "-----------------"
+
+.print "Begin bitmap 1: $" + toHexString(bitmapArea) + " [" + bitmapArea +"]"
+*=bitmapArea	"Bitmap";				.fill picture.getBitmapSize(), picture.getBitmap(i)
+.print "End bitmap 1: $" + toHexString(*) + " [" + * +"]"
+.print "Size = " +(*-bitmapArea)
