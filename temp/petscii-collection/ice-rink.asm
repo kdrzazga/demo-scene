@@ -72,11 +72,8 @@ start:
 	// colorize sprites
 	lda #$01
 	sta $d027
-	lda #$01
 	sta $d028
-	lda #$01
 	sta $d029
-	lda #$01
 	sta $d02a
 	lda #$00
 	sta $d02b
