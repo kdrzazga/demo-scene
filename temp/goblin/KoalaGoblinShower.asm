@@ -34,6 +34,7 @@ loop1:		.for (var i=0; i<4; i++) {
 WAIT_KEY:
 			jsr $ffe4        // Calling KERNAL GETIN
 			beq WAIT_KEY
+
 			rts
 
 .print "Begin ScreenRam 1: $" + toHexString(screenRamArea) + " [" + screenRamArea +"]"
