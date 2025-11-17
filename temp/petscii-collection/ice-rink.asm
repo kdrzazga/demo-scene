@@ -25,43 +25,16 @@ start:
 	sta $d021
 
 	// draw screen
+copy_data_loop:
+    .for (var i = 0; i < 4; i++){
+        lda screenRamArea +256*i, x
+        sta 1024 + 256*i, x
 
-	lda #$00
-	sta $fb
-	sta $fd
-	sta $f7
-
-	lda #$28
-	sta $fc
-
-	lda #$04
-	sta $fe
-
-	lda #$e8
-	sta $f9
-	lda #$2b
-	sta $fa
-
-	lda #$d8
-	sta $f8
-
-	ldx #$00
-	ldy #$00
-	lda ($fb),y
-	sta ($fd),y
-	lda ($f9),y
-	sta ($f7),y
-	iny
-	bne *-9
-
-	inc $fc
-	inc $fe
-	inc $fa
-	inc $f8
-
-	inx
-	cpx #$04
-	bne *-24
+        lda colorRamArea +256*i, x
+        sta $d800 + 256*i, x
+    }
+    inx
+    bne copy_data_loop
 
 	// set sprite multicolors
 	lda #$02
