@@ -11,6 +11,7 @@
 
 BasicUpstart2(start)
     .var picture = LoadBinary("wolfrider.kla", BF_KOALA)
+    .var music = LoadSid("No_Atari_No_Cry.sid")
 
 start:
     jsr KernalCLR_SCR
@@ -33,17 +34,19 @@ WAIT_KEY:
 	jsr KernalGETIN
 	beq WAIT_KEY
 
-            lda #%00111000 //least significant bytes 0011 -> screenRamArea = $0c00 //0110 -> $1800
-			sta $d018
-			lda #11011000
-			sta $d016
-			lda #%00111011
-			sta $d011
-			lda #RED
-			sta $d020
-			lda #picture.getBackgroundColor()
-			sta $d021
-			ldx #0
+    jsr setup_music
+
+    lda #%00111000 //least significant bytes 0011 -> screenRamArea = $0c00 //0110 -> $1800
+	sta $d018
+	lda #11011000
+	sta $d016
+	lda #%00111011
+	sta $d011  //watch value of this cell for potential conflict with graphics display
+	lda #RED
+	sta $d020
+	lda #picture.getBackgroundColor()
+	sta $d021
+	ldx #0
 
 loop1:		.for (var i=0; i<4; i++) {
 				lda colorRam+i*$100,x
@@ -58,9 +61,47 @@ WAIT_KEY2:
 
 			jmp COLD_RESET
 
+irq1:
+    asl $d019   //Interrupt status register
+    jsr music.play
+    pla
+    tay
+    pla
+    tax
+    pla
+    dec counter
+rti
+
+
+setup_music:
+
+     ldx #0
+     ldy #0
+     lda #music.startSong-1
+     jsr music.init
+     sei
+     lda #<irq1
+     sta $0314
+            lda #>irq1
+            sta $0315
+            asl $d019   //Interrupt status register
+            lda #%01111011
+            sta $dc0d   //Interrupt control and status register.
+            lda #%10000001
+            sta $d01a   //Interrupt control register
+            lda #%00111011
+            sta $d011   //Screen control register #1 - watch for conflict with value from lines 16 (16&17)
+            lda #%10000000
+            sta $d012   //Raster line to generate interrupt at (bits #0-#7).
+            cli
+            rts
+
 .print "End main code $" + toHexString(*) + " [" + * + "]"
 .print "Size: " + (* - start)
 .print "End Code segment $" + toHexString(*) + " [" + * + "]"
+
+counter:
+    .byte 255
 
 // screen character data
 screen_data:
@@ -143,3 +184,6 @@ screen_data:
 *=bitmapArea	"Bitmap";				.fill picture.getBitmapSize(), picture.getBitmap(i)
 .print "End bitmap 1: $" + toHexString(*) + " [" + * +"]"
 .print "Size = " +(*-bitmapArea)
+
+.pc=music.location "Music"
+.fill music.size, music.getData(i)
