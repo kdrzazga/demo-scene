@@ -1,3 +1,10 @@
+.const  snow1y = $d001
+.const  snow2y = $d003
+.const  snow3y = $d005
+.const  snow4y = $d007
+.const  snow5y = $d00b
+
+.const IRQcell = $ea31
 .const screenRamArea = $2800
 .const colorRamArea = $2be8
 .const charBitmapDataAddress = $2000
@@ -43,41 +50,37 @@ copy_data_loop:
 	sta $d026
 
 	// colorize sprites
-	lda #$01
-	sta $d027
-	sta $d028
-	sta $d029
-	sta $d02a
-	lda #$00
-	sta $d02b
-	lda #$01
-	sta $d02c
+	.var spriteColors = List().add(WHITE, WHITE, WHITE, WHITE, BLACK, WHITE)
+	.for (var i = 0; i < spriteColors.size(); i++){
+	    lda #spriteColors.get(i)
+	    sta $d027 + i
+	}
 
 	// positioning sprites
 	lda #$18
 	sta $d000	// #0. sprite x low .byte
 	lda #$32
-	sta $d001	// #0. sprite y
+	sta snow1y	// #0. sprite y snow1y = $d001
 	lda #$61
 	sta $d002	// #1. sprite x low .byte
-	lda #$32
-	sta $d003	// #1. sprite y
+	lda #$442
+	sta snow2y	// #1. sprite y  snow2y = $d003
 	lda #$ab
 	sta $d004	// #2. sprite x low .byte
 	lda #$45
-	sta $d005	// #2. sprite y
+	sta snow3y	// #2. sprite y  snow3y = $d005
 	lda #$f5
 	sta $d006	// #3. sprite x low .byte
 	lda #$32
-	sta $d007	// #3. sprite y
+	sta snow4y	// #3. sprite y  snow4y = $d007
 	lda #$1b
 	sta $d008	// #4. sprite x low .byte
 	lda #$bf
 	sta $d009	// #4. sprite y
 	lda #$2a
 	sta $d00a	// #5. sprite x low .byte
-	lda #$47
-	sta $d00b	// #5. sprite y
+	lda #$a7
+	sta snow5y	// #5. sprite y  snow5y = $d00b
 
 	// x coordinate high bits
 	lda #$20
@@ -86,7 +89,6 @@ copy_data_loop:
 	// expand sprites
 	lda #$2f
 	sta $d01d
-	lda #$2f
 	sta $d017
 
 	// set multicolor flags
@@ -98,28 +100,35 @@ copy_data_loop:
 	sta $d01b
 
 	// set sprite pointers
-	lda #$28
-	sta $07f8
-	lda #$29
-	sta $07f9
-	lda #$2a
-	sta $07fa
-	lda #$2b
-	sta $07fb
-	lda #$2c
-	sta $07fc
-	lda #$2d
-	sta $07fd
+	.var spritePtrList = List().add($07f8, $07f9, $07fa, $07fb, $07fc, $07fd).lock()
+	.for (var i = 0; i <spritePtrList.size(); i++){
+	    lda #($28+i)
+	    sta spritePtrList.get(i)
+	}
 
 	// turn on sprites
 	lda #$3f
 	sta $d015
 
-	// wait for keypress
-	lda $c6
-	beq *-2
+	sei
+	lda #<irq1
+	sta $0314
+	lda #>irq1
+	sta $0315
+	cli
+	jmp *
 
-	rts
+irq1:
+    asl $d019   //Interrupt status register
+    dec counter
+    inc 1024
+    jsr handle_snow
+    jmp IRQcell
+
+#import "sprites-snow.asm"
+
+counter:
+    .byte 255
 
 // sprite bitmaps 6 x 64 .bytes
 *=$0a00
