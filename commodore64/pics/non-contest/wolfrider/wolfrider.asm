@@ -19,6 +19,8 @@ start:
     stx $d020
     stx $d021
 
+    jsr setup_music
+
 copy_data_loop:
     .for (var i = 0; i < 4; i++){
         lda screenData +256*i, x
@@ -30,11 +32,11 @@ copy_data_loop:
     inx
     bne copy_data_loop
 
-WAIT_KEY:
-	jsr KernalGETIN
-	beq WAIT_KEY
+    jmp *
 
-    jsr setup_music
+draw:
+    lda #%00011011 //%00011011
+    sta $d011
 
     lda #%00111000 //least significant bytes 0011 -> screenRamArea = $0c00 //0110 -> $1800
 	sta $d018
@@ -48,12 +50,14 @@ WAIT_KEY:
 	sta $d021
 	ldx #0
 
-loop1:		.for (var i=0; i<4; i++) {
-				lda colorRam+i*$100,x
-				sta $d800+i*$100,x
-			}
-			inx
-			bne loop1
+loop1:
+    .for (var i=0; i<4; i++) {
+	    	lda colorRam+i*$100,x
+	    	sta $d800+i*$100,x
+	}
+	inx
+	bne loop1
+    rti
 
 WAIT_KEY2:
 			jsr $ffe4        // Calling KERNAL GETIN
@@ -70,6 +74,9 @@ irq1:
     tax
     pla
     dec counter
+    lda counter
+    cmp #0
+    beq draw
 rti
 
 
@@ -82,19 +89,19 @@ setup_music:
      sei
      lda #<irq1
      sta $0314
-            lda #>irq1
-            sta $0315
-            asl $d019   //Interrupt status register
-            lda #%01111011
-            sta $dc0d   //Interrupt control and status register.
-            lda #%10000001
-            sta $d01a   //Interrupt control register
-            lda #%00111011
-            sta $d011   //Screen control register #1 - watch for conflict with value from lines 16 (16&17)
-            lda #%10000000
-            sta $d012   //Raster line to generate interrupt at (bits #0-#7).
-            cli
-            rts
+     lda #>irq1
+     sta $0315
+     asl $d019   //Interrupt status register
+     lda #%01111011
+     sta $dc0d   //Interrupt control and status register.
+     lda #%10000001
+     sta $d01a   //Interrupt control register
+     lda #%00011011 //%00011011
+     sta $d011   //Screen control register #1 - watch for conflict with value from line43
+     lda #%10000000
+     sta $d012   //Raster line to generate interrupt at (bits #0-#7).
+     cli
+     rts
 
 .print "End main code $" + toHexString(*) + " [" + * + "]"
 .print "Size: " + (* - start)
