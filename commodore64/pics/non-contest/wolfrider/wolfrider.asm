@@ -37,9 +37,22 @@ copy_data_loop:
 draw:
     lda #%00011011 //%00011011
     sta $d011
+    lda #%00111000
+	sta $d018 //53272
+	/*
+    Content of $d018 VS charBitmapDataAddress:
+    $d018      | charBitmapDataAddress
+    -----------+----------------------
+    %0001 1001 |	$2000
+    %0001 1000 |	$2000
+    %0001 1010 |	$2800
+    %0001 1011 |	$2800
+    %0001 1100 |	$3000
+    %0001 1101 |	$3000
+    %0001 1110 |	$3800
+    %0001 1111 |	$3800
+	*/
 
-    lda #%00111000 //least significant bytes 0011 -> screenRamArea = $0c00 //0110 -> $1800
-	sta $d018
 	lda #11011000
 	sta $d016
 	lda #%00111011
