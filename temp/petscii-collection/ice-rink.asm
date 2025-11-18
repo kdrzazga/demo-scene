@@ -2,7 +2,9 @@
 .const  snow2y = $d003
 .const  snow3y = $d005
 .const  snow4y = $d007
-.const  snow5y = $d00b
+.const  snow5y = $d009
+.const skater_x = $d00a
+.const skater_y = skater_x + 1
 
 .const IRQcell = $ea31
 .const screenRamArea = $2800
@@ -50,7 +52,7 @@ copy_data_loop:
 	sta $d026
 
 	// colorize sprites
-	.var spriteColors = List().add(WHITE, WHITE, WHITE, WHITE, BLACK, WHITE)
+	.var spriteColors = List().add(WHITE, WHITE, WHITE, WHITE, WHITE, BLACK)
 	.for (var i = 0; i < spriteColors.size(); i++){
 	    lda #spriteColors.get(i)
 	    sta $d027 + i
@@ -73,26 +75,26 @@ copy_data_loop:
 	sta $d006	// #3. sprite x low .byte
 	lda #$32
 	sta snow4y	// #3. sprite y  snow4y = $d007
-	lda #$1b
-	sta $d008	// #4. sprite x low .byte
-	lda #$bf
-	sta $d009	// #4. sprite y
 	lda #$2a
-	sta $d00a	// #5. sprite x low .byte
+	sta $d008	// #5. sprite x low .byte
 	lda #$a7
 	sta snow5y	// #5. sprite y  snow5y = $d00b
+	lda #$1b
+	sta skater_x	// #4. sprite x low skater_x = $d008
+	lda #$bf
+	sta skater_y	// #4. sprite y     skater_y = $d009
 
 	// x coordinate high bits
-	lda #$20
+	lda #%01000000
 	sta $d010
 
 	// expand sprites
-	lda #$2f
+	lda #00111111 //#00101111
 	sta $d01d
 	sta $d017
 
 	// set multicolor flags
-	lda #$10
+	lda #%00100000
 	sta $d01c
 
 	// set screen-sprite priority flags
@@ -100,14 +102,14 @@ copy_data_loop:
 	sta $d01b
 
 	// set sprite pointers
-	.var spritePtrList = List().add($07f8, $07f9, $07fa, $07fb, $07fc, $07fd).lock()
+	.var spritePtrList = List().add($07f8, $07f9, $07fa, $07fb, $07fc, $07fd, $07fe).lock()
 	.for (var i = 0; i <spritePtrList.size(); i++){
 	    lda #($28+i)
 	    sta spritePtrList.get(i)
 	}
 
 	// turn on sprites
-	lda #$3f
+	lda #%00111111
 	sta $d015
 
 	sei
@@ -123,9 +125,11 @@ irq1:
     dec counter
     inc 1024
     jsr handle_snow
+    jsr handle_skater
     jmp IRQcell
 
 #import "sprites-snow.asm"
+#import "sprites-skater.asm"
 
 counter:
     .byte 255
@@ -157,15 +161,21 @@ counter:
 	.byte 0
 
 // sprite #4
-	.byte $00, $00, $00, $00, $fc, $00, $00, $cf, $00, $00, $ff, $00, $00, $f0, $00, $00, $10, $00, $00, $10, $00
-	.byte $00, $10, $00, $01, $54, $00, $01, $11, $00, $00, $20, $40, $00, $a8, $00, $00, $8a, $00, $00, $82, $00
-	.byte $02, $02, $00, $02, $0a, $00, $02, $08, $00, $02, $0f, $c0, $02, $00, $00, $0c, $00, $00, $0f, $c0, $00
-	.byte 0
-
-// sprite #5
 	.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $14, $00, $00, $08, $00, $00, $14, $00, $10, $00, $00, $00
 	.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $05, $00
 	.byte $00, $02, $00, $00, $05, $00, $00, $00, $00, $04, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+	.byte 0
+
+// sprite #5-skater
+     .byte $00, $00, $00, $00, $fc, $00, $00, $cf, $00, $00, $ff, $00, $00, $f0, $00, $00, $10, $00, $00, $10, $00
+     .byte $00, $10, $00, $01, $54, $00, $01, $11, $00, $00, $20, $40, $00, $a8, $00, $00, $8a, $00, $00, $82, $00
+     .byte $02, $02, $00, $02, $0a, $00, $02, $08, $00, $02, $0f, $c0, $02, $00, $00, $0c, $00, $00, $0f, $c0, $00
+     .byte 0
+
+// sprite #6 - skater 2
+	.byte $00, $00, $00, $00, $00, $00, $00, $FC, $00, $00, $CF, $00, $00, $FF, $00, $00, $F0, $00, $00, $10, $00
+	.byte $00, $10, $00, $00, $54, $00, $01, $11, $00, $01, $20, $40, $00, $68, $00, $00, $8A, $00, $00, $82, $00
+	.byte $02, $02, $00, $32, $02, $00, $3A, $02, $00, $30, $08, $00, $30, $08, $00, $00, $08, $00, $00, $0F, $C0
 	.byte 0
 
 #import "charset.asm"
