@@ -5,6 +5,10 @@
 .const  snow5y = $d009
 .const skater_x = $d00a
 .const skater_y = skater_x + 1
+.const skater_x2 = $d00c
+.const skater_y2 = skater_x2 + 1
+
+.const sprites_enable = $d015
 
 .const IRQcell = $ea31
 .const screenRamArea = $2800
@@ -46,13 +50,13 @@ copy_data_loop:
     bne copy_data_loop
 
 	// set sprite multicolors
-	lda #$02
+	lda #RED
 	sta $d025
-	lda #$06
+	lda #BLUE
 	sta $d026
 
 	// colorize sprites
-	.var spriteColors = List().add(WHITE, WHITE, WHITE, WHITE, WHITE, BLACK)
+	.var spriteColors = List().add(WHITE, WHITE, WHITE, WHITE, WHITE, BLACK, BLACK)
 	.for (var i = 0; i < spriteColors.size(); i++){
 	    lda #spriteColors.get(i)
 	    sta $d027 + i
@@ -81,8 +85,11 @@ copy_data_loop:
 	sta snow5y	// #5. sprite y  snow5y = $d00b
 	lda #$1b
 	sta skater_x	// #4. sprite x low skater_x = $d008
+	sta skater_x2
 	lda #$bf
 	sta skater_y	// #4. sprite y     skater_y = $d009
+	sta skater_y2
+
 
 	// x coordinate high bits
 	lda #%01000000
@@ -110,7 +117,7 @@ copy_data_loop:
 
 	// turn on sprites
 	lda #%00111111
-	sta $d015
+	sta sprites_enable
 
 	sei
 	lda #<irq1
