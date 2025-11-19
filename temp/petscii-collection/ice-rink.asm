@@ -1,3 +1,4 @@
+#import "PseudoCmds.lib"
 .const  snow1y = $d001
 .const  snow2y = $d003
 .const  snow3y = $d005
@@ -18,24 +19,17 @@
 BasicUpstart2(start)
 
 start:
-	lda #$1b
-	sta $d011
+	poke $d011 : #$1b
 
 	// disable shift-commodore
-	lda #$80
-	sta $0291
+	poke $0291 : #$80
 
 	// set screen memory ($0400) and charset bitmap offset ($2000)
-	lda #$18
-	sta $d018
+	poke $d018 : #$18
 
-	// set border color
-	lda #$00
-	sta $d020
-
-	// set background color
-	lda #$03
-	sta $d021
+	// set border - background color
+	poke 53280 : #BLACK
+	poke 53281 : #CYAN
 
 	// draw screen
 copy_data_loop:
@@ -50,10 +44,8 @@ copy_data_loop:
     bne copy_data_loop
 
 	// set sprite multicolors
-	lda #RED
-	sta $d025
-	lda #BLUE
-	sta $d026
+	poke $d025 : #RED
+	poke $d026 : #BLUE
 
 	// colorize sprites
 	.var spriteColors = List().add(WHITE, WHITE, WHITE, WHITE, WHITE, BLACK, BLACK)
@@ -63,12 +55,9 @@ copy_data_loop:
 	}
 
 	// positioning sprites
-	lda #$18
-	sta $d000	// #0. sprite x low .byte
-	lda #$32
-	sta snow1y	// #0. sprite y snow1y = $d001
-	lda #$61
-	sta $d002	// #1. sprite x low .byte
+	poke $d000: #$18	// #0. sprite x low .byte
+	poke snow1y : #$32	// #0. sprite y snow1y = $d001
+	poke $d002 : #$61	// #1. sprite x low .byte
 	lda #$442
 	sta snow2y	// #1. sprite y  snow2y = $d003
 	lda #$ab
@@ -92,8 +81,7 @@ copy_data_loop:
 
 
 	// x coordinate high bits
-	lda #%01000000
-	sta $d010
+	poke $d010 : #%01000000
 
 	// expand sprites
 	lda #00111111 //#00101111
@@ -101,12 +89,10 @@ copy_data_loop:
 	sta $d017
 
 	// set multicolor flags
-	lda #%00100000
-	sta $d01c
+	poke $d01c : #%00100000
 
 	// set screen-sprite priority flags
-	lda #$00
-	sta $d01b
+	poke $d01b : #0
 
 	// set sprite pointers
 	.var spritePtrList = List().add($07f8, $07f9, $07fa, $07fb, $07fc, $07fd, $07fe).lock()
@@ -116,8 +102,7 @@ copy_data_loop:
 	}
 
 	// turn on sprites
-	lda #%00111111
-	sta sprites_enable
+	poke sprites_enable : #%00111111
 
 	sei
 	lda #<irq1
