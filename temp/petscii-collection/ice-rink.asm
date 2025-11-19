@@ -58,10 +58,8 @@ copy_data_loop:
 	poke $d000: #$18	// #0. sprite x low .byte
 	poke snow1y : #$32	// #0. sprite y snow1y = $d001
 	poke $d002 : #$61	// #1. sprite x low .byte
-	lda #$442
-	sta snow2y	// #1. sprite y  snow2y = $d003
-	lda #$ab
-	sta $d004	// #2. sprite x low .byte
+	poke snow2y : #$44	// #1. sprite y  snow2y = $d003
+	poke $d004 : #$ab // #2. sprite x low .byte
 	lda #$45
 	sta snow3y	// #2. sprite y  snow3y = $d005
 	lda #$f5
@@ -70,8 +68,7 @@ copy_data_loop:
 	sta snow4y	// #3. sprite y  snow4y = $d007
 	lda #$2a
 	sta $d008	// #5. sprite x low .byte
-	lda #$a7
-	sta snow5y	// #5. sprite y  snow5y = $d00b
+	poke snow5y	: #$a7// #5. sprite y  snow5y = $d00b
 	lda #$1b
 	sta skater_x	// #4. sprite x low skater_x = $d008
 	sta skater_x2
