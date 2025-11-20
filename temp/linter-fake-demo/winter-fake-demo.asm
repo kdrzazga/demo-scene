@@ -175,7 +175,7 @@ dec_counter4:
     dec counter4
 
     lda counter4
-    cmp #128
+    cmp #0
     beq kill_the_shit
     jmp IRQcell
 
@@ -207,7 +207,7 @@ counter2:
 counter3:
     .byte 255
 counter4:
-    .byte 255
+    .byte 3
 .print "End code = " + toHexString(*) + " [" + * + "]"
 
 // sprite bitmaps 6 x 64 .bytes
