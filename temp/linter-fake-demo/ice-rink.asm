@@ -126,22 +126,39 @@ irq1:
 dec_counter2:
     dec counter2
     lda counter2
-    cmp #240
+    cmp #251
     beq finish_him
     inc 1024
     jmp IRQcell
 
 finish_him:
+    poke sprites_enable : #0
+
+    ldx #0
+    copy_data_loop2:
+        .for (var i = 0; i < 4; i++){
+        lda #32
+            sta 1024 + 256*i, x
+
+            lda #BLACK
+            sta $d800 + 256*i, x
+        }
+    inx
+    bne copy_data_loop2
+
+    //redirect IRQ
 	sei
 	poke $0314 : #<irq2
 	poke $0315 : #>irq2
 	cli
+
     jmp IRQcell
 
-
 irq2:
-    .for
-jmp IRQcell
+    jsr music.play
+    poke 1034 : #'S'
+    poke 1035 : #'t'
+    jmp IRQcell
 
 #import "sprites-snow.asm"
 #import "sprites-skater.asm"
@@ -195,6 +212,7 @@ counter2:
 	.byte $00, $10, $00, $00, $54, $00, $01, $11, $00, $01, $20, $40, $00, $68, $00, $00, $8A, $00, $00, $82, $00
 	.byte $02, $02, $00, $32, $02, $00, $3A, $02, $00, $30, $08, $00, $30, $08, $00, $00, $08, $00, $00, $0F, $C0
 	.byte 0
+.print "End sprites data " + toHexString(*)
 
 #import "charset.asm"
 // screen character data
