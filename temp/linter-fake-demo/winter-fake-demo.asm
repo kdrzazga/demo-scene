@@ -158,12 +158,29 @@ finish_him:
 irq2:
     jsr music.play
     ldx #0
-    petla:	//lda ending, x
+    petla:
     		poke 1024 + 40, x : ending, x
     		inx
     		cpx #(ending_text_term-ending)
     		bne petla
+    dec counter3
+
+    lda counter3
+    cmp #0
+    beq dec_counter4
+
     jmp IRQcell
+
+dec_counter4:
+    dec counter4
+
+    lda counter4
+    cmp #128
+    beq kill_the_shit
+    jmp IRQcell
+
+kill_the_shit:
+    jmp $fce2
 
 ending:
     .text "You better stop watching this crap."
@@ -171,9 +188,11 @@ ending:
     .text "Go outside and make a snowman."
     .fill 10, 32
     .byte 34
-    .text "Linter fake demo"
+    .text "!inter fake demo"
     .byte 34
-    .text " written in hope to   take the last place."
+    .text " was written in hope  to take the last place."
+    .fill 17, 32
+    .text "Released on PAT0LA PARTY 2026"
 ending_text_term:
     .byte 0
 .print "Caption length: " + (ending_text_term-ending)
@@ -184,6 +203,10 @@ ending_text_term:
 counter:
     .byte 255
 counter2:
+    .byte 255
+counter3:
+    .byte 255
+counter4:
     .byte 255
 .print "End code = " + toHexString(*) + " [" + * + "]"
 

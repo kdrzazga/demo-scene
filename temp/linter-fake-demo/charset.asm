@@ -1,6 +1,7 @@
 
 // character bitmap definitions 2k
 *=charBitmapDataAddress
+
 	.byte	$1c, $22, $4a, $56, $4c, $20, $1e, $00
 	.byte	$00, $00, $38, $04, $3c, $44, $3a, $00
 	.byte	$40, $40, $5c, $62, $42, $62, $5c, $00
@@ -34,7 +35,7 @@
 	.byte	$00, $08, $1c, $3e, $7e, $7e, $ff, $ff
 	.byte	$00, $00, $10, $20, $7f, $20, $10, $00
 	.byte	$00, $00, $00, $00, $00, $00, $00, $00
-	.byte	$08, $08, $08, $08, $00, $00, $08, $00
+	.byte	$40, $48, $50, $60, $40, $40, $7e, $00
 	.byte	$24, $24, $24, $00, $00, $00, $00, $00
 	.byte	$24, $24, $7e, $24, $7e, $24, $24, $00
 	.byte	$08, $1e, $28, $1c, $0a, $3c, $08, $00
@@ -162,7 +163,7 @@
 	.byte	$ff, $f7, $e3, $d5, $f7, $f7, $f7, $f7
 	.byte	$ff, $ff, $ef, $df, $80, $df, $ef, $ff
 	.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
-	.byte	$f7, $f7, $f7, $f7, $ff, $ff, $f7, $ff
+	.byte	$bf, $b7, $af, $9f, $bf, $bf, $81, $ff
 	.byte	$db, $db, $db, $ff, $ff, $ff, $ff, $ff
 	.byte	$db, $db, $81, $db, $81, $db, $db, $ff
 	.byte	$f7, $e1, $d7, $e3, $f5, $c3, $f7, $ff
@@ -257,3 +258,4 @@
 	.byte	$f7, $f7, $f7, $f7, $07, $ff, $ff, $ff
 	.byte	$0f, $0f, $0f, $0f, $ff, $ff, $ff, $ff
 	.byte	$0f, $1f, $3f, $7f, $ff, $ff, $ff, $ff
+
