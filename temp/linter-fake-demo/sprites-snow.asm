@@ -6,8 +6,7 @@ handle_snow:
         lda snowYs.get(i)
         cmp #140
         bne exit_loop_snow
-        lda #20
-        sta snowYs.get(i)
+        poke snowYs.get(i) : #20
         exit_loop_snow:
     }
     rts

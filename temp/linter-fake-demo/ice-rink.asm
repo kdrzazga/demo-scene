@@ -1,4 +1,7 @@
 #import "PseudoCmds.lib"
+
+.var music = LoadSid("Jingle_Bells_V1.sid") //csdb.dk/sid/?id=44299
+
 .const  snow1y = $d001
 .const  snow2y = $d003
 .const  snow3y = $d005
@@ -19,6 +22,9 @@
 BasicUpstart2(start)
 
 start:
+    //lda #music.startSong
+    //jsr music.init
+
 	poke $d011 : #$1b
 
 	// disable shift-commodore
@@ -44,6 +50,7 @@ copy_data_loop:
     bne copy_data_loop
 
 	// set sprite multicolors
+	poke $d01c : #01100000 //multicolor for sprites 5 & 6
 	poke $d025 : #RED
 	poke $d026 : #BLUE
 
@@ -59,23 +66,18 @@ copy_data_loop:
 	poke snow1y : #$32	// #0. sprite y snow1y = $d001
 	poke $d002 : #$61	// #1. sprite x low .byte
 	poke snow2y : #$44	// #1. sprite y  snow2y = $d003
-	poke $d004 : #$ab // #2. sprite x low .byte
-	lda #$45
-	sta snow3y	// #2. sprite y  snow3y = $d005
-	lda #$f5
-	sta $d006	// #3. sprite x low .byte
-	lda #$32
-	sta snow4y	// #3. sprite y  snow4y = $d007
-	lda #$2a
-	sta $d008	// #5. sprite x low .byte
-	poke snow5y	: #$a7// #5. sprite y  snow5y = $d00b
+	poke $d004 : #$ab   // #2. sprite x low .byte
+	poke snow3y	: #$45  // #2. sprite y  snow3y = $d005
+	poke $d006 : #$f5   // #3. sprite x low .byte
+	poke snow4y	: #$32  // #3. sprite y  snow4y = $d007
+	poke $d008 : #$2a	// #5. sprite x low .byte
+	poke snow5y	: #$a7  // #5. sprite y  snow5y = $d00b
 	lda #$1b
-	sta skater_x	// #4. sprite x low skater_x = $d008
+	sta skater_x	    // #4. sprite x low skater_x = $d008
 	sta skater_x2
 	lda #$bf
-	sta skater_y	// #4. sprite y     skater_y = $d009
+	sta skater_y		// #4. sprite y     skater_y = $d009
 	sta skater_y2
-
 
 	// x coordinate high bits
 	poke $d010 : #%01000000
@@ -102,26 +104,53 @@ copy_data_loop:
 	poke sprites_enable : #%00111111
 
 	sei
-	lda #<irq1
-	sta $0314
-	lda #>irq1
-	sta $0315
+	poke $0314 : #<irq1
+	poke $0315 : #>irq1
 	cli
 	jmp *
 
 irq1:
     asl $d019   //Interrupt status register
     dec counter
-    inc 1024
     jsr handle_snow
     jsr handle_skater
+    jsr music.play
+
+    lda counter
+    cmp #0
+    beq dec_counter2
+
     jmp IRQcell
+
+
+dec_counter2:
+    dec counter2
+    lda counter2
+    cmp #240
+    beq finish_him
+    inc 1024
+    jmp IRQcell
+
+finish_him:
+	sei
+	poke $0314 : #<irq2
+	poke $0315 : #>irq2
+	cli
+    jmp IRQcell
+
+
+irq2:
+    .for
+jmp IRQcell
 
 #import "sprites-snow.asm"
 #import "sprites-skater.asm"
 
 counter:
     .byte 255
+counter2:
+    .byte 255
+.print "End code = " + toHexString(*) + " [" + * + "]"
 
 // sprite bitmaps 6 x 64 .bytes
 *=$0a00
@@ -223,4 +252,28 @@ counter:
 	.byte	$01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01
 	.byte	$01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01
 	.byte	$01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01
-	
+
+.pc=music.location "Music"
+    .fill music.size, music.getData(i)
+
+    .print ""
+    .print "SID Data"
+    .print "--------"
+    .print "location=$"+toHexString(music.location)
+    .print "init=$"+toHexString(music.init)
+    .print "play=$"+toHexString(music.play)
+    .print "songs="+music.songs
+    .print "startSong="+music.startSong
+    .print "size=$"+toHexString(music.size)
+    .print "name="+music.name
+    .print "author="+music.author
+    .print "copyright="+music.copyright
+    .print ""
+    .print "Additional tech data"
+    .print "--------------------"
+    .print "header="+music.header
+    .print "header version="+music.version
+    .print "flags="+toBinaryString(music.flags)
+    .print "speed="+toBinaryString(music.speed)
+    .print "startpage="+music.startpage
+    .print "pagelength="+music.pagelength
