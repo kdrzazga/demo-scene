@@ -18,6 +18,7 @@
 .const screenRamArea = $2800
 .const colorRamArea = $2be8
 .const charBitmapDataAddress = $2000
+.const spriteDataMultiplier = $39
 
 BasicUpstart2(start)
 
@@ -96,7 +97,7 @@ copy_data_loop:
 	// set sprite pointers
 	.var spritePtrList = List().add($07f8, $07f9, $07fa, $07fb, $07fc, $07fd, $07fe).lock()
 	.for (var i = 0; i <spritePtrList.size(); i++){
-	    lda #($28+i)
+	    lda #(spriteDataMultiplier+i)
 	    sta spritePtrList.get(i)
 	}
 
@@ -156,9 +157,26 @@ finish_him:
 
 irq2:
     jsr music.play
-    poke 1034 : #'S'
-    poke 1035 : #'t'
+    ldx #0
+    petla:	//lda ending, x
+    		poke 1024 + 40, x : ending, x
+    		inx
+    		cpx #(ending_text_term-ending)
+    		bne petla
     jmp IRQcell
+
+ending:
+    .text "You better stop watching this crap."
+    .fill 5, 32
+    .text "Go outside and make a snowman."
+    .fill 10, 32
+    .byte 34
+    .text "Linter fake demo"
+    .byte 34
+    .text " written in hope to   take the last place."
+ending_text_term:
+    .byte 0
+.print "Caption length: " + (ending_text_term-ending)
 
 #import "sprites-snow.asm"
 #import "sprites-skater.asm"
@@ -170,7 +188,7 @@ counter2:
 .print "End code = " + toHexString(*) + " [" + * + "]"
 
 // sprite bitmaps 6 x 64 .bytes
-*=$0a00
+*=spriteDataMultiplier * $40
 // sprite #0
 	.byte $80, $00, $00, $00, $00, $10, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 	.byte $00, $00, $00, $00, $00, $00, $00, $04, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $20, $00, $00
