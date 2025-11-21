@@ -21,7 +21,7 @@
 
 	// set border-background color
 	poke 53280 : #8
-	poke 53281 : #8
+	poke 53281 : 53280
 
 	// draw screen
 	lda #$00
@@ -61,11 +61,11 @@
 	cpx #$04
 	bne *-24
 
-	.var knaSprite = Sprite(1, 255, 111, 1)
+	.var knaSprite = Sprite(1, 255, 111, WHITE)
     .var leftBatTopSprite = Sprite(2, $12, $34, LIGHT_GREEN)
     .var leftBatBottomSprite = Sprite(3, $12, $49, LIGHT_GREEN)
-    .var rightBatTopSprite  = Sprite(4, $de, $34, 1)
-    .var rightBatBottomSprite = Sprite(5, $de, $49, 1)
+    .var rightBatTopSprite  = Sprite(4, $de, $34, WHITE)
+    .var rightBatBottomSprite = Sprite(5, $de, $49, WHITE)
     .var ballSprite = Sprite(6, $77, $6a, YELLOW)
 
     .var allSprites = List().add(knaSprite, leftBatTopSprite, leftBatBottomSprite, rightBatTopSprite, rightBatBottomSprite, ballSprite)
@@ -81,18 +81,14 @@
 	poke $d025 :#RED
 	poke $d026 : #BLUE
 
-	// x coordinate high bits
-	poke $d010 : #0
+	poke $d010 : #0 // x coordinate high bits
 
 	// expand sprites
 	poke $d01d :#0
 	poke $d017 : #%00011110
 
-	// set multicolor flags
-	poke $d01c : #1
-
-	// set screen-sprite priority flags
-	poke $d01b : #0
+	poke $d01c : #1 // set multicolor flags
+	poke $d01b : #0 // set screen-sprite priority flags
 
     .for(var cell=$07f8; cell <=$07ff; cell++) {
         .var i = cell - $07f8
