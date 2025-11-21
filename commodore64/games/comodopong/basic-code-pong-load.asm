@@ -107,7 +107,7 @@
 .text " I "
 .byte 178 //2057
 .byte 32, 49, 32, 164, 32  //2063
-.text "6000 : "
+.text "6 : " //TODO 6000
 .byte  next
 .byte 0,0,$19
 

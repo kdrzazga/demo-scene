@@ -1,5 +1,5 @@
 .var music = LoadSid("Popcorn.sid") //only P-SIDs supported
-
+#import "PseudoCmds.lib"
 #import "basic-code-pong-load.asm"
 .print "basic loader ends " + toHexString(*) + "[" + * + "]"
 
@@ -11,26 +11,16 @@
 .const LEFT = 2
 .const RIGHT = 3
 
+.struct Sprite{id, x, y, color}
+
 *=2534 "main"
-	// set to 25 line text mode and turn on the screen
-	lda #$1b
-	sta $d011
+	poke $d011 : #$1b // set to 25 line text mode and turn on the screen
+	poke $0291 : #$80 // disable shift-commodore
+	poke $d018 : #$18 // set screen memory ($0400) and charset bitmap offset ($2000)
 
-	// disable shift-commodore
-	lda #$80
-	sta $0291
-
-	// set screen memory ($0400) and charset bitmap offset ($2000)
-	lda #$18
-	sta $d018
-
-	// set border color
-	lda #$08
-	sta $d020
-
-	// set background color
-	lda #$08
-	sta $d021
+	// set border-background color
+	poke 53280 : #8
+	poke 53281 : #8
 
 	// draw screen
 	lda #$00
@@ -70,61 +60,35 @@
 	cpx #$04
 	bne *-24
 
+	.var knaSprite = Sprite(1, 255, 111, 1)
+    .var sprite2 = Sprite(2, $12, $34, LIGHT_GREEN)
+    .var sprite3 = Sprite(3, $12, $49, LIGHT_GREEN)
+    .var sprite4 = Sprite(4, $de, $34, 1)
+    .var sprite5 = Sprite(5, $de, $49, 1)
+    .var sprite6 = Sprite(6, $77, $6a, YELLOW)
+
+    .var allSprites = List().add(knaSprite, sprite2, sprite3, sprite4, sprite5, sprite6)
+
+    .for(var i = 0; i < allSprites.size(); i++){
+        poke $d000 + 2*i : #allSprites.get(i).x
+        poke $d001 + 2*i : #allSprites.get(i).y
+
+        poke $d027 + i: #allSprites.get(i).color
+    }
+
 	// set sprite multicolors
-	lda #$02
+	lda #RED
 	sta $d025
-	lda #$06
+	lda #BLUE
 	sta $d026
-
-	// colorize sprites
-	lda #$01
-	sta $d027
-	lda #$0d
-	sta $d028
-	lda #$0d
-	sta $d029
-	lda #$01
-	sta $d02a
-	lda #$01
-	sta $d02b
-	lda #$07
-	sta $d02c
-
-	// positioning sprites
-	lda #$ff
-	sta $d000	// #0. sprite x low .byte
-	lda #$6f
-	sta $d001	// #0. sprite y
-	lda #$12
-	sta $d002	// #1. sprite x low .byte
-	lda #$34
-	sta $d003	// #1. sprite y
-	lda #$12
-	sta $d004	// #2. sprite x low .byte
-	lda #$49
-	sta $d005	// #2. sprite y
-	lda #$de
-	sta $d006	// #3. sprite x low .byte
-	lda #$34
-	sta $d007	// #3. sprite y
-	lda #$de
-	sta $d008	// #4. sprite x low .byte
-	lda #$49
-	sta $d009	// #4. sprite y
-	lda #$77
-	sta ball_x_address	// #5. sprite x low .byte
-	lda #$6a
-	sta ball_y_address	// #5. sprite y
 
 	// x coordinate high bits
 	lda #$00
 	sta $d010
 
 	// expand sprites
-    lda #$00
-	sta $d01d
-	lda #%00011110
-	sta $d017
+	poke $d01d :#0
+	poke $d017 : #%00011110
 
 	// set multicolor flags
 	lda #$01
@@ -153,7 +117,7 @@
 	sta $07ff
 
 	// turn on sprites
-	lda #$3f
+	lda #%00111111//#$3f
 	sta $d015
 
    //-------
