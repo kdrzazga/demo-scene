@@ -119,15 +119,27 @@ check_horizontal_move:
 
 move_ball_down:
     inc ball_y_address
-    jmp check_horizontal_move
+    jmp check_horizontal_deflection
 move_ball_up:
     dec ball_y_address
-    jmp check_horizontal_move
+    jmp check_horizontal_deflection
 move_ball_left:
     dec ball_x_address
     jmp end_movement
 move_ball_right:
     inc ball_x_address
+    jmp end_movement
+
+check_horizontal_deflection:
+    lda ball_y_address
+    cmp #30
+    beq ceiling_deflection
+    jmp check_horizontal_move
+
+ceiling_deflection:
+    lda #DOWN
+    sta ball_movement_vertical
+    jmp check_horizontal_move
 
 end_movement:
     rti
