@@ -22,6 +22,7 @@
 
 BasicUpstart2(start)
 
+*=2700
 start:
     //lda #music.startSong
     //jsr music.init
@@ -45,7 +46,7 @@ copy_data_loop:
         sta 1024 + 256*i, x
 
         lda colorRamArea +256*i, x
-        sta $d800 + 256*i, x
+        sta 55296 + 256*i, x
     }
     inx
     bne copy_data_loop
