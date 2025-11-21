@@ -20,5 +20,8 @@ https://csdb.dk/release/?id=257192
 Tuff Guy
 https://csdb.dk/release/?id=257310
 
+Wolfrider
+https://csdb.dk/release/index.php?id=257392
+
 Commodopong
 in progress

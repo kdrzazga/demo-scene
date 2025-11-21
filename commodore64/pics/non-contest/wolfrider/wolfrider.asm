@@ -83,9 +83,20 @@ irq1:
     dec counter
     lda counter
     cmp #0
-    beq draw
+    beq dec_counter2
 rti
 
+dec_counter2:
+    dec counter2
+    lda counter2
+    cmp #6
+    beq draw
+    cmp #0
+    beq kill
+rti
+
+kill:
+    jmp $fffc
 
 setup_music:
 
@@ -116,6 +127,8 @@ setup_music:
 
 counter:
     .byte 255
+counter2:
+    .byte 9
 
 // screen character data
 screen_data:
