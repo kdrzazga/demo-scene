@@ -3,7 +3,9 @@
 #import "basic-code-pong-load.asm"
 .print "basic loader ends " + toHexString(*) + "[" + * + "]"
 
-.const data_address = $3000
+.const sprite_data = $3000
+.const screenData = $2800
+.const screenColorData = $2be8
 .const ball_x_address = $d00a
 .const ball_y_address = $d00b
 
@@ -24,42 +26,17 @@
 	poke 53281 : 53280
 
 	// draw screen
-	lda #$00
-	sta $fb
-	sta $fd
-	sta $f7
-
-	lda #$28
-	sta $fc
-
-	lda #$04
-	sta $fe
-
-	lda #$e8
-	sta $f9
-	lda #$2b
-	sta $fa
-
-	lda #$d8
-	sta $f8
-
-	ldx #$00
-	ldy #$00
-	lda ($fb),y
-	sta ($fd),y
-	lda ($f9),y
-	sta ($f7),y
-	iny
-	bne *-9
-
-	inc $fc
-	inc $fe
-	inc $fa
-	inc $f8
-
-	inx
-	cpx #$04
-	bne *-24
+	ldx #0
+    copy_data_loop:
+        .for (var i = 0; i < 4; i++){
+            lda screenData +256*i, x
+            sta 1024 + 256*i, x
+    
+            lda screenColorData +256*i, x
+            sta $d800 + 256*i, x
+        }
+    inx
+    bne copy_data_loop
 
 	.var knaSprite = Sprite(1, 255, 111, WHITE)
     .var leftBatTopSprite = Sprite(2, $12, $34, LIGHT_GREEN)
@@ -92,7 +69,7 @@
 
     .for(var cell=$07f8; cell <=$07ff; cell++) {
         .var i = cell - $07f8
-        lda #(data_address/$40 + i)
+        lda #(sprite_data/$40 + i)
         sta cell
     }
 
