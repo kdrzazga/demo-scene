@@ -3,6 +3,7 @@
 #import "basic-code-pong-load.asm"
 .print "basic loader ends " + toHexString(*) + "[" + * + "]"
 
+.const data_address = $3000
 .const ball_x_address = $d00a
 .const ball_y_address = $d00b
 
@@ -61,13 +62,13 @@
 	bne *-24
 
 	.var knaSprite = Sprite(1, 255, 111, 1)
-    .var sprite2 = Sprite(2, $12, $34, LIGHT_GREEN)
-    .var sprite3 = Sprite(3, $12, $49, LIGHT_GREEN)
-    .var sprite4 = Sprite(4, $de, $34, 1)
-    .var sprite5 = Sprite(5, $de, $49, 1)
-    .var sprite6 = Sprite(6, $77, $6a, YELLOW)
+    .var leftBatTopSprite = Sprite(2, $12, $34, LIGHT_GREEN)
+    .var leftBatBottomSprite = Sprite(3, $12, $49, LIGHT_GREEN)
+    .var rightBatTopSprite  = Sprite(4, $de, $34, 1)
+    .var rightBatBottomSprite = Sprite(5, $de, $49, 1)
+    .var ballSprite = Sprite(6, $77, $6a, YELLOW)
 
-    .var allSprites = List().add(knaSprite, sprite2, sprite3, sprite4, sprite5, sprite6)
+    .var allSprites = List().add(knaSprite, leftBatTopSprite, leftBatBottomSprite, rightBatTopSprite, rightBatBottomSprite, ballSprite)
 
     .for(var i = 0; i < allSprites.size(); i++){
         poke $d000 + 2*i : #allSprites.get(i).x
@@ -98,23 +99,11 @@
 	lda #$00
 	sta $d01b
 
-	// set sprite pointers
-	lda #$c0  //points to $40 * $c0 = $3000
-	sta $07F8
-	lda #$c1 //points to $40 * $c1 = $3040
-	sta $07F9
-	lda #$c2
-	sta $07FA
-	lda #$c3
-	sta $07FB
-	lda #$c4
-	sta $07FC
-	lda #$c5
-	sta $07FD
-	lda #$c6
-	sta $07FE
-	lda #$c7
-	sta $07ff
+    .for(var cell=$07f8; cell <=$07ff; cell++) {
+        .var i = cell - $07f8
+        lda #(data_address/$40 + i)
+        sta cell
+    }
 
 	// turn on sprites
 	lda #%00111111//#$3f

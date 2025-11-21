@@ -1,6 +1,6 @@
 
 // sprite bitmaps 6 x 64 .bytes
-*=$3000
+*=data_address
 // sprite #0 K&A+
 	.byte $ff, $ff, $ff, $ff, $ff, $fe, $bf, $bf, $fa, $be, $ff, $fa, $be, $ff, $ea, $bb, $ef, $e2, $bb, $ef, $82
 	.byte $af, $bb, $82, $af, $ba, $02, $bb, $ae, $02, $99, $56, $aa, $96, $56, $02, $96, $56, $42, $95, $96, $42
