@@ -44,7 +44,7 @@ exit:
 		pha
 		tya
 		pha
-		poke $d019, 255
+		asl $d019
 }
 
 .pseudocommand irqEnd line : addr {
