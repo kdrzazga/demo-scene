@@ -78,26 +78,21 @@
     }
 
 	// set sprite multicolors
-	lda #RED
-	sta $d025
-	lda #BLUE
-	sta $d026
+	poke $d025 :#RED
+	poke $d026 : #BLUE
 
 	// x coordinate high bits
-	lda #$00
-	sta $d010
+	poke $d010 : #0
 
 	// expand sprites
 	poke $d01d :#0
 	poke $d017 : #%00011110
 
 	// set multicolor flags
-	lda #$01
-	sta $d01c
+	poke $d01c : #1
 
 	// set screen-sprite priority flags
-	lda #$00
-	sta $d01b
+	poke $d01b : #0
 
     .for(var cell=$07f8; cell <=$07ff; cell++) {
         .var i = cell - $07f8
@@ -106,8 +101,7 @@
     }
 
 	// turn on sprites
-	lda #%00111111//#$3f
-	sta $d015
+	poke $d015 : #%00111111//#$3f
 
    //-------
 
@@ -116,19 +110,13 @@
     lda #music.startSong-1
     jsr music.init
     sei
-    lda #<irq1
-    sta $0314
-    lda #>irq1
-    sta $0315
+    poke $0314 : #<irq1
+    poke $0315 : #>irq1
     asl $d019   //Interrupt status register
-    lda #%01111011
-    sta $dc0d   //Interrupt control and status register.
-    lda #%10000001
-    sta $d01a   //Interrupt control register
-    lda #$1b
-    sta $d011   //Screen control register #1
-    lda #%10000000
-    sta $d012   //Raster line to generate interrupt at (bits #0-#7).
+    poke $dc0d : #%01111011  //Interrupt control and status register.
+    poke $d01a : #%10000001  //Interrupt control register
+    poke $d011 : #$1b  //Screen control register #1
+    poke $d012 : #%10000000  //Raster line to generate interrupt at (bits #0-#7).
     cli
 this:
 	jmp this
