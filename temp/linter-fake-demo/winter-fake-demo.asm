@@ -20,9 +20,9 @@
 .const charBitmapDataAddress = $2000
 .const spriteDataMultiplier = $39
 
-BasicUpstart2(start)
+#import "loader.asm"
 
-*=2700
+*=2932
 start:
     //lda #music.startSong
     //jsr music.init
