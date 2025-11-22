@@ -3,6 +3,8 @@
 #import "basic-code-pong-load.asm"
 .print "basic loader ends " + toHexString(*) + "[" + * + "]"
 
+.const enable_sprites = 53269//$d015
+
 .const sprite_data = $3000
 .const screenData = $2800
 .const screenColorData = $2be8
@@ -54,6 +56,9 @@
         poke $d027 + i: #allSprites.get(i).color
     }
 
+    //enable only raster interrupts and sprite-sprite collision interrupts
+    poke $d01a : #%10100000
+
 	// set sprite multicolors
 	poke $d025 :#RED
 	poke $d026 : #BLUE
@@ -74,7 +79,7 @@
     }
 
 	// turn on sprites
-	poke $d015 : #%00111111//#$3f
+	poke enable_sprites : #%00111111//#$3f
 
    //-------
 
@@ -117,3 +122,4 @@ ball_movement_horizontal:
     .byte LEFT
 
 #import "data.asm"
+#import "charset.asm"
