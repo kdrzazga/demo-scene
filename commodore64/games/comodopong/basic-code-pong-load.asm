@@ -14,8 +14,9 @@
 .const left_arrow = 95
 .const poke = $97
 .const signature_basic = $180d
-.const WHITE = 5
-.const BLACK = 144
+.const PETSCII_WHITE = 5
+.const PETSCII_BLACK = 144
+.const PETSCII_GREY = 151
 
 
 *=2049 "basic loader"
@@ -60,9 +61,9 @@
 .byte 220, 0
 .byte  print,32, quote
 .text "KUDOZ TO "
-.byte WHITE
+.byte PETSCII_GREY
 .text "PAN ARECZEK"
-.byte BLACK
+.byte PETSCII_BLACK
 .text " OF K&A+"
 .byte quote
 .byte $00,0,$19
@@ -107,7 +108,7 @@
 .text " I "
 .byte 178 //2057
 .byte 32, 49, 32, 164, 32  //2063
-.text "6000 : "
+.text "6000 : " //TODO 6000
 .byte  next
 .byte 0,0,$19
 

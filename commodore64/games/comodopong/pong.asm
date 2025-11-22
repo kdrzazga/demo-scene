@@ -1,8 +1,11 @@
 .var music = LoadSid("Popcorn.sid") //only P-SIDs supported
-
+#import "PseudoCmds.lib"
 #import "basic-code-pong-load.asm"
 .print "basic loader ends " + toHexString(*) + "[" + * + "]"
 
+.const sprite_data = $3000
+.const screenData = $2800
+.const screenColorData = $2be8
 .const ball_x_address = $d00a
 .const ball_y_address = $d00b
 
@@ -11,150 +14,67 @@
 .const LEFT = 2
 .const RIGHT = 3
 
+.struct Sprite{id, x, y, color}
+
 *=2534 "main"
-	// set to 25 line text mode and turn on the screen
-	lda #$1b
-	sta $d011
+	poke $d011 : #$1b // set to 25 line text mode and turn on the screen
+	poke $0291 : #$80 // disable shift-commodore
+	poke $d018 : #$18 // set screen memory ($0400) and charset bitmap offset ($2000)
 
-	// disable shift-commodore
-	lda #$80
-	sta $0291
-
-	// set screen memory ($0400) and charset bitmap offset ($2000)
-	lda #$18
-	sta $d018
-
-	// set border color
-	lda #$08
-	sta $d020
-
-	// set background color
-	lda #$08
-	sta $d021
+	// set border-background color
+	poke 53280 : #8
+	poke 53281 : 53280
 
 	// draw screen
-	lda #$00
-	sta $fb
-	sta $fd
-	sta $f7
+	ldx #0
+    copy_data_loop:
+        .for (var i = 0; i < 4; i++){
+            lda screenData +256*i, x
+            sta 1024 + 256*i, x
+    
+            lda screenColorData +256*i, x
+            sta $d800 + 256*i, x
+        }
+    inx
+    bne copy_data_loop
 
-	lda #$28
-	sta $fc
+	.var knaSprite = Sprite(1, 255, 111, WHITE)
+    .var leftBatTopSprite = Sprite(2, $12, $34, LIGHT_GREEN)
+    .var leftBatBottomSprite = Sprite(3, $12, $49, LIGHT_GREEN)
+    .var rightBatTopSprite  = Sprite(4, $de, $34, WHITE)
+    .var rightBatBottomSprite = Sprite(5, $de, $49, WHITE)
+    .var ballSprite = Sprite(6, $77, $6a, YELLOW)
 
-	lda #$04
-	sta $fe
+    .var allSprites = List().add(knaSprite, leftBatTopSprite, leftBatBottomSprite, rightBatTopSprite, rightBatBottomSprite, ballSprite)
 
-	lda #$e8
-	sta $f9
-	lda #$2b
-	sta $fa
+    .for(var i = 0; i < allSprites.size(); i++){
+        poke $d000 + 2*i : #allSprites.get(i).x
+        poke $d001 + 2*i : #allSprites.get(i).y
 
-	lda #$d8
-	sta $f8
-
-	ldx #$00
-	ldy #$00
-	lda ($fb),y
-	sta ($fd),y
-	lda ($f9),y
-	sta ($f7),y
-	iny
-	bne *-9
-
-	inc $fc
-	inc $fe
-	inc $fa
-	inc $f8
-
-	inx
-	cpx #$04
-	bne *-24
+        poke $d027 + i: #allSprites.get(i).color
+    }
 
 	// set sprite multicolors
-	lda #$02
-	sta $d025
-	lda #$06
-	sta $d026
+	poke $d025 :#RED
+	poke $d026 : #BLUE
 
-	// colorize sprites
-	lda #$01
-	sta $d027
-	lda #$0d
-	sta $d028
-	lda #$0d
-	sta $d029
-	lda #$01
-	sta $d02a
-	lda #$01
-	sta $d02b
-	lda #$07
-	sta $d02c
-
-	// positioning sprites
-	lda #$ff
-	sta $d000	// #0. sprite x low .byte
-	lda #$6f
-	sta $d001	// #0. sprite y
-	lda #$12
-	sta $d002	// #1. sprite x low .byte
-	lda #$34
-	sta $d003	// #1. sprite y
-	lda #$12
-	sta $d004	// #2. sprite x low .byte
-	lda #$49
-	sta $d005	// #2. sprite y
-	lda #$de
-	sta $d006	// #3. sprite x low .byte
-	lda #$34
-	sta $d007	// #3. sprite y
-	lda #$de
-	sta $d008	// #4. sprite x low .byte
-	lda #$49
-	sta $d009	// #4. sprite y
-	lda #$77
-	sta ball_x_address	// #5. sprite x low .byte
-	lda #$6a
-	sta ball_y_address	// #5. sprite y
-
-	// x coordinate high bits
-	lda #$00
-	sta $d010
+	poke $d010 : #0 // x coordinate high bits
 
 	// expand sprites
-    lda #$00
-	sta $d01d
-	lda #%00011110
-	sta $d017
+	poke $d01d :#0
+	poke $d017 : #%00011110
 
-	// set multicolor flags
-	lda #$01
-	sta $d01c
+	poke $d01c : #1 // set multicolor flags
+	poke $d01b : #0 // set screen-sprite priority flags
 
-	// set screen-sprite priority flags
-	lda #$00
-	sta $d01b
-
-	// set sprite pointers
-	lda #$c0  //points to $40 * $c0 = $3000
-	sta $07F8
-	lda #$c1 //points to $40 * $c1 = $3040
-	sta $07F9
-	lda #$c2
-	sta $07FA
-	lda #$c3
-	sta $07FB
-	lda #$c4
-	sta $07FC
-	lda #$c5
-	sta $07FD
-	lda #$c6
-	sta $07FE
-	lda #$c7
-	sta $07ff
+    .for(var cell=$07f8; cell <=$07ff; cell++) {
+        .var i = cell - $07f8
+        lda #(sprite_data/$40 + i)
+        sta cell
+    }
 
 	// turn on sprites
-	lda #$3f
-	sta $d015
+	poke $d015 : #%00111111//#$3f
 
    //-------
 
@@ -163,19 +83,13 @@
     lda #music.startSong-1
     jsr music.init
     sei
-    lda #<irq1
-    sta $0314
-    lda #>irq1
-    sta $0315
+    poke $0314 : #<irq1
+    poke $0315 : #>irq1
     asl $d019   //Interrupt status register
-    lda #%01111011
-    sta $dc0d   //Interrupt control and status register.
-    lda #%10000001
-    sta $d01a   //Interrupt control register
-    lda #$1b
-    sta $d011   //Screen control register #1
-    lda #%10000000
-    sta $d012   //Raster line to generate interrupt at (bits #0-#7).
+    poke $dc0d : #%01111011  //Interrupt control and status register.
+    poke $d01a : #%10000001  //Interrupt control register
+    poke $d011 : #$1b  //Screen control register #1
+    poke $d012 : #%10000000  //Raster line to generate interrupt at (bits #0-#7).
     cli
 this:
 	jmp this
@@ -189,34 +103,11 @@ irq1:
     pla
     tax
     pla
-	//jmp move_ball
+	jsr move_ball
 
-move_ball:
-    inc 1024 + 16*40 //TODO: remove
-    lda ball_movement_vertical
-    cmp #DOWN
-    beq move_ball_down
-    jmp move_ball_up
-check_horizontal_move:
-    lda ball_movement_horizontal
-    cmp #LEFT
-    beq move_ball_left
-    jmp move_ball_right
-
-move_ball_down:
-    inc ball_y_address
-    jmp check_horizontal_move
-move_ball_up:
-    dec ball_y_address
-    jmp check_horizontal_move
-move_ball_left:
-    dec ball_x_address
-    jmp end_movement
-move_ball_right:
-    inc ball_x_address
-
-end_movement:
     rti
+
+#import "ball.asm"
 
 counter:
     .byte 0
