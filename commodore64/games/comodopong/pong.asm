@@ -22,8 +22,8 @@
 	poke $d018 : #$18 // set screen memory ($0400) and charset bitmap offset ($2000)
 
 	// set border-background color
-	poke 53280 : #8
-	poke 53281 : 53280
+	poke 53280 : #BROWN
+	poke 53281 : #ORANGE
 
 	// draw screen
 	ldx #0
