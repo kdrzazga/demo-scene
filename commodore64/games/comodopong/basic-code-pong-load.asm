@@ -1,4 +1,4 @@
-.const delay = "6" //TODO 6000
+.const delay = "6000" //TODO 6000
 
 .const rem = $8f
 .const end = $80

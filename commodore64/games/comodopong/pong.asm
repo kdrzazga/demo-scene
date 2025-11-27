@@ -40,7 +40,7 @@
     inx
     bne copy_data_loop
 
-	.var knaSprite = Sprite(1, 255, 111, WHITE)
+	.var knaSprite = Sprite(1, 255, 155, WHITE)
     .var leftBatTopSprite = Sprite(2, $12, $34, LIGHT_GREEN)
     .var leftBatBottomSprite = Sprite(3, $12, $49, LIGHT_GREEN)
     .var rightBatTopSprite  = Sprite(4, $de, $34, WHITE)
