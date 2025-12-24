@@ -23,5 +23,8 @@ https://csdb.dk/release/?id=257310
 Wolfrider
 https://csdb.dk/release/index.php?id=257392
 
+Merry XMas KA+ 2025
+https://csdb.dk/release/?id=258067
+
 Commodopong
 in progress
