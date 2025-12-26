@@ -1,3 +1,5 @@
+.const delay = "6000" //TODO 6000
+
 .const rem = $8f
 .const end = $80
 .const newline = $08
@@ -108,7 +110,7 @@
 .text " I "
 .byte 178 //2057
 .byte 32, 49, 32, 164, 32  //2063
-.text "6000 : " //TODO 6000
+.text delay + " : "
 .byte  next
 .byte 0,0,$19
 

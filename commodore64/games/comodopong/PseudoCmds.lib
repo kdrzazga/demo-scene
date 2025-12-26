@@ -3,9 +3,9 @@
 //------------------------------------
 // Basic commands
 //------------------------------------
-.pseudocommand poke arg1:arg2 {
-	lda arg2
-	sta arg1
+.pseudocommand poke cell:value {
+	lda value
+	sta cell
 }
 
 .pseudocommand incLim tar:lim {
@@ -31,8 +31,6 @@ exit:
 	.if (arg.getType()==AT_IMMEDIATE) .return CmdArgument(arg.getType(),>arg.getValue())
 	.return CmdArgument(arg.getType(),arg.getValue()+1)
 }
-
-
 
 
 //------------------------------------

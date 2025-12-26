@@ -3,6 +3,8 @@
 #import "basic-code-pong-load.asm"
 .print "basic loader ends " + toHexString(*) + "[" + * + "]"
 
+.const enable_sprites = 53269//$d015
+
 .const sprite_data = $3000
 .const screenData = $2800
 .const screenColorData = $2be8
@@ -22,8 +24,8 @@
 	poke $d018 : #$18 // set screen memory ($0400) and charset bitmap offset ($2000)
 
 	// set border-background color
-	poke 53280 : #8
-	poke 53281 : 53280
+	poke 53280 : #BROWN
+	poke 53281 : #ORANGE
 
 	// draw screen
 	ldx #0
@@ -38,7 +40,7 @@
     inx
     bne copy_data_loop
 
-	.var knaSprite = Sprite(1, 255, 111, WHITE)
+	.var knaSprite = Sprite(1, 255, 155, WHITE)
     .var leftBatTopSprite = Sprite(2, $12, $34, LIGHT_GREEN)
     .var leftBatBottomSprite = Sprite(3, $12, $49, LIGHT_GREEN)
     .var rightBatTopSprite  = Sprite(4, $de, $34, WHITE)
@@ -53,6 +55,9 @@
 
         poke $d027 + i: #allSprites.get(i).color
     }
+
+    //enable only raster interrupts and sprite-sprite collision interrupts
+    poke $d01a : #%10100000
 
 	// set sprite multicolors
 	poke $d025 :#RED
@@ -74,7 +79,7 @@
     }
 
 	// turn on sprites
-	poke $d015 : #%00111111//#$3f
+	poke enable_sprites : #%00111111//#$3f
 
    //-------
 
@@ -117,3 +122,4 @@ ball_movement_horizontal:
     .byte LEFT
 
 #import "data.asm"
+#import "charset.asm"
