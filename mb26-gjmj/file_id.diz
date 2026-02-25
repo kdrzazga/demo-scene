@@ -1,0 +1,23 @@
+Good Job Mr. Jobs
+
+Author:   Code + Graphics: KD, Music: Ramos
+Category: PC Demo
+System:   PC Windows
+Language: Java 11+
+
+Instructions:
+
+Make sure you have Java 11 or higher installed
+Simply double-click the JAR file
+or run from command line:
+java -jar WinterDemo25.jar 
+
+Description:
+
+50
+
+Tools used:
+IntelliJ for Java coding (+Maven, +Git)
+Gimp for simple graphics processing
+Online Sequencer for simple chiptunes, GoatTracker for more advanced, retro-style chiptunes.
+Narakeet for text to speech
