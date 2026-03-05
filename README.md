@@ -12,8 +12,8 @@ DEMOS and GAMES:
 
 3. C=XMAS (Dream210 2025)
 
-4. upcoming... Anniversaries (Operator Digitalfest 2026)
+4. Anniversaries (Operator Digitalfest 2026)
 
-5. upcoming... 3Dizzy (Jumalauta Winterfärjan)
+5. Good Job Mr. Jobs (Mountain Bytes 2026)
 
 6. upcoming... Electrician (Lost Party 2026) 
