@@ -3,18 +3,18 @@ Good Job Mr. Jobs
 Author:   Code + Graphics: KD, Music: Ramos
 Category: PC Demo
 System:   PC Windows
-Language: Java 11+
+Language: Java 24
 
 Instructions:
 
-Make sure you have Java 11 or higher installed
+Make sure you have Java 24 or higher installed
 Simply double-click the JAR file
 or run from command line:
-java -jar WinterDemo25.jar 
+java -jar GoodJobMrJobs.jar 
 
 Description:
 
-50
+Some important anniversary in the history of computers is comming soon...
 
 Tools used:
 IntelliJ for Java coding (+Maven, +Git)
