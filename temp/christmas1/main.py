@@ -6,7 +6,7 @@ import arcade
 from animated_sprite import AnimatedSprite
 
 class Globals:
-    fullscreen = True
+    fullscreen = False
     HEIGHT = 750
     WIDTH = 1200
 
@@ -22,7 +22,7 @@ class Stage1(arcade.Window):
         self.media_player = background_music.play()
         self.media_player.loop = True
 
-        arcade.set_background_color(arcade.color.WHITE)
+        arcade.set_background_color(arcade.color.BLACK)
 
         window1 = arcade.get_window()
         current_width = window1.width
@@ -35,17 +35,20 @@ class Stage1(arcade.Window):
             frame_width=263,
             frame_height=420,
             num_frames=3,
-            frame_delay=0.2
+            frame_delay=0.33
         )
 
     def on_update(self, delta_time):
-        self.animated_sprite.update(delta_time)
+
         self.timer += 1
 
-        if self.timer > 3*60:
+        if self.timer < 2.5*60:
+            self.animated_sprite.update(delta_time,(1,2))
+        else:
             self.media_player.volume *= 0.995
+            self.animated_sprite.update(delta_time)
 
-        if self.timer > 16*60:
+        if self.timer > 10*60:
             arcade.exit()
 
     def on_draw(self):

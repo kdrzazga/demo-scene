@@ -26,11 +26,18 @@ class AnimatedSprite:
         self.frame_delay = frame_delay
         self.time_since_last_frame = 0
 
-    def update(self, delta_time):
+    def update(self, delta_time, frame_set=()):
+        playback_frames = []
+        if len(frame_set) == 0:
+            playback_frames = self.frames
+        else:
+            for i in frame_set:
+                playback_frames.append(self.frames[i])
+
         self.time_since_last_frame += delta_time
         if self.time_since_last_frame > self.frame_delay:
-            self.current_frame = (self.current_frame + 1) % len(self.frames)
-            self.sprite.texture = self.frames[self.current_frame]
+            self.current_frame = (self.current_frame + 1) % len(playback_frames)
+            self.sprite.texture = playback_frames[self.current_frame]
             self.time_since_last_frame = 0
 
     def draw(self):
