@@ -142,8 +142,19 @@ class City {
             this.famineTurns++;
             this.report = 'Famine held off by the granary.';
         } else {
-            this.foodStore = Math.max(0, this.foodStore + surplus);
-            this.report = 'Famine — food store shrinking (city holds firm).';
+            this._starve();
+        }
+    }
+
+    _starve() {
+        this.famineTurns = 0;
+        this.foodStore = 0;
+        if (this.level > 1) {
+            this.level--;
+            if (this.entertainers > this.level) this.entertainers = this.level;
+            this.report = 'Famine! The city starves down to level ' + this.level + '.';
+        } else {
+            this.report = 'Famine! The city clings to level 1.';
         }
     }
 
