@@ -17,22 +17,33 @@ class ArenaScene extends Phaser.Scene {
         this.muzzleHeight = 130;
         this.flameGroundForward = 235;
         this.arenas = [
-            { key: 'warrior', file: 'files/arenas/WARRIOR_SHRINE_HD.png' },
-            { key: 'mk2cave', file: 'files/arenas/mk2cave.png' },
-            { key: 'pit', file: 'files/arenas/pit.png' },
-            { key: 'gorolair', file: 'files/arenas/gorolair.png' },
-            { key: 'palace', file: 'files/arenas/PalaceGates.png' }
+            { key: 'warrior', back: 'files/arenas/WARRIOR_SHRINE_HD.png' },
+            { key: 'mk2cave', back: 'files/arenas/mk2cave.png' },
+            { key: 'pit', back: 'files/arenas/pit.png' },
+            { key: 'gorolair', back: 'files/arenas/gorolair1.png', front: 'files/arenas/gorolair2.png', goro: true },
+            { key: 'palace', back: 'files/arenas/PalaceGates.png' }
         ];
         this.arenaIndex = 0;
+        this.backLayer = null;
+        this.frontLayer = null;
+        this.goro = null;
+        this.goroSpritesheet = null;
+        this.goroConfig = { baseY: 227, leftEdge: 80, rightEdge: 920, scale: 1, speed: 70, depth: -15, leftPauseMs: 6000 };
     }
 
     preload() {
-        this.arenas.forEach(arena => this.load.image(arena.key, arena.file));
+        this.arenas.forEach(arena => {
+            this.load.image(arena.key, arena.back);
+            if (arena.front) this.load.image(arena.key + '_front', arena.front);
+        });
+        this.load.image('goro', 'files/goro.png');
         this.load.image('subzero', 'files/subzero.png');
         this.load.audio('freeze', 'files/freeze.mp3');
     }
 
     create() {
+        this.goroSpritesheet = new GoroSpritesheet(this, 'goro');
+        this.goroSpritesheet.build();
         this._paintArena();
         this._spawnSubZero();
         this._followSubZero();
@@ -42,6 +53,7 @@ class ArenaScene extends Phaser.Scene {
 
     update(time, delta) {
         this._checkArenaSwitch();
+        if (this.goro) this.goro.walk(delta);
         if (this.fatalityActive) {
             this._updateFatality();
             return;
@@ -55,8 +67,30 @@ class ArenaScene extends Phaser.Scene {
     }
 
     _paintArena() {
-        this.arenaImage = this.add.image(0, 0, this.arenas[this.arenaIndex].key).setOrigin(0, 0);
-        this.arenaImage.setDisplaySize(this.arenaWidth, this.arenaHeight);
+        this.backLayer = this.add.image(0, 0, this.arenas[0].key).setOrigin(0, 0).setDepth(-20);
+        this._buildArena(0);
+    }
+
+    _buildArena(index) {
+        this.arenaIndex = index;
+        const arena = this.arenas[index];
+        this.backLayer.setTexture(arena.key);
+        this.backLayer.setDisplaySize(this.arenaWidth, this.arenaHeight);
+        if (this.frontLayer) {
+            this.frontLayer.destroy();
+            this.frontLayer = null;
+        }
+        if (this.goro) {
+            this.goro.destroy();
+            this.goro = null;
+        }
+        if (arena.front) {
+            this.frontLayer = this.add.image(0, 0, arena.key + '_front').setOrigin(0, 0).setDepth(-10);
+            this.frontLayer.setDisplaySize(this.arenaWidth, this.arenaHeight);
+        }
+        if (arena.goro) {
+            this.goro = new Goro(this, this.goroSpritesheet, this.goroConfig);
+        }
     }
 
     _spawnSubZero() {
@@ -247,9 +281,7 @@ class ArenaScene extends Phaser.Scene {
     }
 
     _nextArena() {
-        this.arenaIndex = (this.arenaIndex + 1) % this.arenas.length;
-        this.arenaImage.setTexture(this.arenas[this.arenaIndex].key);
-        this.arenaImage.setDisplaySize(this.arenaWidth, this.arenaHeight);
+        this._buildArena((this.arenaIndex + 1) % this.arenas.length);
     }
 
     _anyJustDown(keys) {

@@ -10,3 +10,12 @@ const config = {
 };
 
 new Phaser.Game(config);
+
+const audio = new Audio('files/Mortal Kombat.mp3');
+var alreadyPlaying = false
+
+document.addEventListener('keydown', function(event) {
+  if (!alreadyPlaying) {
+    audio.play();
+  }
+});
