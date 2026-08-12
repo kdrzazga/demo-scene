@@ -8,18 +8,28 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.jumpSpeed = 620;
         this.jumpCut = 0.4;
         this.coyoteMs = 90;
+        this.groundGraceMs = 100;
         this.climbSpeed = 200;
         this.bodyWidth = 22;
         this.bodyHeight = 88;
+        this.doubleTapMs = 280;
+        this.comboMs = 320;
+        this.throwHeight = 55;
+        this.throwReach = 40;
         this.groundedAt = -Infinity;
+        this.tap = { left: -Infinity, right: -Infinity };
+        this.dashTime = -Infinity;
+        this.dashDir = 1;
+        this.pendingThrowDir = 1;
+        this.attacking = false;
+        this.climbing = false;
+        this.escalators = [];
 
         this.setOrigin(0.5, 1);
         this.setDepth(10);
         this.setCollideWorldBounds(true);
         this.body.setMaxVelocity(2000, 900);
-
-        this.climbing = false;
-        this.escalators = [];
+        this.on('animationcomplete', this.onAnimComplete, this);
     }
 
     fitHeight(height) {
@@ -69,7 +79,39 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     update(controls) {
+        this.syncBody();
+        const now = this.scene.time.now;
+        const punch = controls.punchPressed;
+        const kick = controls.kickPressed;
+        const leftTap = controls.leftPressed;
+        const rightTap = controls.rightPressed;
+        const jumpPressed = controls.jumpPressed;
+        const jumpReleased = controls.jumpReleased;
+
+        if (this.attacking) {
+            this.body.setVelocityX(0);
+            return;
+        }
+
+        if (leftTap) {
+            if (now - this.tap.left < this.doubleTapMs) { this.dashTime = now; this.dashDir = -1; }
+            this.tap.left = now;
+        }
+        if (rightTap) {
+            if (now - this.tap.right < this.doubleTapMs) { this.dashTime = now; this.dashDir = 1; }
+            this.tap.right = now;
+        }
+
         const escalator = this.escalatorUnder();
+
+        if (this.groundedRecently() && !this.climbing) {
+            if (punch && now - this.dashTime < this.comboMs && !this.scene.projectile) {
+                this.startThrow(this.dashDir);
+                return;
+            }
+            if (punch) { this.startAttack('punch'); return; }
+            if (kick) { this.startAttack('kick'); return; }
+        }
 
         if (this.climbing) {
             this.x = this.climbColumnX;
@@ -78,8 +120,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             else if (controls.down) this.body.setVelocityY(this.climbSpeed);
             else this.body.setVelocityY(0);
             this.setFrame('walk0');
-            if (!escalator || controls.jumpPressed) this.stopClimb();
-            this.syncBody();
+            if (!escalator || jumpPressed) this.stopClimb();
             return;
         }
 
@@ -96,29 +137,59 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             this.body.setVelocityX(0);
         }
 
-        if (this.isOnGround()) this.groundedAt = this.scene.time.now;
+        if (this.isOnGround()) this.groundedAt = now;
 
         if (escalator && controls.climbHeld) {
             this.startClimb(escalator);
-            this.syncBody();
             return;
         }
 
-        if (controls.jumpPressed && this.canJump()) {
+        if (jumpPressed && this.canJump()) {
             this.body.setVelocityY(-this.jumpSpeed);
             this.groundedAt = -Infinity;
-        } else if (controls.jumpReleased && this.body.velocity.y < 0) {
+        } else if (jumpReleased && this.body.velocity.y < 0) {
             this.body.setVelocityY(this.body.velocity.y * this.jumpCut);
         }
 
         this.updateAnimation(moving);
-        this.syncBody();
+    }
+
+    startAttack(type) {
+        this.attacking = true;
+        this.body.setVelocityX(0);
+        this.anims.play(type);
+    }
+
+    startThrow(direction) {
+        this.attacking = true;
+        this.pendingThrowDir = direction;
+        this.dashTime = -Infinity;
+        this.setFlipX(direction < 0);
+        this.body.setVelocityX(0);
+        this.anims.play('throw');
+    }
+
+    onAnimComplete(anim) {
+        if (anim.key === 'punch' || anim.key === 'kick') {
+            this.attacking = false;
+        } else if (anim.key === 'throw') {
+            this.attacking = false;
+            this.scene.launchFireball(
+                this.x + this.pendingThrowDir * this.throwReach,
+                this.y - this.throwHeight,
+                this.pendingThrowDir
+            );
+        }
     }
 
     updateAnimation(moving) {
-        if (!this.isOnGround()) {
-            this.anims.stop();
-            this.setFrame('jump');
+        if (!this.groundedRecently()) {
+            if (Math.abs(this.body.velocity.x) > 10) {
+                this.anims.play('somersault', true);
+            } else {
+                this.anims.stop();
+                this.setFrame('jump');
+            }
         } else if (moving) {
             this.anims.play('walk', true);
         } else {
@@ -129,6 +200,10 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 
     isOnGround() {
         return this.body.blocked.down || this.body.touching.down;
+    }
+
+    groundedRecently() {
+        return this.scene.time.now - this.groundedAt <= this.groundGraceMs;
     }
 
     canJump() {

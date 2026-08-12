@@ -6,9 +6,10 @@ class Controls {
             right: K.RIGHT,
             up: K.UP,
             down: K.DOWN,
-            jump: K.SPACE,
-            kick: K.CTRL
+            jump: K.UP
         });
+        this.punchKeys = Object.values(scene.input.keyboard.addKeys('Q,W,E,R,T,Y'));
+        this.kickKeys = Object.values(scene.input.keyboard.addKeys('A,S,D,F,G,H'));
     }
 
     get left() { return this.keys.left.isDown; }
@@ -18,5 +19,16 @@ class Controls {
     get climbHeld() { return this.keys.up.isDown || this.keys.down.isDown; }
     get jumpPressed() { return Phaser.Input.Keyboard.JustDown(this.keys.jump); }
     get jumpReleased() { return Phaser.Input.Keyboard.JustUp(this.keys.jump); }
-    get kickPressed() { return Phaser.Input.Keyboard.JustDown(this.keys.kick); }
+    get leftPressed() { return Phaser.Input.Keyboard.JustDown(this.keys.left); }
+    get rightPressed() { return Phaser.Input.Keyboard.JustDown(this.keys.right); }
+    get punchPressed() { return this.anyPressed(this.punchKeys); }
+    get kickPressed() { return this.anyPressed(this.kickKeys); }
+
+    anyPressed(keys) {
+        let hit = false;
+        for (const key of keys) {
+            if (Phaser.Input.Keyboard.JustDown(key)) hit = true;
+        }
+        return hit;
+    }
 }
