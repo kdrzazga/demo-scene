@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bruce Lee — Registry Test</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #0a0d10; color: #cfd8dc; font-family: monospace; }
+        #controls { padding: 10px 14px; display: flex; gap: 22px; align-items: center; }
+        #controls label { font-size: 14px; cursor: pointer; user-select: none; }
+        #controls .swatch { display: inline-block; width: 12px; height: 12px; vertical-align: middle; margin: 0 4px 2px 0; border: 1px solid #333; }
+        #game canvas { display: block; image-rendering: pixelated; }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <label><input type="checkbox" id="cb-walls"><span class="swatch" style="background:#ffe000"></span>Walls</label>
+        <label><input type="checkbox" id="cb-platforms"><span class="swatch" style="background:#0a6b0a"></span>Platforms</label>
+        <label><input type="checkbox" id="cb-lanterns"><span class="swatch" style="background:#ff2020"></span>Lanterns</label>
+        <label><input type="checkbox" id="cb-escalators"><span class="swatch" style="background:#00e5ff"></span>Escalators</label>
+    </div>
+    <div id="game"></div>
+    <script src="../common/phaser.min.js"></script>
+    <script>
+        class TestScene extends Phaser.Scene {
+            preload() {
+                this.load.image('map', 'files/map.png');
+                this.load.json('mapdata', 'files/registry.json');
+            }
+
+            create() {
+                const data = this.cache.json.get('mapdata');
+                const s = 1 / (data.world.scale || 2);
+
+                this.add.image(0, 0, 'map').setOrigin(0, 0);
+
+                this.walls = this.add.graphics().setVisible(false);
+                this.walls.fillStyle(0xffe000, 0.45);
+                this.walls.lineStyle(1, 0xffe000, 0.9);
+                for (const w of data.walls) {
+                    this.walls.fillRect(w.x * s, w.y * s, w.w * s, w.h * s);
+                    this.walls.strokeRect(w.x * s, w.y * s, w.w * s, w.h * s);
+                }
+
+                this.platforms = this.add.graphics().setVisible(false);
+                for (const p of data.platforms) {
+                    const h = Math.max(4, p.h * s);
+                    this.platforms.fillStyle(0x0a6b0a, 0.75);
+                    this.platforms.fillRect(p.x * s, p.y * s, p.w * s, h);
+                    this.platforms.lineStyle(1, 0x33ff66, 0.9);
+                    this.platforms.strokeRect(p.x * s, p.y * s, p.w * s, h);
+                }
+
+                this.escalators = this.add.graphics().setVisible(false);
+                this.escalators.fillStyle(0x00e5ff, 0.4);
+                this.escalators.lineStyle(1, 0x00e5ff, 0.9);
+                for (const e of data.escalators) {
+                    this.escalators.fillRect(e.x * s, e.y * s, e.w * s, e.h * s);
+                    this.escalators.strokeRect(e.x * s, e.y * s, e.w * s, e.h * s);
+                }
+
+                this.lanterns = this.add.graphics().setVisible(false);
+                this.lanterns.fillStyle(0xff2020, 0.85);
+                this.lanterns.lineStyle(1, 0xff8080, 1);
+                for (const l of data.lanterns) {
+                    this.lanterns.fillCircle(l.x * s, l.y * s, 4);
+                    this.lanterns.strokeCircle(l.x * s, l.y * s, 4);
+                }
+
+                this.bind('cb-walls', this.walls);
+                this.bind('cb-platforms', this.platforms);
+                this.bind('cb-lanterns', this.lanterns);
+                this.bind('cb-escalators', this.escalators);
+            }
+
+            bind(id, layer) {
+                const box = document.getElementById(id);
+                layer.setVisible(box.checked);
+                box.addEventListener('change', () => layer.setVisible(box.checked));
+            }
+        }
+
+        new Phaser.Game({
+            type: Phaser.AUTO,
+            parent: 'game',
+            width: 2600,
+            height: 750,
+            backgroundColor: '#000000',
+            pixelArt: true,
+            scene: [TestScene]
+        });
+    </script>
+</body>
+</html>
