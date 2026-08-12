@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bruce Lee</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #05080b; color: #cfd8dc; font-family: monospace;
+               display: flex; flex-direction: column; align-items: center; }
+        h1 { font-size: 16px; letter-spacing: 4px; margin: 12px 0 8px; color: #ff5555; }
+        #game { width: 800px; height: 600px; }
+        #game canvas { display: block; image-rendering: pixelated; border: 2px solid #1a2630; }
+    </style>
+</head>
+<body>
+    <h1>BRUCE LEE</h1>
+    <div id="game"></div>
+    <script src="../common/phaser.min.js"></script>
+    <script src="files/Controls.js"></script>
+    <script src="files/Player.js"></script>
+    <script src="files/CameraDirector.js"></script>
+    <script src="files/WorldScene.js"></script>
+    <script src="files/main.js"></script>
+</body>
+</html>
