@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>TextWall scroll test</title>
+    <style>
+        html, body { margin: 0; background: #000; color: #33ff66; font-family: monospace; }
+        body { display: flex; flex-direction: column; align-items: center; }
+        #game canvas { display: block; }
+        #note { text-align: center; font-size: 12px; padding: 6px; color: #226633; }
+    </style>
+    <script src="../common/phaser.min.js"></script>
+    <script src="../common/text-wall.js"></script>
+</head>
+<body>
+    <div id="note">
+        TextWall — typing at speed = 20 lines/s, scrolling once the screen fills.
+    </div>
+    <div id="game"></div>
+
+    <script>
+    const WIDTH = 800, HEIGHT = 600;
+
+    // Only used if vocabluary1.txt can't be fetched (e.g. the page was opened
+    // straight from disk via file://, where the loader is blocked). Serve the
+    // folder over http to see the real vocabulary file instead.
+    const FALLBACK = "the of and a to in is you that it he was for on are as with " +
+        "his they I at be this have from or one had by word but not what all were " +
+        "we when your can said there use an each which she do how their if will up " +
+        "other about out many then them these so some her would make like him into " +
+        "time has look two more write go see number no way could people my than first";
+
+    class ScrollTest extends Phaser.Scene {
+
+        constructor() { super('scroll-test'); }
+
+        preload() {
+            this.loadFailed = false;
+            this.load.text('vocab', '../common/vocabluary1.txt');
+            this.load.on('loaderror', () => { this.loadFailed = true; });
+        }
+
+        create() {
+            const raw = (!this.loadFailed && this.cache.text.has('vocab'))
+                ? this.cache.text.get('vocab')
+                : FALLBACK;
+
+            this.wall = new TextWall(this, {
+                x: 16,
+                y: 12,
+                rows: 25,
+                speed: 20,
+                loop: false,
+                lines: this.buildLines(raw, 62),
+                style: {
+                    fontFamily: 'monospace',
+                    fontSize: '18px',
+                    color: '#33ff66',
+                    lineSpacing: 4
+                }
+            });
+
+            // Small HUD so the effect is self-explanatory on screen.
+            this.hud = this.add.text(WIDTH - 8, HEIGHT - 6,
+                'speed = ' + this.wall.speed + ' lines/s   ' +
+                (this.loadFailed ? '(fallback words)' : '(vocabluary1.txt)'),
+                { fontFamily: 'monospace', fontSize: '12px', color: '#226633' })
+                .setOrigin(1, 1)
+                .setDepth(200);
+        }
+
+        update(time, delta) {
+            this.wall.write(delta);
+        }
+
+        /** Pack whitespace-separated words into lines no wider than maxChars. */
+        buildLines(text, maxChars) {
+            const words = text.split(/\s+/).filter(Boolean);
+            const lines = [];
+            let line = '';
+            for (const w of words) {
+                if (line.length === 0) {
+                    line = w;
+                } else if (line.length + 1 + w.length <= maxChars) {
+                    line += ' ' + w;
+                } else {
+                    lines.push(line);
+                    line = w;
+                }
+            }
+            if (line) lines.push(line);
+            return lines;
+        }
+    }
+
+    new Phaser.Game({
+        type: Phaser.AUTO,          // let Phaser pick WebGL/Canvas; no custom canvas
+        width: WIDTH,
+        height: HEIGHT,
+        backgroundColor: '#000000',
+        parent: 'game',
+        scene: ScrollTest
+    });
+    </script>
+</body>
+</html>
