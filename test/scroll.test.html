@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>TextWall scroll test</title>
+    <style>
+        html, body { margin: 0; background: #000; color: #33ff66; font-family: monospace; }
+        body { display: flex; flex-direction: column; align-items: center; }
+        #game canvas { display: block; }
+        #note { text-align: center; font-size: 12px; padding: 6px; color: #226633; }
+    </style>
+    <script src="../common/phaser.min.js"></script>
+    <script src="../common/text-wall.js"></script>
+</head>
+<body>
+    <div id="note">
+        TextWallArray — wallA (green, vocabluary1.txt) types out; 500 ms after it
+        ends wallB (blue, vocabluary2.txt) continues the same scroll, pushing
+        wallA's text up and off the top. One merged column.
+    </div>
+    <div id="game"></div>
+
+    <script>
+    const WIDTH = 800, HEIGHT = 600;
+
+    // Fallbacks, used only if the .txt files can't be fetched (e.g. the page was
+    // opened straight from disk via file://, where the loader is blocked). Serve
+    // the folder over http to see the real vocabulary files instead.
+    const FALLBACK_A = "the of and a to in is you that it he was for on are as with " +
+        "his they I at be this have from or one had by word but not what all were " +
+        "we when your can said there use an each which she do how their if will up " +
+        "other about out many then them these so some her would make like him into " +
+        "time has look two more write go see number no way could people my than first";
+
+    const FALLBACK_B = "Gallia est omnis divisa in partes tres, quarum unam incolunt " +
+        "Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli " +
+        "appellantur. Hi omnes lingua, institutis, legibus inter se differunt. Gallos " +
+        "ab Aquitanis Garumna flumen, a Belgis Matrona et Sequana dividit. Horum omnium " +
+        "fortissimi sunt Belgae, propterea quod a cultu atque humanitate provinciae " +
+        "longissime absunt, minimeque ad eos mercatores saepe commeant.";
+
+    class ScrollTest extends Phaser.Scene {
+
+        constructor() { super('scroll-test'); }
+
+        preload() {
+            this.load.text('vocab', '../common/vocabluary1.txt');
+            this.load.text('vocab2', '../common/vocabluary2.txt');
+            // Swallow load errors so create() runs and the fallbacks kick in.
+            this.load.on('loaderror', () => {});
+        }
+
+        create() {
+            const rawA = this.cache.text.has('vocab')  ? this.cache.text.get('vocab')  : FALLBACK_A;
+            const rawB = this.cache.text.has('vocab2') ? this.cache.text.get('vocab2') : FALLBACK_B;
+            const served = this.cache.text.has('vocab') && this.cache.text.has('vocab2');
+
+            // Shared layout for both walls: they occupy the same region and the
+            // TextWallArray shows only one at a time.
+            const layout = {
+                x: 16,
+                y: 12,
+                initial_screen_y: 260,   // first line starts partway down, then rises
+                rows: 25,
+                speed: 20,
+                loop: false              // finite, so the sequence can advance
+            };
+
+            const wallA = new TextWall(this, Object.assign({}, layout, {
+                lines: this.buildLines(rawA, 62),
+                style: { fontFamily: 'monospace', fontSize: '18px', color: '#33ff66', lineSpacing: 4 }
+            }));
+
+            const wallB = new TextWall(this, Object.assign({}, layout, {
+                lines: this.buildLines(rawB, 62),
+                style: { fontFamily: 'monospace', fontSize: '18px', color: '#66ccff', lineSpacing: 4 }
+            }));
+
+            this.walls = new TextWallArray();
+            this.walls.add(wallA, 0);     // starts immediately
+            this.walls.add(wallB, 500);   // 500 ms after wallA ends
+
+            // Small HUD so the effect is self-explanatory on screen.
+            this.add.text(WIDTH - 8, HEIGHT - 6,
+                'speed = 20 lines/s   green = vocabluary1 → blue = vocabluary2   ' +
+                (served ? '(served)' : '(fallback text)'),
+                { fontFamily: 'monospace', fontSize: '12px', color: '#226633' })
+                .setOrigin(1, 1)
+                .setDepth(200);
+        }
+
+        update(time, delta) {
+            this.walls.update(delta);
+            this.walls.draw();
+        }
+
+        /** Pack whitespace-separated words into lines no wider than maxChars. */
+        buildLines(text, maxChars) {
+            const words = text.split(/\s+/).filter(Boolean);
+            const lines = [];
+            let line = '';
+            for (const w of words) {
+                if (line.length === 0) {
+                    line = w;
+                } else if (line.length + 1 + w.length <= maxChars) {
+                    line += ' ' + w;
+                } else {
+                    lines.push(line);
+                    line = w;
+                }
+            }
+            if (line) lines.push(line);
+            return lines;
+        }
+    }
+
+    new Phaser.Game({
+        type: Phaser.AUTO,          // let Phaser pick WebGL/Canvas; no custom canvas
+        width: WIDTH,
+        height: HEIGHT,
+        backgroundColor: '#000000',
+        parent: 'game',
+        scene: ScrollTest
+    });
+    </script>
+</body>
+</html>
