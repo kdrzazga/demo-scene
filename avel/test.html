@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Avel Battle Engine Tests</title>
+    <style>
+        body { font-family: monospace; background: #0e1116; color: #cfe0f0; padding: 24px; line-height: 1.6; }
+        h1 { color: #7fd7ff; font-size: 18px; }
+        .pass { color: #7fd77f; }
+        .fail { color: #ff7f7f; font-weight: bold; }
+        #summary { margin-top: 16px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>AVEL BATTLE — ENGINE TESTS</h1>
+    <div id="results"></div>
+    <div id="summary"></div>
+    <script src="files/emitter.js"></script>
+    <script src="files/constants.js"></script>
+    <script src="files/die.js"></script>
+    <script src="files/diceFactory.js"></script>
+    <script src="files/clash.js"></script>
+    <script src="files/hero.js"></script>
+    <script src="files/monster.js"></script>
+    <script src="files/battle.js"></script>
+    <script src="test.js"></script>
+    <script>
+        const results = runTests();
+        const container = document.getElementById('results');
+        let passedCount = 0;
+        for (const result of results) {
+            const line = document.createElement('div');
+            line.className = result.passed ? 'pass' : 'fail';
+            line.textContent = (result.passed ? 'PASS  ' : 'FAIL  ') + result.description;
+            container.appendChild(line);
+            if (result.passed) {
+                passedCount++;
+            }
+        }
+        document.getElementById('summary').textContent = passedCount + ' / ' + results.length + ' passed';
+    </script>
+</body>
+</html>
