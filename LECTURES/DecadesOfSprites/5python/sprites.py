@@ -1,7 +1,7 @@
 import arcade
 import random
 
-SPRITE_SCALING = 2.5
+SPRITE_SCALING = 1
 
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600

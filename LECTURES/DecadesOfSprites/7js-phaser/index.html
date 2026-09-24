@@ -24,6 +24,9 @@
         const game = new Phaser.Game(config);
 
         let monster;
+        let tank;
+        let skull;
+
         let alpha = 0;
 
         function preload(){
@@ -33,8 +36,8 @@
         }
 
         function create(){
-            let skull = this.add.sprite(50, 100, 'skull');
-            let tank = this.add.sprite(100, 150, 'tank');
+            skull = this.add.sprite(50, 100, 'skull');
+            tank = this.add.sprite(100, 150, 'tank');
             monster = this.add.sprite(150, 250, 'monster');
 
             skull.scaleY = 7;
