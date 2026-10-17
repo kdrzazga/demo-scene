@@ -1,136 +1,612 @@
+<!DOCTYPE html>
 <html>
-<head><script src="../../../common/phaser.min.js"></script></head>
+<head>
+<meta charset="utf-8">
+<title>River Raid JS</title>
+<script src="phaser.min.js"></script>
+<style>
+    body { margin: 0; background: #111; display: flex; justify-content: center; align-items: center; height: 100vh; }
+</style>
+</head>
 <body>
 <div id="game-container"></div>
 
 <script>
-    const config = {
-    type: Phaser.CANVAS,
-    width: 800,
-    height: 600,
-    parent: 'game-container',
-    scene: {
-        preload: preload,
-        create: create,
-        update: update
+const SCREEN_WIDTH = 800;
+const SCREEN_HEIGHT = 600;
+const PANEL_HEIGHT = 70;                       // HUD strip at the bottom
+const PLAY_HEIGHT = SCREEN_HEIGHT - PANEL_HEIGHT;
+const BOARD_WIDTH = 800;
+const BOARD_HEIGHT = 3000;
+
+const PLAYER_Y = PLAY_HEIGHT - 60;
+const PLAYER_SCALE = 0.55;
+const PLAYER_SIDE_SPEED = 260;                 // px / second
+const SCROLL_SPEED_SLOW = 70;
+const SCROLL_SPEED_NORMAL = 140;
+const SCROLL_SPEED_FAST = 280;
+
+const BULLET_SPEED = 700;
+const FIRE_COOLDOWN_MS = 220;
+
+const BOAT_SCALE = 0.6;
+const FUEL_MAX = 100;
+const FUEL_DRAIN_PER_SECOND = 4;
+const FUEL_REFILL_PER_SECOND = 35;
+
+const SCORE_BOAT = 30;
+const SCORE_FUEL = 80;
+const START_LIVES = 3;
+
+/**
+ * The board (800x3000) is repeated endlessly: every second copy is flipped
+ * vertically, so the bottom edge of one copy always meets the bottom edge of the
+ * next one (and top meets top) - the river banks join without a seam.
+ *
+ * "track" = distance in pixels measured upward from the very start of the river.
+ * The bottom of the play area shows track == distanceFlown.
+ */
+class RiverRaidScene extends Phaser.Scene {
+    constructor() {
+        super('river-raid');
     }
-};
 
-    const game = new Phaser.Game(config);
-    let background;
-    let player;
-    let bullet;
-    const boatsCount = 3;
-    let boats = [];
-    let cursors;
-    let fire = false;
-
-    function preload(){
+    preload() {
         this.load.image('background', 'empty-project/board.png');
         this.load.image('aircraft', 'empty-project/aircraft.png');
         this.load.image('boat', 'empty-project/enemy.png');
         this.load.image('bullet', 'empty-project/bullet.png');
     }
 
-    function create(){
-        background = this.add.sprite(400, -1500 + 600, 'background');//pic size: 800x3000
-        const boatcoords = [[210,-10, 0.2], [151,-320, 0.3], [0,-510, 0.5]];
-        for (let i = 0; i < boatsCount; i++){
-            let b = this.add.sprite(boatcoords[i][0], boatcoords[i][1], 'boat');
-            b.speed = boatcoords[i][2];
-            b.active = true;
-            boats.push(b);
-        }
+    create() {
+        this.boardPixels = this.readPixels('background');
+        this.planeCollisionPoints = this.buildCollisionPoints('aircraft', PLAYER_SCALE, 3);
+        this.createGeneratedTextures();
 
-        bullet = this.add.sprite(300, 550+15, 'bullet');
-        player = this.add.sprite(300, 550, 'aircraft');
-        cursors = this.input.keyboard.createCursorKeys();
+        this.boardTiles = [
+            this.add.image(SCREEN_WIDTH / 2, 0, 'background'),
+            this.add.image(SCREEN_WIDTH / 2, 0, 'background')
+        ];
+
+        this.entities = [];                    // boats and fuel depots
+        this.bullets = [];
+
+        this.player = this.add.image(SCREEN_WIDTH / 2, PLAYER_Y, 'aircraft').setScale(PLAYER_SCALE).setDepth(10);
+        this.explosionParticles = this.add.particles('spark').setDepth(20);
+        this.explosionEmitter = this.explosionParticles.createEmitter({
+            speed: { min: 60, max: 320 },
+            lifespan: { min: 300, max: 900 },
+            scale: { start: 1.4, end: 0 },
+            tint: [0xffffff, 0xffee55, 0xff8800, 0xff3300],
+            blendMode: 'ADD',
+            on: false
+        });
+
+        this.createHud();
+
+        this.cursors = this.input.keyboard.createCursorKeys();
+        this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        this.fireKey.on('down', () => this.onFirePressed());
+
+        this.highScore = this.loadHighScore();
+        this.audio = new SoundEffects();
+        this.showTitle();
     }
 
-    function update(time, delta){
-        background.y += 1;
-        checkBackgroundCollision();
-        checkKeys();
-        moveBoats();
-        fireConditionally();
+    // ------------------------------------------------------------------ setup helpers
+
+    readPixels(textureKey) {
+        const image = this.textures.get(textureKey).getSourceImage();
+        const canvas = document.createElement('canvas');
+        canvas.width = image.width;
+        canvas.height = image.height;
+        const context = canvas.getContext('2d');
+        context.drawImage(image, 0, 0);
+        return { width: image.width, height: image.height, data: context.getImageData(0, 0, image.width, image.height).data };
     }
 
-    function fireConditionally(){
-        if (fire){
-            if (bullet.y>0){
-                bullet.y -=6;
-                checkCollision();
-            }
-            else{
-                resetBullet();
-            }
-        }
-    }
-
-    function checkCollision(){
-        for(let i = 0; i < boatsCount; i++){
-            if (boats[i].active){
-                const d = Phaser.Math.Distance.Between(boats[i].x + 136/4, boats[i].y, bullet.x, bullet.y);
-
-                console.log(i, d);
-                if (d < 40){
-                    boats[i].y = Math.pow(10,16);
-                    boats[i].active = false;
-                    resetBullet();
+    /** Offsets (relative to sprite centre) of opaque pixels - used for pixel-perfect bank collisions. */
+    buildCollisionPoints(textureKey, scale, step) {
+        const pixels = this.readPixels(textureKey);
+        const points = [];
+        for (let y = 0; y < pixels.height; y += step) {
+            for (let x = 0; x < pixels.width; x += step) {
+                const alpha = pixels.data[(y * pixels.width + x) * 4 + 3];
+                if (alpha > 128) {
+                    points.push({ dx: (x - pixels.width / 2) * scale, dy: (y - pixels.height / 2) * scale });
                 }
-            }//end if active
-        }//end for
+            }
+        }
+        return points;
     }
 
-    function resetBullet(){
-        fire = false;
-        bullet.y = 550 + 15;
+    createGeneratedTextures() {
+        const graphics = this.make.graphics({ add: false });
+        graphics.fillStyle(0xffffff).fillCircle(4, 4, 4);
+        graphics.generateTexture('spark', 8, 8);
+        graphics.clear();
+
+        // fuel depot: red/white stripes, the letters are added as text in a container
+        const depotWidth = 40, depotHeight = 76;
+        graphics.fillStyle(0xd02020).fillRect(0, 0, depotWidth, depotHeight);
+        graphics.fillStyle(0xffffff);
+        for (let stripe = 0; stripe < 4; stripe++) {
+            graphics.fillRect(0, 10 + stripe * 17, depotWidth, 8);
+        }
+        graphics.lineStyle(2, 0x000000).strokeRect(1, 1, depotWidth - 2, depotHeight - 2);
+        graphics.generateTexture('fuel', depotWidth, depotHeight);
+        graphics.destroy();
     }
 
-    function moveBoats(){
-        for(let i = 0; i < boatsCount; i++){
-            if (!boats[i].active)
-                continue;
-            boats[i].x += boats[i].speed;
-            boats[i].y++;
+    createHud() {
+        this.add.rectangle(0, PLAY_HEIGHT, SCREEN_WIDTH, PANEL_HEIGHT, 0x8c8c8c).setOrigin(0, 0).setDepth(30);
+        this.add.rectangle(0, PLAY_HEIGHT, SCREEN_WIDTH, 3, 0x3a3a3a).setOrigin(0, 0).setDepth(30);
+        const hudStyle = { fontFamily: 'Courier New, monospace', fontSize: '22px', color: '#ffe23d', fontStyle: 'bold' };
+        this.scoreText = this.add.text(20, PLAY_HEIGHT + 22, '', hudStyle).setDepth(31);
+        this.livesText = this.add.text(SCREEN_WIDTH - 20, PLAY_HEIGHT + 22, '', hudStyle).setOrigin(1, 0).setDepth(31);
+
+        // fuel gauge  E  1/2  F
+        const gaugeX = SCREEN_WIDTH / 2 - 110, gaugeY = PLAY_HEIGHT + 16, gaugeWidth = 220, gaugeHeight = 38;
+        this.gauge = { x: gaugeX, y: gaugeY, width: gaugeWidth, height: gaugeHeight };
+        this.add.rectangle(gaugeX, gaugeY, gaugeWidth, gaugeHeight, 0x202020).setOrigin(0, 0).setStrokeStyle(3, 0xffffff).setDepth(31);
+        const gaugeLabelStyle = { fontFamily: 'Courier New, monospace', fontSize: '18px', color: '#ffffff', fontStyle: 'bold' };
+        this.add.text(gaugeX + 10, gaugeY + 9, 'E', gaugeLabelStyle).setDepth(32);
+        this.add.text(gaugeX + gaugeWidth / 2, gaugeY + 9, '½', gaugeLabelStyle).setOrigin(0.5, 0).setDepth(32);
+        this.add.text(gaugeX + gaugeWidth - 22, gaugeY + 9, 'F', gaugeLabelStyle).setDepth(32);
+        this.fuelNeedle = this.add.rectangle(0, gaugeY + 4, 6, gaugeHeight - 8, 0xffe23d).setOrigin(0.5, 0).setDepth(33);
+
+        const messageStyle = { fontFamily: 'Courier New, monospace', fontSize: '28px', color: '#ffffff', fontStyle: 'bold',
+            align: 'center', stroke: '#000000', strokeThickness: 6 };
+        this.messageText = this.add.text(SCREEN_WIDTH / 2, PLAY_HEIGHT / 2 - 40, '', messageStyle).setOrigin(0.5).setDepth(40);
+    }
+
+    // ------------------------------------------------------------------ game states
+
+    showTitle() {
+        this.state = 'title';
+        this.score = 0;
+        this.lives = START_LIVES;
+        this.resetRun(0);
+        this.messageText.setText(
+            'R I V E R   R A I D\n\n' +
+            '← →  steer      ↑ ↓  speed\n' +
+            'SPACE  fire\n\n' +
+            'fly over FUEL to refuel\n\n' +
+            'HIGH SCORE ' + this.highScore + '\n\n' +
+            'press SPACE to start');
+        this.updateHud();
+    }
+
+    /** Puts the plane at a fresh start: full tank, empty river ahead. */
+    resetRun(distance) {
+        this.distanceFlown = distance;
+        this.fuel = FUEL_MAX;
+        this.lastShotTime = 0;
+        this.lowFuelBeepTime = 0;
+        this.entities.forEach(entity => entity.object.destroy());
+        this.entities = [];
+        this.bullets.forEach(bullet => bullet.destroy());
+        this.bullets = [];
+        this.nextSpawnTrack = distance + PLAY_HEIGHT + 250;
+        this.player.setVisible(true).setScale(PLAYER_SCALE);
+        this.player.x = this.findSafeX(this.screenYToTrack(PLAYER_Y));
+        this.positionBoard();
+    }
+
+    onFirePressed() {
+        this.audio.unlock();
+        if (this.state === 'title' || this.state === 'gameOver') {
+            if (this.state === 'gameOver') {
+                this.showTitle();
+                return;
+            }
+            this.messageText.setText('');
+            this.state = 'playing';
+        } else if (this.state === 'ready') {
+            this.messageText.setText('');
+            this.state = 'playing';
+        } else if (this.state === 'playing') {
+            this.tryFire();
         }
     }
 
-    function checkBackgroundCollision(){
-        const ctx = game.canvas.getContext('2d');
-        const leftTopPixel = ctx.getImageData(player.x - Math.floor(79/2), 600-50, 1, 1).data;
-        const rightTopPixel = ctx.getImageData(player.x + Math.floor(79/2), 600-50, 1, 1).data;
-
-        const groundColor = [136, 0, 21];
-        const riverColor = [63, 72, 204];
-
-        const pixelsToCheck = [leftTopPixel, rightTopPixel];
-
-        pixelsToCheck.forEach(pixelColor =>{
-            if (pixelColor[0] === groundColor[0] && pixelColor[1] === groundColor[1] && pixelColor[2] === groundColor[2])
-                gameOver();
+    crash() {
+        if (this.state !== 'playing') return;
+        this.state = 'crashed';
+        this.explode(this.player.x, this.player.y, 60);
+        this.player.setVisible(false);
+        this.lives--;
+        this.updateHud();
+        this.time.delayedCall(1600, () => {
+            if (this.lives <= 0) {
+                this.state = 'gameOver';
+                if (this.score > this.highScore) {
+                    this.highScore = this.score;
+                    this.saveHighScore(this.highScore);
+                }
+                this.messageText.setText('G A M E   O V E R\n\nSCORE ' + this.score + '\nHIGH SCORE ' + this.highScore + '\n\npress SPACE');
+            } else {
+                this.resetRun(this.distanceFlown);
+                this.state = 'ready';
+                this.messageText.setText('LIVES LEFT: ' + this.lives + '\n\npress SPACE');
+            }
         });
     }
 
-    function gameOver(){
-        window.alert('GAME OVER!');
-        location.reload();
+    // ------------------------------------------------------------------ main loop
+
+    update(time, delta) {
+        const seconds = Math.min(delta, 50) / 1000;
+        if (this.state === 'playing') {
+            this.steer(seconds);
+            this.distanceFlown += this.currentScrollSpeed() * seconds;
+            this.consumeFuel(time, seconds);
+            this.spawnEntities();
+        }
+        this.positionBoard();
+        this.updateEntities(seconds);
+        this.updateBullets(seconds);
+        if (this.state === 'playing') {
+            this.checkPlayerCollisions(seconds);
+        }
+        this.updateHud();
     }
 
-    function checkKeys(){
-        const speed = 4;
-        if (cursors.left.isDown){
-            player.x -= speed;
-            bullet.x -= speed;
-        } else if (cursors.right.isDown){
-            player.x += speed;
-            bullet.x += speed;
+    currentScrollSpeed() {
+        if (this.cursors.up.isDown) return SCROLL_SPEED_FAST;
+        if (this.cursors.down.isDown) return SCROLL_SPEED_SLOW;
+        return SCROLL_SPEED_NORMAL;
+    }
+
+    steer(seconds) {
+        let bank = 1;
+        if (this.cursors.left.isDown) {
+            this.player.x -= PLAYER_SIDE_SPEED * seconds;
+            bank = 0.8;
+        } else if (this.cursors.right.isDown) {
+            this.player.x += PLAYER_SIDE_SPEED * seconds;
+            bank = 0.8;
         }
-        if (cursors.up.isDown){
-            fire = true;
+        this.player.x = Phaser.Math.Clamp(this.player.x, 20, SCREEN_WIDTH - 20);
+        this.player.scaleX = PLAYER_SCALE * bank;   // a cheap "banking" effect
+    }
+
+    consumeFuel(time, seconds) {
+        this.fuel -= FUEL_DRAIN_PER_SECOND * seconds;
+        if (this.fuel < FUEL_MAX * 0.25 && time > this.lowFuelBeepTime) {
+            this.audio.lowFuel();
+            this.lowFuelBeepTime = time + 600;
+        }
+        if (this.fuel <= 0) {
+            this.fuel = 0;
+            this.crash();
         }
     }
 
+    // ------------------------------------------------------------------ river geometry
+
+    screenYToTrack(screenY) {
+        return this.distanceFlown + (PLAY_HEIGHT - screenY);
+    }
+
+    trackToScreenY(track) {
+        return PLAY_HEIGHT - (track - this.distanceFlown);
+    }
+
+    /** Which row of board.png is shown at the given track position. */
+    trackToBoardRow(track) {
+        const tileIndex = Math.floor(track / BOARD_HEIGHT);
+        const positionInTile = Math.floor(track - tileIndex * BOARD_HEIGHT);
+        const isFlipped = Math.abs(tileIndex) % 2 === 1;
+        return isFlipped ? positionInTile : BOARD_HEIGHT - 1 - positionInTile;
+    }
+
+    isLand(x, track) {
+        if (x < 0 || x >= BOARD_WIDTH) return true;
+        const row = this.trackToBoardRow(track);
+        const blue = this.boardPixels.data[(row * BOARD_WIDTH + Math.floor(x)) * 4 + 2];
+        return blue < 150;     // river is (63,72,204), ground is (136,0,21)
+    }
+
+    /** Horizontal stretches of water at a given track position, as [left, right] pairs. */
+    waterSpans(track) {
+        const spans = [];
+        let spanStart = -1;
+        for (let x = 0; x < BOARD_WIDTH; x += 2) {
+            const water = !this.isLand(x, track);
+            if (water && spanStart < 0) spanStart = x;
+            if (!water && spanStart >= 0) {
+                spans.push([spanStart, x - 2]);
+                spanStart = -1;
+            }
+        }
+        if (spanStart >= 0) spans.push([spanStart, BOARD_WIDTH - 1]);
+        return spans;
+    }
+
+    findSafeX(track) {
+        const spans = this.waterSpans(track);
+        if (spans.length === 0) return SCREEN_WIDTH / 2;
+        const widest = spans.reduce((best, span) => (span[1] - span[0] > best[1] - best[0] ? span : best));
+        return (widest[0] + widest[1]) / 2;
+    }
+
+    isAreaWater(centerX, track, halfWidth, halfHeight) {
+        for (const dy of [-halfHeight, 0, halfHeight]) {
+            for (const dx of [-halfWidth, 0, halfWidth]) {
+                if (this.isLand(centerX + dx, track + dy)) return false;
+            }
+        }
+        return true;
+    }
+
+    positionBoard() {
+        const firstTileIndex = Math.floor(this.distanceFlown / BOARD_HEIGHT);
+        this.boardTiles.forEach((tile, offset) => {
+            const tileIndex = firstTileIndex + offset;
+            const tileTopTrack = (tileIndex + 1) * BOARD_HEIGHT;
+            tile.y = this.trackToScreenY(tileTopTrack) + BOARD_HEIGHT / 2;
+            tile.setFlipY(Math.abs(tileIndex) % 2 === 1);
+        });
+    }
+
+    // ------------------------------------------------------------------ boats and fuel
+
+    spawnEntities() {
+        const topVisibleTrack = this.screenYToTrack(-80);
+        while (this.nextSpawnTrack < topVisibleTrack) {
+            this.spawnEntityAt(this.nextSpawnTrack);
+            const difficulty = Math.min(this.distanceFlown / 30000, 1);   // 0 .. 1
+            this.nextSpawnTrack += Phaser.Math.Between(260, 420) - difficulty * 140;
+        }
+    }
+
+    spawnEntityAt(track) {
+        const isFuel = Math.random() < 0.28;
+        const halfWidth = isFuel ? 20 : 136 * BOAT_SCALE / 2;
+        const halfHeight = isFuel ? 38 : 68 * BOAT_SCALE / 2;
+        const spans = this.waterSpans(track).filter(span => span[1] - span[0] > halfWidth * 2 + 12);
+        if (spans.length === 0) return;
+
+        for (let attempt = 0; attempt < 6; attempt++) {
+            const span = Phaser.Utils.Array.GetRandom(spans);
+            const x = Phaser.Math.Between(span[0] + halfWidth + 6, span[1] - halfWidth - 6);
+            if (!this.isAreaWater(x, track, halfWidth, halfHeight)) continue;
+
+            const screenY = this.trackToScreenY(track);
+            let object;
+            if (isFuel) {
+                object = this.add.container(x, screenY, [
+                    this.add.image(0, 0, 'fuel'),
+                    this.add.text(0, 0, 'F\nU\nE\nL', { fontFamily: 'Arial', fontSize: '15px', color: '#000000',
+                        fontStyle: 'bold', align: 'center', lineSpacing: -3 }).setOrigin(0.5)
+                ]);
+            } else {
+                object = this.add.image(x, screenY, 'boat').setScale(BOAT_SCALE);
+            }
+            object.setDepth(5);
+
+            const difficulty = Math.min(this.distanceFlown / 30000, 1);
+            const direction = Math.random() < 0.5 ? -1 : 1;
+            const entity = {
+                kind: isFuel ? 'fuel' : 'boat',
+                object, track, halfWidth, halfHeight,
+                direction,
+                speed: isFuel ? 0 : Phaser.Math.Between(30, 70) + difficulty * 90,
+                // some boats stay put until the plane gets close, like in the original
+                wakeUpY: Math.random() < 0.5 ? -100 : Phaser.Math.Between(80, 260)
+            };
+            if (!isFuel) object.setFlipX(direction < 0);
+            this.entities.push(entity);
+            return;
+        }
+    }
+
+    updateEntities(seconds) {
+        for (const entity of this.entities) {
+            entity.object.y = this.trackToScreenY(entity.track);
+            if (entity.kind === 'boat' && this.state !== 'crashed' && entity.object.y > entity.wakeUpY) {
+                const nextX = entity.object.x + entity.direction * entity.speed * seconds;
+                const leadingEdge = nextX + entity.direction * entity.halfWidth;
+                if (this.isLand(leadingEdge, entity.track) ||
+                    this.isLand(leadingEdge, entity.track + entity.halfHeight) ||
+                    this.isLand(leadingEdge, entity.track - entity.halfHeight)) {
+                    entity.direction = -entity.direction;
+                    entity.object.setFlipX(entity.direction < 0);
+                } else {
+                    entity.object.x = nextX;
+                }
+            }
+        }
+        this.entities = this.entities.filter(entity => {
+            const gone = entity.object.y - entity.halfHeight > PLAY_HEIGHT;
+            if (gone) entity.object.destroy();
+            return !gone;
+        });
+    }
+
+    destroyEntity(entity) {
+        entity.object.destroy();
+        this.entities = this.entities.filter(other => other !== entity);
+    }
+
+    // ------------------------------------------------------------------ shooting
+
+    tryFire() {
+        if (this.time.now - this.lastShotTime < FIRE_COOLDOWN_MS) return;
+        this.lastShotTime = this.time.now;
+        const noseY = this.player.y - this.player.displayHeight / 2;
+        this.bullets.push(this.add.image(this.player.x, noseY, 'bullet').setDepth(9));
+        this.audio.shot();
+    }
+
+    updateBullets(seconds) {
+        for (const bullet of this.bullets) {
+            bullet.y -= BULLET_SPEED * seconds;
+            const bulletTrack = this.screenYToTrack(bullet.y);
+            if (bullet.y < -10 || this.isLand(bullet.x, bulletTrack)) {
+                bullet.active = false;
+                continue;
+            }
+            const target = this.entities.find(entity => this.overlaps(bullet.x, bullet.y, 4, 5, entity));
+            if (target) {
+                bullet.active = false;
+                this.score += target.kind === 'fuel' ? SCORE_FUEL : SCORE_BOAT;
+                this.explode(target.object.x, target.object.y, 30);
+                this.destroyEntity(target);
+            }
+        }
+        this.bullets = this.bullets.filter(bullet => {
+            if (!bullet.active) bullet.destroy();
+            return bullet.active;
+        });
+    }
+
+    overlaps(x, y, halfWidth, halfHeight, entity) {
+        return Math.abs(x - entity.object.x) < halfWidth + entity.halfWidth &&
+               Math.abs(y - entity.object.y) < halfHeight + entity.halfHeight;
+    }
+
+    // ------------------------------------------------------------------ player collisions
+
+    checkPlayerCollisions(seconds) {
+        for (const point of this.planeCollisionPoints) {
+            const x = this.player.x + point.dx * (this.player.scaleX / PLAYER_SCALE);
+            const track = this.screenYToTrack(this.player.y + point.dy);
+            if (this.isLand(x, track)) {
+                this.crash();
+                return;
+            }
+        }
+
+        const planeHalfWidth = this.player.displayWidth * 0.35;
+        const planeHalfHeight = this.player.displayHeight * 0.4;
+        let refuelling = false;
+        for (const entity of this.entities) {
+            if (!this.overlaps(this.player.x, this.player.y, planeHalfWidth, planeHalfHeight, entity)) continue;
+            if (entity.kind === 'fuel') {
+                refuelling = true;
+            } else {
+                this.explode(entity.object.x, entity.object.y, 30);
+                this.destroyEntity(entity);
+                this.crash();
+                return;
+            }
+        }
+        if (refuelling && this.fuel < FUEL_MAX) {
+            this.fuel = Math.min(FUEL_MAX, this.fuel + FUEL_REFILL_PER_SECOND * seconds);
+            this.audio.refuel();
+        }
+    }
+
+    explode(x, y, particleCount) {
+        this.explosionEmitter.explode(particleCount, x, y);
+        this.cameras.main.shake(180, 0.006);
+        this.audio.explosion();
+    }
+
+    // ------------------------------------------------------------------ HUD
+
+    updateHud() {
+        this.scoreText.setText('SCORE ' + String(this.score).padStart(6, '0'));
+        this.livesText.setText('LIVES ' + Math.max(this.lives, 0));
+        const fuelFraction = this.fuel / FUEL_MAX;
+        this.fuelNeedle.x = this.gauge.x + 20 + fuelFraction * (this.gauge.width - 40);
+        this.fuelNeedle.fillColor = fuelFraction < 0.25 ? 0xff3030 : 0xffe23d;
+    }
+
+    loadHighScore() {
+        try {
+            return parseInt(localStorage.getItem('rr-js-high-score'), 10) || 0;
+        } catch (error) {
+            return 0;
+        }
+    }
+
+    saveHighScore(value) {
+        try {
+            localStorage.setItem('rr-js-high-score', String(value));
+        } catch (error) {
+            // storage unavailable - high score lives only for this session
+        }
+    }
+}
+
+/** Tiny synthesized sound effects (no audio files needed). */
+class SoundEffects {
+    constructor() {
+        this.context = null;
+        this.lastRefuelTime = 0;
+    }
+
+    unlock() {
+        if (!this.context) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) this.context = new AudioContextClass();
+        }
+        if (this.context && this.context.state === 'suspended') this.context.resume();
+    }
+
+    tone(startFrequency, endFrequency, duration, waveType, volume) {
+        if (!this.context) return;
+        const now = this.context.currentTime;
+        const oscillator = this.context.createOscillator();
+        const gain = this.context.createGain();
+        oscillator.type = waveType;
+        oscillator.frequency.setValueAtTime(startFrequency, now);
+        oscillator.frequency.exponentialRampToValueAtTime(endFrequency, now + duration);
+        gain.gain.setValueAtTime(volume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        oscillator.connect(gain).connect(this.context.destination);
+        oscillator.start(now);
+        oscillator.stop(now + duration);
+    }
+
+    shot() {
+        this.tone(1400, 300, 0.12, 'square', 0.08);
+    }
+
+    lowFuel() {
+        this.tone(880, 860, 0.15, 'sine', 0.12);
+    }
+
+    refuel() {
+        if (!this.context || this.context.currentTime - this.lastRefuelTime < 0.12) return;
+        this.lastRefuelTime = this.context.currentTime;
+        this.tone(500, 900, 0.1, 'triangle', 0.08);
+    }
+
+    explosion() {
+        if (!this.context) return;
+        const duration = 0.6;
+        const sampleCount = Math.floor(this.context.sampleRate * duration);
+        const buffer = this.context.createBuffer(1, sampleCount, this.context.sampleRate);
+        const samples = buffer.getChannelData(0);
+        for (let i = 0; i < sampleCount; i++) {
+            samples[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / sampleCount, 2);
+        }
+        const source = this.context.createBufferSource();
+        const filter = this.context.createBiquadFilter();
+        const gain = this.context.createGain();
+        source.buffer = buffer;
+        filter.type = 'lowpass';
+        filter.frequency.value = 900;
+        gain.gain.value = 0.35;
+        source.connect(filter).connect(gain).connect(this.context.destination);
+        source.start();
+    }
+}
+
+const config = {
+    type: Phaser.AUTO,
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT,
+    parent: 'game-container',
+    backgroundColor: '#000000',
+    scene: RiverRaidScene
+};
+
+const game = new Phaser.Game(config);
 </script>
 </body>
 </html>

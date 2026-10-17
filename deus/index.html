@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Deus Ex</title>
+<style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #05080b; }
+    #stage canvas { display: block; }
+    #start {
+        position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+        pointer-events: none;
+        animation: appear 0.8s ease-out 5.8s both;
+    }
+    @keyframes appear { from { opacity: 0; } to { opacity: 1; } }
+    #start[hidden] { display: none; }
+    #start-button {
+        pointer-events: auto;
+        font: bold 22px Arial, Helvetica, sans-serif; letter-spacing: 6px; color: rgba(230, 238, 243, 0.85);
+        padding: 14px 48px; cursor: pointer;
+        background: linear-gradient(rgba(34, 48, 58, 0.45), rgba(11, 17, 23, 0.45)); border: 2px solid rgba(143, 161, 173, 0.6);
+        clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+    }
+    #start-button:hover { color: #fff; border-color: rgba(207, 224, 234, 0.85); background: linear-gradient(rgba(44, 61, 74, 0.6), rgba(17, 26, 34, 0.6)); }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="start"><button id="start-button">START</button></div>
+<script src="../common/three.min.js"></script>
+<script src="stage.js"></script>
+<script src="lightning-bolt.js"></script>
+<script src="intro-logo.js"></script>
+<script src="pier.js"></script>
+<script src="statue-of-liberty.js"></script>
+<script src="first-person-controller.js"></script>
+<script src="liberty-island.js"></script>
+<script src="telecomm-window.js"></script>
+<script src="hud-panel.js"></script>
+<script src="belt-view.js"></script>
+<script src="inventory-view.js"></script>
+<script src="demo.js"></script>
+<script>
+    new Demo({
+        music: 'title.mp3',
+        transmission: {
+            photo: 'alex.png',
+            message: 'alex.mp3',
+            name: 'Alex Jacobson',
+            text: 'JC, I have patched into your infolink. Stay sharp, we are picking up movement near the docks.',
+        },
+    });
+</script>
+</body>
+</html>

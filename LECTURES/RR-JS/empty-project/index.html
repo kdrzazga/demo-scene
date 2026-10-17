@@ -1,2 +1,136 @@
 <html>
+<head><script src="phaser.min.js"></script></head>
+<body>
+<div id="game-container"></div>
+
+<script>
+    const config = {
+    type: Phaser.CANVAS,
+    width: 800,
+    height: 600,
+    parent: 'game-container',
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+    const game = new Phaser.Game(config);
+    let background;
+    let player;
+    let bullet;
+    const boatsCount = 3;
+    let boats = [];
+    let cursors;
+    let fire = false;
+
+    function preload(){
+        this.load.image('background', 'empty-project/board.png');
+        this.load.image('aircraft', 'empty-project/aircraft.png');
+        this.load.image('boat', 'empty-project/enemy.png');
+        this.load.image('bullet', 'empty-project/bullet.png');
+    }
+
+    function create(){
+        background = this.add.sprite(400, -1500 + 600, 'background');//pic size: 800x3000
+        const boatcoords = [[210,-10, 0.2], [151,-320, 0.3], [0,-510, 0.5]];
+        for (let i = 0; i < boatsCount; i++){
+            let b = this.add.sprite(boatcoords[i][0], boatcoords[i][1], 'boat');
+            b.speed = boatcoords[i][2];
+            b.active = true;
+            boats.push(b);
+        }
+
+        bullet = this.add.sprite(300, 550+15, 'bullet');
+        player = this.add.sprite(300, 550, 'aircraft');
+        cursors = this.input.keyboard.createCursorKeys();
+    }
+
+    function update(time, delta){
+        background.y += 1;
+        checkBackgroundCollision();
+        checkKeys();
+        moveBoats();
+        fireConditionally();
+    }
+
+    function fireConditionally(){
+        if (fire){
+            if (bullet.y>0){
+                bullet.y -=6;
+                checkCollision();
+            }
+            else{
+                resetBullet();
+            }
+        }
+    }
+
+    function checkCollision(){
+        for(let i = 0; i < boatsCount; i++){
+            if (boats[i].active){
+                const d = Phaser.Math.Distance.Between(boats[i].x + 136/4, boats[i].y, bullet.x, bullet.y);
+
+                console.log(i, d);
+                if (d < 40){
+                    boats[i].y = Math.pow(10,16);
+                    boats[i].active = false;
+                    resetBullet();
+                }
+            }//end if active
+        }//end for
+    }
+
+    function resetBullet(){
+        fire = false;
+        bullet.y = 550 + 15;
+    }
+
+    function moveBoats(){
+        for(let i = 0; i < boatsCount; i++){
+            if (!boats[i].active)
+                continue;
+            boats[i].x += boats[i].speed;
+            boats[i].y++;
+        }
+    }
+
+    function checkBackgroundCollision(){
+        const ctx = game.canvas.getContext('2d');
+        const leftTopPixel = ctx.getImageData(player.x - Math.floor(79/2), 600-50, 1, 1).data;
+        const rightTopPixel = ctx.getImageData(player.x + Math.floor(79/2), 600-50, 1, 1).data;
+
+        const groundColor = [136, 0, 21];
+        const riverColor = [63, 72, 204];
+
+        const pixelsToCheck = [leftTopPixel, rightTopPixel];
+
+        pixelsToCheck.forEach(pixelColor =>{
+            if (pixelColor[0] === groundColor[0] && pixelColor[1] === groundColor[1] && pixelColor[2] === groundColor[2])
+                gameOver();
+        });
+    }
+
+    function gameOver(){
+        window.alert('GAME OVER!');
+        location.reload();
+    }
+
+    function checkKeys(){
+        const speed = 4;
+        if (cursors.left.isDown){
+            player.x -= speed;
+            bullet.x -= speed;
+        } else if (cursors.right.isDown){
+            player.x += speed;
+            bullet.x += speed;
+        }
+        if (cursors.up.isDown){
+            fire = true;
+        }
+    }
+
+</script>
+</body>
 </html>
