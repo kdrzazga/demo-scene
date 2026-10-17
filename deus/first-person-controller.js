@@ -10,6 +10,8 @@ class FirstPersonController {
         bobAmount = 0.05,
         bobFrequency = 9,
         walkableAreas = [],
+        obstacles = [],
+        floorHeight = () => 0,
         keys = { forward: 'KeyW', backward: 'KeyS', left: 'KeyA', right: 'KeyD', run: 'ShiftLeft' },
     } = {}) {
         this.camera = camera;
@@ -25,6 +27,8 @@ class FirstPersonController {
         this.bobAmount = bobAmount;
         this.bobFrequency = bobFrequency;
         this.walkableAreas = walkableAreas;
+        this.obstacles = obstacles;
+        this.floorHeight = floorHeight;
         this.keys = keys;
         this.pressed = new Set();
         this.position = new THREE.Vector3();
@@ -104,11 +108,18 @@ class FirstPersonController {
     }
 
     isWalkable(x, z) {
-        return this.walkableAreas.some(area => x >= area.minX && x <= area.maxX && z >= area.minZ && z <= area.maxZ);
+        return this.walkableAreas.some(area => this.insideArea(area, x, z))
+            && this.obstacles.every(obstacle => Math.hypot(x - obstacle.position.x, z - obstacle.position.z) >= obstacle.radius);
+    }
+
+    insideArea(area, x, z) {
+        if (area.radius !== undefined) return Math.hypot(x - area.centerX, z - area.centerZ) <= area.radius;
+        return x >= area.minX && x <= area.maxX && z >= area.minZ && z <= area.maxZ;
     }
 
     applyCamera() {
-        this.camera.position.set(this.position.x, this.eyeHeight + Math.sin(this.bobPhase) * this.bobAmount, this.position.z);
+        const floor = this.floorHeight(this.position.x, this.position.z);
+        this.camera.position.set(this.position.x, floor + this.eyeHeight + Math.sin(this.bobPhase) * this.bobAmount, this.position.z);
         this.camera.rotation.set(this.pitch, this.yaw, 0, 'YXZ');
     }
 

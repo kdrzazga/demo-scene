@@ -1,6 +1,5 @@
 class Demo {
-    constructor({ music, transmission, musicVolume = 0.6, duckedVolume = 0.2, restartDelay = 60 }) {
-        this.transmission = transmission;
+    constructor({ music, transmissions = [], musicVolume = 0.6, duckedVolume = 0.2, restartDelay = 1800 }) {
         this.restartDelay = restartDelay;
         this.musicVolume = musicVolume;
         this.duckedVolume = duckedVolume;
@@ -11,6 +10,11 @@ class Demo {
         this.stage = new Stage(document.getElementById('stage'));
         this.intro = new IntroLogo();
         this.island = new LibertyIsland();
+        this.transmissionQueue = Promise.resolve();
+        this.island.addCheckpoints(transmissions.map(({ checkpoint, radius, ...transmission }) => new Checkpoint({
+            ...(Array.isArray(checkpoint) ? { position: checkpoint, radius } : { area: checkpoint }),
+            onReach: () => this.queueTransmission(transmission),
+        })));
         this.belt = new BeltView();
         this.inventory = new InventoryView({ bottomOffset: this.belt.margin + this.belt.height + 12 });
         this.stage.add(this.intro);
@@ -35,7 +39,6 @@ class Demo {
         this.island.restart();
         this.stage.add(this.island);
         this.showHud();
-        await this.playTransmission();
         await this.wait(this.restartDelay);
         this.hideHud();
         this.island.stop();
@@ -60,8 +63,12 @@ class Demo {
         this.stage.remove(this.inventory);
     }
 
-    async playTransmission() {
-        const telecomm = new TelecommWindow({ ...this.transmission, listener: this.listener });
+    queueTransmission(transmission) {
+        this.transmissionQueue = this.transmissionQueue.then(() => this.playTransmission(transmission));
+    }
+
+    async playTransmission(transmission) {
+        const telecomm = new TelecommWindow({ ...transmission, listener: this.listener });
         this.stage.add(telecomm);
         this.music.volume = this.duckedVolume;
         await telecomm.play();

@@ -1,6 +1,9 @@
 class StatueOfLiberty {
     constructor({
-        position = [-45, -2, -110],
+        position = [-45, 0, -110],
+        islandRadius = 34,
+        fortRadius = 19,
+        waterDepth = 2,
         rotation = 0.38,
         scale = 1,
         patinaColor = 0x5d7d6e,
@@ -11,6 +14,9 @@ class StatueOfLiberty {
         this.group.position.set(...position);
         this.group.rotation.y = rotation;
         this.group.scale.setScalar(scale);
+        this.islandRadius = islandRadius;
+        this.fortRadius = fortRadius;
+        this.waterDepth = waterDepth;
         this.disposables = [];
         this.time = 0;
         this.patina = this.track(new THREE.MeshStandardMaterial({ color: patinaColor, roughness: 0.75, metalness: 0.25 }));
@@ -36,8 +42,9 @@ class StatueOfLiberty {
     }
 
     createPedestal() {
-        this.add(new THREE.CylinderGeometry(34, 36, 3, 24), this.stone, 0, 1.5, 0);
-        this.add(new THREE.CylinderGeometry(18, 19, 4, 11), this.stone, 0, 5, 0);
+        const islandHeight = 3 + this.waterDepth;
+        this.add(new THREE.CylinderGeometry(this.islandRadius, this.islandRadius + 2, islandHeight, 32), this.stone, 0, 3 - islandHeight / 2, 0);
+        this.add(new THREE.CylinderGeometry(this.fortRadius - 1, this.fortRadius, 4, 11), this.stone, 0, 5, 0);
         this.add(new THREE.CylinderGeometry(6.4, 8.5, 16, 4), this.stone, 0, 15, 0).rotation.y = Math.PI / 4;
         this.add(new THREE.BoxGeometry(10, 1.5, 10), this.stone, 0, 23.75, 0);
         this.add(new THREE.BoxGeometry(6, 1, 6), this.stone, 0, 25, 0);

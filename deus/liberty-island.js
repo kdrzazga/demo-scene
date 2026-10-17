@@ -16,6 +16,28 @@ class LibertyIsland {
         fadeInDuration = 2,
         pier = {},
         statue = {},
+        ramp = {},
+        plateauEdge = [-72, -110],
+        leftAreaDepth = 20,
+        blockPassageWidth = 6,
+        westTerrace = { minX: -152, minZ: -110, maxZ: -80 },
+        npcs = [
+            new PaulDenton({ position: [-30, 0, -46], rotation: Math.PI / 2, route: [[-22, -46], [-40, -46]] }),
+            new UnatcoTroop({ position: [3.5, 0, -34], rotation: 0, route: [[3.5, -12], [3.5, -34]] }),
+            new AnnaNavarre({ position: [-110.5, 3, -24], rotation: 2.3 }),
+            new MaggieChow({ position: [-144, 3, -92], rotation: 1.2 }),
+            new Terrorist({ position: [-85, 3, -60], rotation: Math.PI, route: [[-85, -95], [-85, -60]] }),
+            new Terrorist({
+                position: [-95, 3, -38.5], rotation: Math.PI / 2, walkSpeed: 1.5, waypointPause: 0.3,
+                route: [[-109.8, -38.5], [-109.8, -53.5], [-95, -53.5], [-95, -38.5]],
+            }),
+            new Terrorist({ position: [-52, 3, -133], rotation: Math.PI + 0.3 }),
+            new Terrorist({ position: [-45, 3, -137], rotation: Math.PI }),
+            new Terrorist({ position: [-38, 3, -133], rotation: Math.PI - 0.3 }),
+            new Terrorist({ position: [-28.5, 7, -110], waypointPause: 0, route: NPC.circleRoute([-45, -110], 16.5, 16, 0) }),
+            new Terrorist({ position: [-61.5, 7, -110], waypointPause: 0, route: NPC.circleRoute([-45, -110], 16.5, 16, Math.PI) }),
+        ],
+        npcRadius = 0.5,
     } = {}) {
         this.skylineImage = skylineImage;
         this.skylineRadius = skylineRadius;
@@ -37,16 +59,74 @@ class LibertyIsland {
         this.createLights();
         this.pier = new Pier(pier);
         this.statue = new StatueOfLiberty(statue);
-        this.scene.add(this.pier.group, this.statue.group);
+        this.ramp = new Ramp({
+            start: [-this.pier.sideLength, -this.pier.forwardLength - this.pier.halfWidth],
+            connectWidth: this.pier.width,
+            ...ramp,
+        });
+        this.plateau = this.createPlateau(plateauEdge, leftAreaDepth, blockPassageWidth, westTerrace);
+        this.scene.add(this.pier.group, this.ramp.group, this.plateau.group, this.statue.group);
+        this.npcs = npcs;
+        this.npcs.forEach(npc => this.scene.add(npc.group));
         this.createFade();
         this.player = new FirstPersonController(this.camera, {
             position: cameraPosition,
             lookAt,
             eyeHeight: cameraPosition[1],
-            walkableAreas: this.pier.walkableAreas(railingMargin),
+            walkableAreas: [
+                ...this.pier.walkableAreas(railingMargin),
+                this.ramp.walkableArea(railingMargin),
+                this.ramp.openingArea(railingMargin, 'right'),
+                this.ramp.openingArea(railingMargin, 'left'),
+                ...this.plateau.walkableAreas(railingMargin),
+                this.blockPassageArea(railingMargin, blockPassageWidth),
+            ],
+            floorHeight: (x, z) => this.plateau.contains(x, z) ? this.plateau.height : this.ramp.floorHeight(x, z),
+            obstacles: [
+                ...this.npcs.map(npc => ({ position: npc.group.position, radius: npcRadius })),
+                { position: this.statue.group.position, radius: this.statue.fortRadius + railingMargin },
+            ],
             ...controls,
         });
         this.time = 0;
+        this.checkpoints = [];
+    }
+
+    addCheckpoints(checkpoints) {
+        this.checkpoints.push(...checkpoints);
+    }
+
+    blockPassageArea(margin, width) {
+        const ramp = this.ramp, blockWestX = ramp.farX - ramp.endBlockSize, reach = margin + 1;
+        return {
+            minX: blockWestX - width + this.plateau.parapetThickness + margin, maxX: blockWestX - margin,
+            minZ: ramp.rightZ - ramp.wallThickness - reach, maxZ: ramp.leftZ + ramp.wallThickness + reach,
+        };
+    }
+
+    createPlateau([eastX, southZ], leftAreaDepth, blockPassageWidth, westTerrace) {
+        const ramp = this.ramp, statue = this.statue.group.position;
+        const northEdge = ramp.leftZ + ramp.wallThickness, southEdge = ramp.rightZ - ramp.wallThickness;
+        const blockWestX = ramp.farX - ramp.endBlockSize, westX = blockWestX - blockPassageWidth;
+        return new Plateau({
+            height: ramp.rise,
+            waterLevel: this.waterLevel,
+            material: ramp.floorMaterial,
+            parapetMaterial: ramp.wallMaterial,
+            rects: [
+                { minX: westX, maxX: eastX, minZ: westTerrace.maxZ, maxZ: southEdge, parapets: ['west'], joins: ['south'] },
+                { minX: westX, maxX: eastX, minZ: southZ, maxZ: westTerrace.maxZ, joins: ['north', 'west'] },
+                { minX: westTerrace.minX, maxX: westX, minZ: westTerrace.minZ, maxZ: westTerrace.maxZ, parapets: ['west', 'north', 'south'], joins: ['east'] },
+                { minX: westX, maxX: blockWestX, minZ: southEdge, maxZ: northEdge, parapets: ['west'], parapetHeight: ramp.wallHeight, walkable: false },
+                { minX: ramp.farX, maxX: ramp.endX, minZ: ramp.rightZ - ramp.wallThickness, maxZ: ramp.rightZ, walkable: false },
+                {
+                    minX: westX, maxX: ramp.endX, minZ: northEdge, maxZ: northEdge + leftAreaDepth,
+                    parapets: ['north', 'west', 'east'], parapetHeight: ramp.wallHeight,
+                },
+                { minX: ramp.farX, maxX: ramp.endX, minZ: ramp.leftZ, maxZ: northEdge, walkable: false },
+            ],
+            circles: [{ centerX: statue.x, centerZ: statue.z, radius: this.statue.islandRadius }],
+        });
     }
 
     track(resource) {
@@ -124,6 +204,7 @@ class LibertyIsland {
         this.time = 0;
         this.player.reset();
         this.player.enable();
+        this.checkpoints.forEach(checkpoint => checkpoint.reset());
     }
 
     stop() {
@@ -138,7 +219,13 @@ class LibertyIsland {
     update(dt) {
         this.time += dt;
         this.player.update(dt);
+        this.checkpoints.forEach(checkpoint => checkpoint.check(this.camera.position));
         this.statue.update(dt);
+        this.npcs.forEach(npc => {
+            npc.lookAt(this.camera.position);
+            npc.avoidPositions([this.camera.position, ...this.npcs.filter(other => other !== npc).map(other => other.group.position)]);
+            npc.update(dt);
+        });
         this.fadeMaterial.opacity = 1 - Math.min(1, this.time / this.fadeInDuration);
     }
 
@@ -151,7 +238,10 @@ class LibertyIsland {
     dispose() {
         this.player.dispose();
         this.pier.dispose();
+        this.ramp.dispose();
+        this.plateau.dispose();
         this.statue.dispose();
+        this.npcs.forEach(npc => npc.dispose());
         this.disposables.forEach(resource => resource.dispose());
     }
 }

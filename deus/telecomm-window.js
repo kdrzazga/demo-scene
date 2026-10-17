@@ -108,6 +108,10 @@ class TelecommWindow {
     }
 
     createAudio() {
+        if (!this.message) {
+            this.audioFailed = true;
+            return;
+        }
         this.audio = new Audio(this.message);
         this.audio.preload = 'auto';
         this.audio.addEventListener('ended', () => this.phase === 'speaking' && this.enter('ending'));

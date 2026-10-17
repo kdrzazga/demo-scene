@@ -31,8 +31,17 @@
 <script src="lightning-bolt.js"></script>
 <script src="intro-logo.js"></script>
 <script src="pier.js"></script>
+<script src="ramp.js"></script>
+<script src="plateau.js"></script>
 <script src="statue-of-liberty.js"></script>
+<script src="npc/npc.js"></script>
+<script src="npc/paul-denton.js"></script>
+<script src="npc/unatco.js"></script>
+<script src="npc/terrorist.js"></script>
+<script src="npc/anna-navarre.js"></script>
+<script src="npc/maggie-chow.js"></script>
 <script src="first-person-controller.js"></script>
+<script src="checkpoint.js"></script>
 <script src="liberty-island.js"></script>
 <script src="telecomm-window.js"></script>
 <script src="hud-panel.js"></script>
@@ -42,12 +51,30 @@
 <script>
     new Demo({
         music: 'title.mp3',
-        transmission: {
-            photo: 'alex.png',
-            message: 'alex.mp3',
-            name: 'Alex Jacobson',
-            text: 'JC, I have patched into your infolink. Stay sharp, we are picking up movement near the docks.',
-        },
+        transmissions: [
+            {
+                checkpoint: [2, 8],
+                radius: 3,
+                photo: 'alex.png',
+                message: 'alex.mp3',
+                name: 'Krzychu',
+                text: 'Heads up JC! Click the screen to enable mouse movement. You can find your brother Paul further on the pier,'
+                +' just like in year 2000. Paul Denton looks like he comes from ALIEXPRESS :D :D :D',
+            },
+            {
+                checkpoint: [-90, -46],
+                radius: 4,
+                photo: 'alex.png',
+                name: 'Krzychu',
+                text: 'You can meet Anna Navarre on the left.',
+            },
+            {
+                checkpoint: { minX: -152, maxX: -112.8, minZ: -110, maxZ: -80 },
+                photo: 'alex.png',
+                name: 'Krzychu',
+                text: 'Here you can meet Maggie Chow from Hong Kong, which is another alteration from the original game (and its plot).',
+            },
+        ],
     });
 </script>
 </body>
