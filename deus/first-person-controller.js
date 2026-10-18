@@ -59,6 +59,11 @@ class FirstPersonController {
 
     enable() {
         this.enabled = true;
+        this.pressed.clear();
+    }
+
+    lock() {
+        if (this.enabled) this.element?.requestPointerLock();
     }
 
     disable() {
@@ -89,6 +94,10 @@ class FirstPersonController {
     }
 
     update(dt) {
+        if (!this.enabled) {
+            this.applyCamera();
+            return;
+        }
         const forward = this.axis(this.keys.forward, this.keys.backward);
         const strafe = this.axis(this.keys.right, this.keys.left);
         const moving = forward !== 0 || strafe !== 0;
@@ -111,7 +120,13 @@ class FirstPersonController {
 
     isWalkable(x, z) {
         return this.walkableAreas.some(area => this.insideArea(area, x, z))
-            && this.obstacles.every(obstacle => obstacle.solid === false || Math.hypot(x - obstacle.position.x, z - obstacle.position.z) >= obstacle.radius);
+            && this.obstacles.every(obstacle => !this.blockedBy(obstacle, x, z));
+    }
+
+    blockedBy(obstacle, x, z) {
+        if (obstacle.solid === false) return false;
+        if (obstacle.blocks) return obstacle.blocks(x, z);
+        return Math.hypot(x - obstacle.position.x, z - obstacle.position.z) < obstacle.radius;
     }
 
     onGround(x, z) {

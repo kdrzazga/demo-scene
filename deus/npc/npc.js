@@ -253,6 +253,11 @@ class NPC {
         this.welcomeAudio?.pause();
     }
 
+    reset() {
+        this.revive();
+        this.welcomed = false;
+    }
+
     revive() {
         this.hitPoints = this.maxHitPoints;
         this.flinch = 0;

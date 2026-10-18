@@ -11,8 +11,9 @@ class Demo {
         this.intro = new IntroLogo();
         this.island = new LibertyIsland();
         this.transmissionQueue = Promise.resolve();
-        this.island.addCheckpoints(transmissions.map(({ checkpoint, radius, ...transmission }) => new Checkpoint({
+        this.island.addCheckpoints(transmissions.map(({ checkpoint, radius, requires, ...transmission }) => new Checkpoint({
             ...(Array.isArray(checkpoint) ? { position: checkpoint, radius } : { area: checkpoint }),
+            condition: () => this.island.meets(requires),
             onReach: () => this.queueTransmission(transmission),
         })));
         this.belt = new BeltView();

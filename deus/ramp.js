@@ -159,55 +159,9 @@ class Ramp {
     }
 
     createSign() {
-        const canvas = document.createElement('canvas');
-        canvas.width = 512;
-        canvas.height = 320;
-        const c = canvas.getContext('2d');
-        c.fillStyle = '#5a5e66';
-        c.fillRect(0, 0, 512, 320);
-        c.fillStyle = '#eceef0';
-        c.fillRect(14, 14, 484, 292);
-        c.fillStyle = '#9e1b1b';
-        c.fillRect(30, 30, 452, 80);
-        c.fillStyle = '#1d3f8a';
-        c.beginPath();
-        c.arc(78, 70, 32, 0, Math.PI * 2);
-        c.fill();
-        c.strokeStyle = '#d8c060';
-        c.lineWidth = 3;
-        c.stroke();
-        this.drawStar(c, 78, 70, 16, 7);
-        c.textAlign = 'center';
-        c.textBaseline = 'middle';
-        c.fillStyle = '#f2f2f2';
-        c.font = 'bold 52px "Times New Roman", Georgia, serif';
-        c.fillText('U.N.A.T.C.O.', 290, 72);
-        c.fillStyle = '#141414';
-        c.font = '62px Arial, Helvetica, sans-serif';
-        c.fillText('Personnel', 256, 170);
-        c.fillStyle = '#9e1b1b';
-        c.font = '900 76px "Arial Black", Arial, sans-serif';
-        c.fillText('ONLY', 256, 252);
-        const sign = new THREE.Mesh(
-            this.track(new THREE.PlaneGeometry(...this.signSize)),
-            this.track(new THREE.MeshStandardMaterial({ map: this.track(new THREE.CanvasTexture(canvas)), roughness: 0.6 }))
-        );
         const x = this.startX - this.signPosition;
-        sign.position.set(x, this.floorHeight(x, this.centerZ) + this.signHeight, this.leftZ - 0.02);
-        sign.rotation.y = Math.PI;
-        this.group.add(sign);
-    }
-
-    drawStar(c, x, y, outer, inner) {
-        c.fillStyle = '#d8c060';
-        c.beginPath();
-        for (let point = 0; point < 10; point++) {
-            const radius = point % 2 === 0 ? outer : inner;
-            const angle = -Math.PI / 2 + point * Math.PI / 5;
-            c.lineTo(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius);
-        }
-        c.closePath();
-        c.fill();
+        this.sign = new UnatcoSign({ position: [x, this.floorHeight(x, this.centerZ) + this.signHeight, this.leftZ - 0.02], facing: Math.PI, size: this.signSize });
+        this.group.add(this.sign.group);
     }
 
     createFence() {
@@ -235,36 +189,14 @@ class Ramp {
     }
 
     createLamp() {
-        const x = this.endX + 1, z = this.leftZ - 0.3, poleHeight = 5;
-        const base = this.floorHeight(x, this.centerZ);
-        const metal = this.track(new THREE.MeshStandardMaterial({ color: 0x30343a, roughness: 0.5, metalness: 0.6 }));
-        this.box(0.15, poleHeight, 0.15, x, base + poleHeight / 2, z, metal);
-        this.box(0.1, 0.1, 1.2, x, base + poleHeight, z - 0.55, metal);
-        const bulbY = base + poleHeight - 0.15, bulbZ = z - 1.1;
-        const canvas = document.createElement('canvas');
-        canvas.width = canvas.height = 64;
-        const c = canvas.getContext('2d');
-        const gradient = c.createRadialGradient(32, 32, 0, 32, 32, 32);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-        gradient.addColorStop(0.2, 'rgba(230, 240, 255, 0.8)');
-        gradient.addColorStop(1, 'rgba(200, 220, 255, 0)');
-        c.fillStyle = gradient;
-        c.fillRect(0, 0, 64, 64);
-        const glow = new THREE.Sprite(this.track(new THREE.SpriteMaterial({
-            map: this.track(new THREE.CanvasTexture(canvas)),
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
-            transparent: true,
-        })));
-        glow.scale.setScalar(2.4);
-        glow.position.set(x, bulbY, bulbZ);
-        this.group.add(glow);
-        const light = new THREE.PointLight(this.lampColor, 1.6, 30);
-        light.position.set(x, bulbY - 0.2, bulbZ);
-        this.group.add(light);
+        const x = this.endX + 1;
+        this.lamp = new StreetLamp({ position: [x, this.floorHeight(x, this.centerZ), this.leftZ - 0.3], facing: Math.PI, lightColor: this.lampColor });
+        this.group.add(this.lamp.group);
     }
 
     dispose() {
+        this.lamp.dispose();
+        this.sign.dispose();
         this.disposables.forEach(resource => resource.dispose());
     }
 }

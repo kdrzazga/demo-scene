@@ -3,6 +3,11 @@ class StatueOfLiberty {
         position = [-45, 0, -110],
         islandRadius = 34,
         fortRadius = 19,
+        fortHeight = 4,
+        fortSides = 11,
+        tunnelWidth = 3.2,
+        tunnelHeight = 3,
+        tunnelLightColor = 0xffc890,
         waterDepth = 2,
         rotation = 0.38,
         scale = 1,
@@ -16,6 +21,11 @@ class StatueOfLiberty {
         this.group.scale.setScalar(scale);
         this.islandRadius = islandRadius;
         this.fortRadius = fortRadius;
+        this.fortHeight = fortHeight;
+        this.fortSides = fortSides;
+        this.tunnelWidth = tunnelWidth;
+        this.tunnelHeight = tunnelHeight;
+        this.tunnelLightColor = tunnelLightColor;
         this.waterDepth = waterDepth;
         this.disposables = [];
         this.time = 0;
@@ -27,6 +37,7 @@ class StatueOfLiberty {
         this.createFigure();
         this.createTorch();
         this.createUplights();
+        this.group.updateMatrixWorld(true);
     }
 
     track(resource) {
@@ -44,10 +55,62 @@ class StatueOfLiberty {
     createPedestal() {
         const islandHeight = 3 + this.waterDepth;
         this.add(new THREE.CylinderGeometry(this.islandRadius, this.islandRadius + 2, islandHeight, 32), this.stone, 0, 3 - islandHeight / 2, 0);
-        this.add(new THREE.CylinderGeometry(this.fortRadius - 1, this.fortRadius, 4, 11), this.stone, 0, 5, 0);
+        this.createFort(3);
         this.add(new THREE.CylinderGeometry(6.4, 8.5, 16, 4), this.stone, 0, 15, 0).rotation.y = Math.PI / 4;
         this.add(new THREE.BoxGeometry(10, 1.5, 10), this.stone, 0, 23.75, 0);
         this.add(new THREE.BoxGeometry(6, 1, 6), this.stone, 0, 25, 0);
+    }
+
+    fortOutline() {
+        return Array.from({ length: this.fortSides }, (_, index) => {
+            const angle = index / this.fortSides * Math.PI * 2;
+            return new THREE.Vector2(Math.sin(angle) * this.fortRadius, Math.cos(angle) * this.fortRadius);
+        });
+    }
+
+    clip(points, limit, keepGreater) {
+        const inside = point => keepGreater ? point.x >= limit : point.x <= limit;
+        const result = [];
+        points.forEach((current, index) => {
+            const previous = points[(index + points.length - 1) % points.length];
+            if (inside(current) !== inside(previous)) {
+                const t = (limit - previous.x) / (current.x - previous.x);
+                result.push(new THREE.Vector2(limit, previous.y + (current.y - previous.y) * t));
+            }
+            if (inside(current)) result.push(current.clone());
+        });
+        return result;
+    }
+
+    prism(points, bottom, height) {
+        const geometry = new THREE.ExtrudeGeometry(new THREE.Shape(points), { depth: height, bevelEnabled: false });
+        geometry.rotateX(-Math.PI / 2);
+        geometry.translate(0, bottom, 0);
+        return this.add(geometry, this.stone, 0, 0, 0);
+    }
+
+    createFort(ground) {
+        const outline = this.fortOutline(), half = this.tunnelWidth / 2;
+        this.prism(this.clip(outline, -half, false), ground, this.fortHeight);
+        this.prism(this.clip(outline, half, true), ground, this.fortHeight);
+        this.prism(this.clip(this.clip(outline, -half, true), half, false), ground + this.tunnelHeight, this.fortHeight - this.tunnelHeight);
+        const lamp = this.track(new THREE.MeshBasicMaterial({ color: this.tunnelLightColor }));
+        [-this.fortRadius * 0.45, this.fortRadius * 0.45].forEach(z => {
+            this.add(new THREE.BoxGeometry(0.6, 0.08, 0.3), lamp, 0, ground + this.tunnelHeight - 0.04, z);
+            const light = new THREE.PointLight(this.tunnelLightColor, 0.9, 12);
+            light.position.set(0, ground + this.tunnelHeight - 0.4, z);
+            this.group.add(light);
+        });
+    }
+
+    blocks(x, z, margin) {
+        const local = this.group.worldToLocal(new THREE.Vector3(x, 0, z));
+        if (Math.hypot(local.x, local.z) > this.fortRadius + margin) return false;
+        return Math.abs(local.x) > this.tunnelWidth / 2 - margin;
+    }
+
+    obstacle(margin) {
+        return { blocks: (x, z) => this.blocks(x, z, margin) };
     }
 
     createFigure() {

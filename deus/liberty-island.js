@@ -21,9 +21,14 @@ class LibertyIsland {
         leftAreaDepth = 20,
         blockPassageWidth = 6,
         westTerrace = { minX: -152, minZ: -110, maxZ: -80 },
+        passage = {},
+        passageGuardGroups = [3, 1, 2, 4, 1, 2, 3, 1, 2, 4, 1, 3, 2, 1],
+        crateGroupSize = 4,
         npcs = [
             new PaulDenton({ position: [-30, 0, -46], rotation: Math.PI / 2, route: [[-22, -46], [-40, -46]] }),
             new UnatcoTroop({ position: [3.5, 0, -34], rotation: 0, route: [[3.5, -12], [3.5, -34]] }),
+            new UnatcoTroop({ position: [-231, 0, -43.8], rotation: Math.PI / 2 }),
+            new UnatcoTroop({ position: [-231, 0, -48.2], rotation: Math.PI / 2 }),
             new AnnaNavarre({ position: [-110.5, 3, -24], rotation: 2.3 }),
             new MaggieChow({ position: [-144, 3, -92], rotation: 1.2 }),
             new Terrorist({ position: [-85, 3, -60], rotation: Math.PI, route: [[-85, -95], [-85, -60]] }),
@@ -47,6 +52,13 @@ class LibertyIsland {
         ],
         floatDepth = 0.3,
         weapon = {},
+        streetLamps = [
+            new StreetLamp({ position: [-32, 3, -87.5], facing: StreetLamp.facingTowards([-32, -87.5], [-45, -110]) }),
+            new StreetLamp({ position: [-58, 3, -87.5], facing: StreetLamp.facingTowards([-58, -87.5], [-45, -110]) }),
+            new StreetLamp({ position: [-150.8, 3, -81.2], facing: StreetLamp.facingTowards([-150.8, -81.2], [-132, -95]) }),
+        ],
+        tunnelTerminal = { side: -1, along: 5, height: 1.45 },
+        useReach = 2.5,
         weaponDamage = 1,
         weaponRange = 200,
     } = {}) {
@@ -59,6 +71,7 @@ class LibertyIsland {
         this.waterLevel = waterLevel;
         this.floatDepth = floatDepth;
         this.weaponDamage = weaponDamage;
+        this.useReach = useReach;
         this.fadeInDuration = fadeInDuration;
         this.disposables = [];
 
@@ -78,11 +91,25 @@ class LibertyIsland {
             ...ramp,
         });
         this.plateau = this.createPlateau(plateauEdge, leftAreaDepth, blockPassageWidth, westTerrace);
-        this.scene.add(this.pier.group, this.ramp.group, this.plateau.group, this.statue.group);
-        this.npcs = npcs;
+        this.passage = new Passage({
+            start: [this.ramp.farX - this.ramp.endBlockSize - blockPassageWidth, this.ramp.centerZ],
+            width: this.ramp.endBlockSize,
+            height: this.ramp.rise,
+            waterLevel,
+            wallMaterial: this.ramp.wallMaterial,
+            floorMaterial: this.ramp.floorMaterial,
+            ...passage,
+        });
+        this.scene.add(this.pier.group, this.ramp.group, this.plateau.group, this.passage.group, this.statue.group);
+        this.npcs = [...npcs, ...this.createPassageGuards(passageGuardGroups)];
         this.npcs.forEach(npc => this.scene.add(npc.group));
-        this.objects = objects;
+        this.objects = [...objects, ...this.createPassageCrates(passageGuardGroups, crateGroupSize)];
         this.objects.forEach(object => this.scene.add(object.group));
+        this.streetLamps = streetLamps;
+        this.streetLamps.forEach(lamp => this.scene.add(lamp.group));
+        this.terminals = [this.createTunnelTerminal(tunnelTerminal)];
+        this.terminals.forEach(terminal => this.scene.add(terminal.group));
+        this.terminalWindow = new TerminalWindow({ onClose: () => this.leaveTerminal() });
         this.createFade();
         this.player = new FirstPersonController(this.camera, {
             position: cameraPosition,
@@ -95,12 +122,15 @@ class LibertyIsland {
                 this.ramp.openingArea(railingMargin, 'left'),
                 ...this.plateau.walkableAreas(railingMargin),
                 this.blockPassageArea(railingMargin, blockPassageWidth),
+                ...this.passage.walkableAreas(railingMargin),
             ],
             floorHeight: (x, z) => this.floorHeight(x, z),
             obstacles: [
                 ...this.npcs.map(npc => ({ position: npc.group.position, radius: npcRadius, get solid() { return npc.solid; } })),
-                { position: this.statue.group.position, radius: this.statue.fortRadius + railingMargin },
+                this.statue.obstacle(railingMargin),
                 ...this.objects,
+                ...this.streetLamps,
+                ...this.passage.lamps,
             ],
             ...controls,
         });
@@ -111,12 +141,13 @@ class LibertyIsland {
             this.ramp.openingArea(0, 'left'),
             ...this.plateau.walkableAreas(0),
             this.blockPassageArea(0, blockPassageWidth),
+            ...this.passage.walkableAreas(0),
         ];
         this.grabber = new Grabber(this.camera, {
             objects: this.objects,
             groundHeight: (x, z) => this.groundHeight(x, z),
             isEnabled: () => this.player.enabled,
-            onUse: () => this.player.locked && this.weapon.fire() && this.shoot(),
+            onUse: () => this.player.locked && this.use(),
         });
         this.weapon = new WeaponView(weapon);
         this.hitScan = new HitScan(this.camera, { range: weaponRange });
@@ -124,20 +155,94 @@ class LibertyIsland {
         this.checkpoints = [];
     }
 
+    passageGroupCenters(groups) {
+        const passage = this.passage, inset = 5;
+        const spacing = (passage.length - inset * 2) / Math.max(1, groups.length - 1);
+        return groups.map((size, index) => ({
+            size,
+            index,
+            x: passage.startX - inset - index * spacing,
+            z: passage.centerZ + (index % 2 === 0 ? -1 : 1) * (size === 1 ? 2 : 1.4),
+        }));
+    }
+
+    createPassageCrates(groups, crateGroupSize) {
+        return this.passageGroupCenters(groups)
+            .filter(({ size }) => size === crateGroupSize)
+            .map(({ x, z, index }) => new Crate({ position: [x, this.passage.height + 0.5, z], rotation: index * 0.7 }));
+    }
+
+    createPassageGuards(groups) {
+        const passage = this.passage, wallClearance = 1;
+        return this.passageGroupCenters(groups).flatMap(({ size, index, x: centerX, z: centerZ }) => {
+            const radius = size === 1 ? 0 : 0.8 + size * 0.1;
+            return Array.from({ length: size }, (_, member) => {
+                const angle = index + member / size * Math.PI * 2;
+                const x = centerX + Math.cos(angle) * radius, z = centerZ + Math.sin(angle) * radius;
+                if (size === 1) {
+                    const route = [[x, passage.leftZ - wallClearance], [x, passage.rightZ + wallClearance]];
+                    return new Terrorist({ position: [x, passage.height, z], rotation: 0, route });
+                }
+                return new Terrorist({ position: [x, passage.height, z], rotation: Math.atan2(centerX - x, centerZ - z) });
+            });
+        });
+    }
+
+    createTunnelTerminal({ side, along, height }) {
+        const statue = this.statue;
+        const mount = statue.group.localToWorld(new THREE.Vector3(side * statue.tunnelWidth / 2, 3 + height, along));
+        return new SecurityTerminal({ position: mount.toArray(), rotation: statue.group.rotation.y - side * Math.PI / 2 });
+    }
+
+    get blockers() {
+        return [
+            this.pier.group, this.ramp.group, this.plateau.group, this.passage.group, this.statue.group,
+            ...this.objects.map(object => object.group),
+            ...this.streetLamps.map(lamp => lamp.group),
+            ...this.terminals.map(terminal => terminal.group),
+        ];
+    }
+
+    use() {
+        const hit = this.hitScan.trace(this.blockers);
+        const terminal = this.hitScan.owner(hit, this.terminals);
+        if (terminal && hit.distance <= this.useReach) this.enterTerminal(terminal);
+        else if (this.weapon.fire()) this.shoot();
+    }
+
+    enterTerminal(terminal) {
+        this.player.disable();
+        this.terminalWindow.open(terminal.name);
+    }
+
+    leaveTerminal() {
+        this.player.enable();
+        this.player.lock();
+    }
+
     shoot() {
         const targets = this.npcs.filter(npc => npc.alive);
-        const blockers = [this.pier.group, this.ramp.group, this.plateau.group, this.statue.group, ...this.objects.map(object => object.group)];
-        const hit = this.hitScan.trace([...blockers, ...targets.map(npc => npc.group)]);
+        const hit = this.hitScan.trace([...this.blockers, ...targets.map(npc => npc.group)]);
         this.hitScan.owner(hit, targets)?.hit(this.weaponDamage);
     }
 
     floorHeight(x, z) {
-        return this.plateau.contains(x, z) ? this.plateau.height : this.ramp.floorHeight(x, z);
+        if (this.plateau.contains(x, z)) return this.plateau.height;
+        if (this.passage.contains(x, z)) return this.passage.floorHeight(x);
+        return this.ramp.floorHeight(x, z);
     }
 
     groundHeight(x, z) {
         const onLand = this.landAreas.some(area => this.player.insideArea(area, x, z));
         return onLand ? this.floorHeight(x, z) : this.waterLevel - this.floatDepth;
+    }
+
+    npc(name) {
+        return this.npcs.find(npc => npc.name === name) ?? null;
+    }
+
+    meets({ talkedTo = [], alive = [] } = {}) {
+        return talkedTo.every(name => this.npc(name)?.welcomed) && alive.every(name => this.npc(name)?.alive);
     }
 
     addCheckpoints(checkpoints) {
@@ -165,7 +270,7 @@ class LibertyIsland {
                 { minX: westX, maxX: eastX, minZ: westTerrace.maxZ, maxZ: southEdge, parapets: ['west'], joins: ['south'] },
                 { minX: westX, maxX: eastX, minZ: southZ, maxZ: westTerrace.maxZ, joins: ['north', 'west'] },
                 { minX: westTerrace.minX, maxX: westX, minZ: westTerrace.minZ, maxZ: westTerrace.maxZ, parapets: ['west', 'north', 'south'], joins: ['east'] },
-                { minX: westX, maxX: blockWestX, minZ: southEdge, maxZ: northEdge, parapets: ['west'], parapetHeight: ramp.wallHeight, walkable: false },
+                { minX: westX, maxX: blockWestX, minZ: southEdge, maxZ: northEdge, walkable: false },
                 { minX: ramp.farX, maxX: ramp.endX, minZ: ramp.rightZ - ramp.wallThickness, maxZ: ramp.rightZ, walkable: false },
                 {
                     minX: westX, maxX: ramp.endX, minZ: northEdge, maxZ: northEdge + leftAreaDepth,
@@ -253,11 +358,12 @@ class LibertyIsland {
         this.player.reset();
         this.player.enable();
         this.grabber.reset();
-        this.npcs.forEach(npc => npc.revive());
+        this.npcs.forEach(npc => npc.reset());
         this.checkpoints.forEach(checkpoint => checkpoint.reset());
     }
 
     stop() {
+        this.terminalWindow.close(false);
         this.player.disable();
     }
 
@@ -300,9 +406,13 @@ class LibertyIsland {
         this.grabber.dispose();
         this.weapon.dispose();
         this.objects.forEach(object => object.dispose());
+        this.streetLamps.forEach(lamp => lamp.dispose());
+        this.terminals.forEach(terminal => terminal.dispose());
+        this.terminalWindow.dispose();
         this.pier.dispose();
         this.ramp.dispose();
         this.plateau.dispose();
+        this.passage.dispose();
         this.statue.dispose();
         this.npcs.forEach(npc => npc.dispose());
         this.disposables.forEach(resource => resource.dispose());
