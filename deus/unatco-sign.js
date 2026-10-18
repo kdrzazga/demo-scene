@@ -1,18 +1,10 @@
-class UnatcoSign {
-    constructor({ position = [0, 0, 0], facing = 0, size = [1.6, 1.0] } = {}) {
-        this.disposables = [];
-        this.group = new THREE.Group();
-        this.group.position.set(...position);
-        this.group.rotation.y = facing;
-        this.group.add(new THREE.Mesh(
-            this.track(new THREE.PlaneGeometry(...size)),
-            this.track(new THREE.MeshStandardMaterial({ map: this.track(new THREE.CanvasTexture(this.paint())), roughness: 0.6 }))
-        ));
+class UnatcoSign extends WallDecal {
+    constructor({ size = [1.6, 1.0], ...options } = {}) {
+        super({ width: size[0], height: size[1], ...options });
     }
 
-    track(resource) {
-        this.disposables.push(resource);
-        return resource;
+    source() {
+        return this.paint();
     }
 
     paint() {
@@ -58,9 +50,5 @@ class UnatcoSign {
         }
         c.closePath();
         c.fill();
-    }
-
-    dispose() {
-        this.disposables.forEach(resource => resource.dispose());
     }
 }

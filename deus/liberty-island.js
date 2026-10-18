@@ -58,6 +58,7 @@ class LibertyIsland {
             new StreetLamp({ position: [-150.8, 3, -81.2], facing: StreetLamp.facingTowards([-150.8, -81.2], [-132, -95]) }),
         ],
         tunnelTerminal = { side: -1, along: 5, height: 1.45 },
+        tunnelGraffiti = { image: 'easter-egg.png', side: 1, along: 0, height: 1.6, width: 10 },
         useReach = 2.5,
         weaponDamage = 1,
         weaponRange = 200,
@@ -109,6 +110,8 @@ class LibertyIsland {
         this.streetLamps.forEach(lamp => this.scene.add(lamp.group));
         this.terminals = [this.createTunnelTerminal(tunnelTerminal)];
         this.terminals.forEach(terminal => this.scene.add(terminal.group));
+        this.graffiti = this.createTunnelGraffiti(tunnelGraffiti);
+        this.scene.add(this.graffiti.group);
         this.terminalWindow = new TerminalWindow({ onClose: () => this.leaveTerminal() });
         this.createFade();
         this.player = new FirstPersonController(this.camera, {
@@ -186,6 +189,12 @@ class LibertyIsland {
                 return new Terrorist({ position: [x, passage.height, z], rotation: Math.atan2(centerX - x, centerZ - z) });
             });
         });
+    }
+
+    createTunnelGraffiti({ image, side, along, height, width }) {
+        const statue = this.statue;
+        const spot = statue.group.localToWorld(new THREE.Vector3(side * (statue.tunnelWidth / 2 - 0.01), 3 + height, along));
+        return new Graffiti({ image, width, position: spot.toArray(), facing: statue.group.rotation.y - side * Math.PI / 2 });
     }
 
     createTunnelTerminal({ side, along, height }) {
@@ -409,6 +418,7 @@ class LibertyIsland {
         this.streetLamps.forEach(lamp => lamp.dispose());
         this.terminals.forEach(terminal => terminal.dispose());
         this.terminalWindow.dispose();
+        this.graffiti.dispose();
         this.pier.dispose();
         this.ramp.dispose();
         this.plateau.dispose();
