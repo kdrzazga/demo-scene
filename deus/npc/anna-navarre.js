@@ -2,6 +2,7 @@ class AnnaNavarre extends NPC {
     constructor(options = {}) {
         super({
             name: 'Anna Navarre',
+            hitPoints: 5,
             height: 1.8,
             welcomeMp3: 'npc/AnnaNavarre.mp3',
             ...options,

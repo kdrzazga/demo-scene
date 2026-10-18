@@ -2,6 +2,7 @@ class PaulDenton extends NPC {
     constructor(options = {}) {
         super({
             name: 'Paul Denton',
+            hitPoints: 7,
             welcomeMp3: 'npc/Paul! I thought you were in Hong Kong.mp3',
             ...options,
             appearance: {

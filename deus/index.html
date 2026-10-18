@@ -20,11 +20,17 @@
         background: linear-gradient(rgba(34, 48, 58, 0.45), rgba(11, 17, 23, 0.45)); border: 2px solid rgba(143, 161, 173, 0.6);
         clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
     }
+    #crosshair { display: none; position: fixed; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; pointer-events: none; }
+    #crosshair::before, #crosshair::after { content: ''; position: absolute; background: rgba(230, 238, 243, 0.8); }
+    #crosshair::before { left: 6px; top: 0; width: 2px; height: 14px; }
+    #crosshair::after { left: 0; top: 6px; width: 14px; height: 2px; }
+    body.aiming #crosshair { display: block; }
     #start-button:hover { color: #fff; border-color: rgba(207, 224, 234, 0.85); background: linear-gradient(rgba(44, 61, 74, 0.6), rgba(17, 26, 34, 0.6)); }
 </style>
 </head>
 <body>
 <div id="stage"></div>
+<div id="crosshair"></div>
 <div id="start"><button id="start-button">START</button></div>
 <script src="../common/three.min.js"></script>
 <script src="stage.js"></script>
@@ -42,6 +48,13 @@
 <script src="npc/maggie-chow.js"></script>
 <script src="first-person-controller.js"></script>
 <script src="checkpoint.js"></script>
+<script src="objects/game-object.js"></script>
+<script src="objects/crate.js"></script>
+<script src="objects/grabber.js"></script>
+<script src="weapons/pistol.js"></script>
+<script src="weapons/hand.js"></script>
+<script src="weapons/weapon-view.js"></script>
+<script src="weapons/hit-scan.js"></script>
 <script src="liberty-island.js"></script>
 <script src="telecomm-window.js"></script>
 <script src="hud-panel.js"></script>

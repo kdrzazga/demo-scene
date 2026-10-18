@@ -2,6 +2,7 @@ class UnatcoTroop extends NPC {
     constructor(options = {}) {
         super({
             name: 'UNATCO Troop',
+            hitPoints: 5,
             ...options,
             appearance: {
                 skin: 0xc49a7c,

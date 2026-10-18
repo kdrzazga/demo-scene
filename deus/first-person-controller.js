@@ -39,10 +39,12 @@ class FirstPersonController {
         this.onBlur = () => this.pressed.clear();
         this.onMouseMove = event => this.look(event);
         this.onClick = () => this.enabled && this.element?.requestPointerLock();
+        this.onPointerLockChange = () => document.body.classList.toggle('aiming', this.locked);
         window.addEventListener('keydown', this.onKeyDown);
         window.addEventListener('keyup', this.onKeyUp);
         window.addEventListener('blur', this.onBlur);
         document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('pointerlockchange', this.onPointerLockChange);
         this.reset();
     }
 
@@ -109,7 +111,11 @@ class FirstPersonController {
 
     isWalkable(x, z) {
         return this.walkableAreas.some(area => this.insideArea(area, x, z))
-            && this.obstacles.every(obstacle => Math.hypot(x - obstacle.position.x, z - obstacle.position.z) >= obstacle.radius);
+            && this.obstacles.every(obstacle => obstacle.solid === false || Math.hypot(x - obstacle.position.x, z - obstacle.position.z) >= obstacle.radius);
+    }
+
+    onGround(x, z) {
+        return this.walkableAreas.some(area => this.insideArea(area, x, z));
     }
 
     insideArea(area, x, z) {
@@ -128,6 +134,7 @@ class FirstPersonController {
         window.removeEventListener('keyup', this.onKeyUp);
         window.removeEventListener('blur', this.onBlur);
         document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('pointerlockchange', this.onPointerLockChange);
         this.element?.removeEventListener('click', this.onClick);
     }
 }

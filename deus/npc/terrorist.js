@@ -2,6 +2,7 @@ class Terrorist extends NPC {
     constructor(options = {}) {
         super({
             name: 'Terrorist',
+            hitPoints: 4,
             ...options,
             appearance: {
                 skin: 0x55504c,

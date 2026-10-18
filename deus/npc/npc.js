@@ -21,6 +21,8 @@ class NPC {
         turnSpeed = 5,
         personalSpace = 0.9,
         welcomeMp3 = '',
+        hitPoints = 3,
+        flinchRecovery = 6,
         appearance = {},
     } = {}) {
         this.name = name;
@@ -43,6 +45,10 @@ class NPC {
         this.personalSpace = personalSpace;
         this.welcomeMp3 = welcomeMp3;
         this.welcomed = false;
+        this.maxHitPoints = hitPoints;
+        this.hitPoints = hitPoints;
+        this.flinchRecovery = flinchRecovery;
+        this.flinch = 0;
         this.appearance = {
             skin: 0xb98a6a,
             hair: 0x141210,
@@ -227,8 +233,36 @@ class NPC {
         return this.walkBlend > 0.5;
     }
 
+    get alive() {
+        return this.hitPoints > 0;
+    }
+
+    get solid() {
+        return this.alive;
+    }
+
+    hit(damage = 1) {
+        if (!this.alive) return;
+        this.hitPoints = Math.max(0, this.hitPoints - damage);
+        this.flinch = 1;
+        if (!this.alive) this.die();
+    }
+
+    die() {
+        this.group.visible = false;
+        this.welcomeAudio?.pause();
+    }
+
+    revive() {
+        this.hitPoints = this.maxHitPoints;
+        this.flinch = 0;
+        this.group.visible = true;
+    }
+
     update(dt) {
+        if (!this.alive) return;
         this.time += dt;
+        this.flinch = Math.max(0, this.flinch - dt * this.flinchRecovery);
         const breath = Math.sin(this.time * this.breathingRate * Math.PI);
         this.torso.scale.set(1 + breath * 0.008, 1 + breath * 0.006, 1 + breath * 0.012);
         this.updateRoute(dt);
@@ -277,6 +311,7 @@ class NPC {
         this.legs[1].rotation.x = -swing;
         this.arms.forEach((arm, index) => arm.rotation.x = (index === 0 ? -swing : swing) * 0.7 + Math.sin(this.time * 0.7 + index) * 0.02);
         this.body.position.y = -Math.abs(Math.sin(this.walkPhase)) * 0.025 * this.walkBlend;
+        this.body.rotation.x = -this.flinch * 0.18;
     }
 
     updateLabel(dt) {

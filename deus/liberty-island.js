@@ -38,6 +38,17 @@ class LibertyIsland {
             new Terrorist({ position: [-61.5, 7, -110], waypointPause: 0, route: NPC.circleRoute([-45, -110], 16.5, 16, Math.PI) }),
         ],
         npcRadius = 0.5,
+        objects = [
+            new Crate({ position: [-4, 0.5, -8], rotation: 0.3 }),
+            new Crate({ position: [-4.4, 0.5, -9.5], rotation: -0.2 }),
+            new Crate({ position: [-30, 3.5, -131], rotation: 0.1 }),
+            new Crate({ position: [-31.3, 3.5, -130.6], rotation: -0.25 }),
+            new Crate({ position: [-30.6, 4.5, -130.8], rotation: 0.6 }),
+        ],
+        floatDepth = 0.3,
+        weapon = {},
+        weaponDamage = 1,
+        weaponRange = 200,
     } = {}) {
         this.skylineImage = skylineImage;
         this.skylineRadius = skylineRadius;
@@ -46,6 +57,8 @@ class LibertyIsland {
         this.skylineHorizon = skylineHorizon;
         this.skyRadius = skyRadius;
         this.waterLevel = waterLevel;
+        this.floatDepth = floatDepth;
+        this.weaponDamage = weaponDamage;
         this.fadeInDuration = fadeInDuration;
         this.disposables = [];
 
@@ -68,6 +81,8 @@ class LibertyIsland {
         this.scene.add(this.pier.group, this.ramp.group, this.plateau.group, this.statue.group);
         this.npcs = npcs;
         this.npcs.forEach(npc => this.scene.add(npc.group));
+        this.objects = objects;
+        this.objects.forEach(object => this.scene.add(object.group));
         this.createFade();
         this.player = new FirstPersonController(this.camera, {
             position: cameraPosition,
@@ -81,15 +96,48 @@ class LibertyIsland {
                 ...this.plateau.walkableAreas(railingMargin),
                 this.blockPassageArea(railingMargin, blockPassageWidth),
             ],
-            floorHeight: (x, z) => this.plateau.contains(x, z) ? this.plateau.height : this.ramp.floorHeight(x, z),
+            floorHeight: (x, z) => this.floorHeight(x, z),
             obstacles: [
-                ...this.npcs.map(npc => ({ position: npc.group.position, radius: npcRadius })),
+                ...this.npcs.map(npc => ({ position: npc.group.position, radius: npcRadius, get solid() { return npc.solid; } })),
                 { position: this.statue.group.position, radius: this.statue.fortRadius + railingMargin },
+                ...this.objects,
             ],
             ...controls,
         });
+        this.landAreas = [
+            ...this.pier.walkableAreas(0),
+            this.ramp.walkableArea(0),
+            this.ramp.openingArea(0, 'right'),
+            this.ramp.openingArea(0, 'left'),
+            ...this.plateau.walkableAreas(0),
+            this.blockPassageArea(0, blockPassageWidth),
+        ];
+        this.grabber = new Grabber(this.camera, {
+            objects: this.objects,
+            groundHeight: (x, z) => this.groundHeight(x, z),
+            isEnabled: () => this.player.enabled,
+            onUse: () => this.player.locked && this.weapon.fire() && this.shoot(),
+        });
+        this.weapon = new WeaponView(weapon);
+        this.hitScan = new HitScan(this.camera, { range: weaponRange });
         this.time = 0;
         this.checkpoints = [];
+    }
+
+    shoot() {
+        const targets = this.npcs.filter(npc => npc.alive);
+        const blockers = [this.pier.group, this.ramp.group, this.plateau.group, this.statue.group, ...this.objects.map(object => object.group)];
+        const hit = this.hitScan.trace([...blockers, ...targets.map(npc => npc.group)]);
+        this.hitScan.owner(hit, targets)?.hit(this.weaponDamage);
+    }
+
+    floorHeight(x, z) {
+        return this.plateau.contains(x, z) ? this.plateau.height : this.ramp.floorHeight(x, z);
+    }
+
+    groundHeight(x, z) {
+        const onLand = this.landAreas.some(area => this.player.insideArea(area, x, z));
+        return onLand ? this.floorHeight(x, z) : this.waterLevel - this.floatDepth;
     }
 
     addCheckpoints(checkpoints) {
@@ -204,6 +252,8 @@ class LibertyIsland {
         this.time = 0;
         this.player.reset();
         this.player.enable();
+        this.grabber.reset();
+        this.npcs.forEach(npc => npc.revive());
         this.checkpoints.forEach(checkpoint => checkpoint.reset());
     }
 
@@ -214,16 +264,24 @@ class LibertyIsland {
     layout(viewportWidth, viewportHeight) {
         this.camera.aspect = viewportWidth / viewportHeight;
         this.camera.updateProjectionMatrix();
+        this.weapon.layout(viewportWidth, viewportHeight);
     }
 
     update(dt) {
         this.time += dt;
         this.player.update(dt);
+        this.grabber.update(dt);
+        this.weapon.update(dt, {
+            yaw: this.player.yaw,
+            pitch: this.player.pitch,
+            bobPhase: this.player.bobPhase,
+            lowered: !!this.grabber.held,
+        });
         this.checkpoints.forEach(checkpoint => checkpoint.check(this.camera.position));
         this.statue.update(dt);
         this.npcs.forEach(npc => {
             npc.lookAt(this.camera.position);
-            npc.avoidPositions([this.camera.position, ...this.npcs.filter(other => other !== npc).map(other => other.group.position)]);
+            npc.avoidPositions([this.camera.position, ...this.npcs.filter(other => other !== npc && other.alive).map(other => other.group.position)]);
             npc.update(dt);
         });
         this.fadeMaterial.opacity = 1 - Math.min(1, this.time / this.fadeInDuration);
@@ -231,12 +289,17 @@ class LibertyIsland {
 
     render(renderer) {
         this.player.attach(renderer.domElement);
+        this.grabber.attach(renderer.domElement);
         renderer.render(this.scene, this.camera);
+        this.weapon.render(renderer);
         if (this.fadeMaterial.opacity > 0) renderer.render(this.fadeScene, this.fadeCamera);
     }
 
     dispose() {
         this.player.dispose();
+        this.grabber.dispose();
+        this.weapon.dispose();
+        this.objects.forEach(object => object.dispose());
         this.pier.dispose();
         this.ramp.dispose();
         this.plateau.dispose();
