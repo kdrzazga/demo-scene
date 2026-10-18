@@ -1,15 +1,18 @@
 class Checkpoint {
-    constructor({ position = null, radius = 3, area = null, condition = () => true, onReach = () => {} }) {
+    constructor({ position = null, radius = 3, area = null, repeat = false, condition = () => true, onReach = () => {} }) {
         this.position = position;
         this.radius = radius;
         this.area = area;
+        this.repeat = repeat;
         this.condition = condition;
         this.onReach = onReach;
         this.reached = false;
     }
 
     check(point) {
-        if (this.reached || !this.contains(point) || !this.condition()) return;
+        const inside = this.contains(point);
+        if (this.repeat && !inside) this.reached = false;
+        if (this.reached || !inside || !this.condition()) return;
         this.reached = true;
         this.onReach();
     }

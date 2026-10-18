@@ -39,7 +39,7 @@ class FirstPersonController {
         this.onBlur = () => this.pressed.clear();
         this.onMouseMove = event => this.look(event);
         this.onClick = () => this.enabled && this.element?.requestPointerLock();
-        this.onPointerLockChange = () => document.body.classList.toggle('aiming', this.locked);
+        this.onPointerLockChange = () => document.body.classList.toggle('aiming', !!document.pointerLockElement);
         window.addEventListener('keydown', this.onKeyDown);
         window.addEventListener('keyup', this.onKeyUp);
         window.addEventListener('blur', this.onBlur);
@@ -57,6 +57,14 @@ class FirstPersonController {
         this.applyCamera();
     }
 
+    teleport(x, z, yaw, pitch = 0) {
+        this.position.set(x, 0, z);
+        this.yaw = yaw;
+        this.pitch = pitch;
+        this.bobPhase = 0;
+        this.applyCamera();
+    }
+
     enable() {
         this.enabled = true;
         this.pressed.clear();
@@ -64,6 +72,11 @@ class FirstPersonController {
 
     lock() {
         if (this.enabled) this.element?.requestPointerLock();
+    }
+
+    suspend() {
+        this.enabled = false;
+        this.pressed.clear();
     }
 
     disable() {

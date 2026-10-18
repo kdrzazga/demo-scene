@@ -1,6 +1,7 @@
 class WallDecal {
     constructor({
         image = null,
+        content = null,
         position = [0, 0, 0],
         facing = 0,
         width = 1,
@@ -9,6 +10,7 @@ class WallDecal {
         material = {},
     } = {}) {
         this.image = image;
+        this.content = content;
         this.width = width;
         this.height = height;
         this.anisotropy = anisotropy;
