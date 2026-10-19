@@ -48,7 +48,24 @@ class InventoryView extends HudPanel {
         this.buttons = buttons;
         this.group.position.z = 2;
         this.group.visible = visible;
+        this.items = [];
         this.draw();
+    }
+
+    addItem(item) {
+        if (this.items.length >= this.columns * this.rows) return false;
+        this.items.push(item);
+        this.draw();
+        return true;
+    }
+
+    clear() {
+        this.items = [];
+        this.draw();
+    }
+
+    get selectedItem() {
+        return this.items[this.items.length - 1] ?? null;
     }
 
     show() {
@@ -116,6 +133,7 @@ class InventoryView extends HudPanel {
                 const x = this.padding + column * (this.cellSize + this.gap);
                 const y = this.gridTop + row * (this.cellSize + this.gap);
                 this.drawSlot(c, x, y, this.cellSize, this.cellSize);
+                this.items[row * this.columns + column]?.paintIcon(c, x, y, this.cellSize);
             }
         }
     }
@@ -134,6 +152,30 @@ class InventoryView extends HudPanel {
         const x = this.padding + this.gridWidth + this.spacing, y = this.gridTop;
         const height = this.buttonsTop + this.buttonHeight - this.gridTop;
         this.drawStrip(c, x, y, this.infoWidth, this.tabHeight);
-        this.drawSlot(c, x, y + this.tabHeight + this.spacing, this.infoWidth, height - this.tabHeight - this.spacing);
+        const boxTop = y + this.tabHeight + this.spacing;
+        this.drawSlot(c, x, boxTop, this.infoWidth, height - this.tabHeight - this.spacing);
+        const item = this.selectedItem;
+        if (!item) return;
+        this.drawLabel(c, item.name.toUpperCase(), x + 10, y + this.tabHeight / 2 + 1, { size: 12, bold: true, spacing: 1 });
+        this.wrapText(c, item.description, this.infoWidth - 24).forEach((line, index) => {
+            this.drawLabel(c, line, x + 12, boxTop + 18 + index * 18, { size: 13, color: '#cfdbe2' });
+        });
+    }
+
+    wrapText(c, text, maxWidth) {
+        c.font = `13px ${this.font}`;
+        const lines = [];
+        let line = '';
+        text.split(/\s+/).filter(Boolean).forEach(word => {
+            const candidate = line ? `${line} ${word}` : word;
+            if (line && c.measureText(candidate).width > maxWidth) {
+                lines.push(line);
+                line = word;
+            } else {
+                line = candidate;
+            }
+        });
+        if (line) lines.push(line);
+        return lines;
     }
 }

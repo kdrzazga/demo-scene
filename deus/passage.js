@@ -15,6 +15,9 @@ class Passage {
         signSize = [1.6, 1.0],
         signHeight = 1.7,
         signGap = 0.4,
+        doorCaption = ['UNATCO H.Q.', 'LIBERTY ISLAND'],
+        doorCaptionSize = [4, 1],
+        doorCaptionHeight = 3.6,
         wallMaterial = new THREE.MeshStandardMaterial({ color: 0x3a424d, roughness: 0.95 }),
         floorMaterial = new THREE.MeshStandardMaterial({ color: 0x5a626c, roughness: 0.95 }),
     } = {}) {
@@ -34,6 +37,9 @@ class Passage {
         this.signSize = signSize;
         this.signHeight = signHeight;
         this.signGap = signGap;
+        this.doorCaption = doorCaption;
+        this.doorCaptionSize = doorCaptionSize;
+        this.doorCaptionHeight = doorCaptionHeight;
         this.wallMaterial = wallMaterial;
         this.floorMaterial = floorMaterial;
         this.disposables = [];
@@ -44,6 +50,7 @@ class Passage {
         this.createWalls();
         this.createDoor();
         this.createSign();
+        this.createDoorCaption();
         this.createLamps();
     }
 
@@ -141,63 +148,21 @@ class Passage {
         this.box(this.wallThickness, height, this.width + this.wallThickness * 2, this.farX - half, this.waterLevel + height / 2, this.centerZ, this.wallMaterial);
     }
 
-    paintDoor() {
-        const canvas = document.createElement('canvas');
-        canvas.width = 128;
-        canvas.height = 256;
-        const c = canvas.getContext('2d');
-        const gradient = c.createLinearGradient(0, 0, 128, 0);
-        gradient.addColorStop(0, '#4a5058');
-        gradient.addColorStop(0.5, '#6a727c');
-        gradient.addColorStop(1, '#4a5058');
-        c.fillStyle = gradient;
-        c.fillRect(0, 0, 128, 256);
-        c.strokeStyle = 'rgba(20, 24, 28, 0.8)';
-        c.lineWidth = 3;
-        c.strokeRect(10, 10, 108, 110);
-        c.strokeRect(10, 136, 108, 110);
-        c.fillStyle = 'rgba(20, 24, 28, 0.5)';
-        for (let y = 24; y < 110; y += 14) c.fillRect(16, y, 96, 3);
-        c.fillStyle = '#2a2e33';
-        [[6, 6], [122, 6], [6, 250], [122, 250], [6, 128], [122, 128]].forEach(([x, y]) => {
-            c.beginPath();
-            c.arc(x, y, 2.5, 0, Math.PI * 2);
-            c.fill();
-        });
-        c.fillStyle = '#c8a020';
-        c.fillRect(10, 230, 108, 10);
-        c.fillStyle = '#1a1a1a';
-        for (let x = 10; x < 118; x += 16) {
-            c.beginPath();
-            c.moveTo(x, 240);
-            c.lineTo(x + 8, 230);
-            c.lineTo(x + 14, 230);
-            c.lineTo(x + 6, 240);
-            c.fill();
-        }
-        return canvas;
-    }
-
     createDoor() {
-        const [width, height] = this.doorSize;
-        const metal = this.track(new THREE.MeshStandardMaterial({ color: 0x3a3f46, roughness: 0.4, metalness: 0.8 }));
-        const door = this.track(new THREE.MeshStandardMaterial({ map: this.track(new THREE.CanvasTexture(this.paintDoor())), roughness: 0.45, metalness: 0.7 }));
-        const panel = this.box(0.08, height, width, this.farX + 0.04, height / 2, this.centerZ, metal);
-        panel.material = [door, metal, metal, metal, metal, metal];
-        this.box(0.14, height + 0.15, 0.12, this.farX + 0.07, (height + 0.15) / 2, this.centerZ - width / 2 - 0.06, metal);
-        this.box(0.14, height + 0.15, 0.12, this.farX + 0.07, (height + 0.15) / 2, this.centerZ + width / 2 + 0.06, metal);
-        this.box(0.14, 0.12, width + 0.24, this.farX + 0.07, height + 0.09, this.centerZ, metal);
-        this.box(0.06, 0.04, 0.18, this.farX + 0.11, 1.05, this.centerZ + width / 2 - 0.2, metal);
-        const light = new THREE.PointLight(0xff9a40, 0.8, 8);
-        light.position.set(this.farX + 1.2, height + 0.5, this.centerZ);
-        this.group.add(light);
-        this.box(0.2, 0.1, 0.4, this.farX + 0.1, height + 0.5, this.centerZ, this.track(new THREE.MeshBasicMaterial({ color: 0xffb060 })));
+        this.door = new MetalDoor({ position: [this.farX, 0, this.centerZ], facing: Math.PI / 2, size: this.doorSize });
+        this.group.add(this.door.group);
     }
 
     createSign() {
         const z = this.centerZ + this.doorSize[0] / 2 + this.signGap + this.signSize[0] / 2;
         this.sign = new UnatcoSign({ position: [this.farX + 0.02, this.signHeight, z], facing: Math.PI / 2, size: this.signSize });
         this.group.add(this.sign.group);
+    }
+
+    createDoorCaption() {
+        const [width, height] = this.doorCaptionSize;
+        this.caption = new WallCaption({ lines: this.doorCaption, width, height, position: [this.farX + 0.02, this.doorCaptionHeight, this.centerZ], facing: Math.PI / 2 });
+        this.group.add(this.caption.group);
     }
 
     createLamps() {
@@ -212,6 +177,8 @@ class Passage {
     dispose() {
         this.lamps.forEach(lamp => lamp.dispose());
         this.sign.dispose();
+        this.door.dispose();
+        this.caption.dispose();
         this.disposables.forEach(resource => resource.dispose());
     }
 }

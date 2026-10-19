@@ -9,6 +9,7 @@ class Grabber {
         liftButton = 2,
         dropButton = 0,
         onUse = () => {},
+        onCollect = () => {},
     } = {}) {
         this.camera = camera;
         this.objects = objects;
@@ -20,6 +21,7 @@ class Grabber {
         this.liftButton = liftButton;
         this.dropButton = dropButton;
         this.onUse = onUse;
+        this.onCollect = onCollect;
         this.held = null;
         this.raycaster = new THREE.Raycaster();
         this.screenCenter = new THREE.Vector2(0, 0);
@@ -46,6 +48,10 @@ class Grabber {
         if (this.held) return;
         const target = this.aimedObject();
         if (!target) return;
+        if (target.collectible) {
+            this.onCollect(target);
+            return;
+        }
         target.pickUp();
         this.held = target;
     }
@@ -59,7 +65,7 @@ class Grabber {
     aimedObject() {
         this.raycaster.setFromCamera(this.screenCenter, this.camera);
         this.raycaster.far = this.reach;
-        const candidates = this.objects.filter(object => object.liftable && !object.held);
+        const candidates = this.objects.filter(object => (object.liftable || object.collectible) && !object.held && !object.collected);
         const [hit] = this.raycaster.intersectObjects(candidates.map(object => object.group), true);
         return hit ? candidates.find(object => this.belongsTo(hit.object, object.group)) : null;
     }
@@ -71,7 +77,7 @@ class Grabber {
 
     update(dt) {
         if (this.held) this.carry(dt);
-        this.objects.forEach(object => object.settle(dt, this.supportHeight(object)));
+        this.objects.forEach(object => object.collected || object.settle(dt, this.supportHeight(object)));
     }
 
     carry(dt) {
@@ -85,7 +91,7 @@ class Grabber {
     supportHeight(object) {
         let height = this.groundHeight(object.position.x, object.position.z);
         this.objects.forEach(other => {
-            if (other === object || other.held || !object.overlaps(other)) return;
+            if (other === object || other.held || other.collected || !object.overlaps(other)) return;
             if (other.top <= object.position.y - object.halfHeight + 0.05) height = Math.max(height, other.top);
         });
         return height;

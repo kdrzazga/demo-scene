@@ -95,7 +95,7 @@ class StatueOfLiberty {
         this.prism(this.clip(outline, half, true), ground, this.fortHeight);
         this.prism(this.clip(this.clip(outline, -half, true), half, false), ground + this.tunnelHeight, this.fortHeight - this.tunnelHeight);
         const lamp = this.track(new THREE.MeshBasicMaterial({ color: this.tunnelLightColor }));
-        [-this.fortRadius * 0.45, this.fortRadius * 0.45].forEach(z => {
+        [-this.fortRadius * 0.45, 0, this.fortRadius * 0.45].forEach(z => {
             this.add(new THREE.BoxGeometry(0.6, 0.08, 0.3), lamp, 0, ground + this.tunnelHeight - 0.04, z);
             const light = new THREE.PointLight(this.tunnelLightColor, 0.9, 12);
             light.position.set(0, ground + this.tunnelHeight - 0.4, z);

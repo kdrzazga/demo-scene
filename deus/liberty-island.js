@@ -1,19 +1,16 @@
-class LibertyIsland {
+class LibertyIsland extends Level {
     constructor({
         skylineImage = 'NY_lights.png',
         skylineRadius = 600,
-        skylineRepeat = 4,
+        skylineRepeat = 8,
+        skylineCenter = [-110, -60],
         skylineHeight = 260,
         skylineHorizon = 390 / 620,
         skyRadius = 900,
         waterLevel = -2,
-        fogColor = 0x05060a,
-        fogDensity = 0.006,
         cameraPosition = [2, 1.7, 8],
         lookAt = [-6, 3, -40],
         railingMargin = 0.5,
-        controls = {},
-        fadeInDuration = 2,
         pier = {},
         statue = {},
         ramp = {},
@@ -42,7 +39,6 @@ class LibertyIsland {
             new Terrorist({ position: [-28.5, 7, -110], waypointPause: 0, route: NPC.circleRoute([-45, -110], 16.5, 16, 0) }),
             new Terrorist({ position: [-61.5, 7, -110], waypointPause: 0, route: NPC.circleRoute([-45, -110], 16.5, 16, Math.PI) }),
         ],
-        npcRadius = 0.5,
         objects = [
             new Crate({ position: [-4, 0.5, -8], rotation: 0.3 }),
             new Crate({ position: [-4.4, 0.5, -9.5], rotation: -0.2 }),
@@ -51,33 +47,27 @@ class LibertyIsland {
             new Crate({ position: [-30.6, 4.5, -130.8], rotation: 0.6 }),
         ],
         floatDepth = 0.3,
-        weapon = {},
         streetLamps = [
             new StreetLamp({ position: [-32, 3, -87.5], facing: StreetLamp.facingTowards([-32, -87.5], [-45, -110]) }),
             new StreetLamp({ position: [-58, 3, -87.5], facing: StreetLamp.facingTowards([-58, -87.5], [-45, -110]) }),
             new StreetLamp({ position: [-150.8, 3, -81.2], facing: StreetLamp.facingTowards([-150.8, -81.2], [-132, -95]) }),
         ],
         tunnelTerminal = { side: -1, along: 5, height: 1.45 },
-        useReach = 2.5,
-        weaponDamage = 1,
-        weaponRange = 200,
+        tunnelGraffiti = { image: 'easter-egg.png', side: 1, along: 0, height: 1.6, width: 10 },
+        doorApproach = 0.9,
+        ...levelOptions
     } = {}) {
+        super(levelOptions);
         this.skylineImage = skylineImage;
         this.skylineRadius = skylineRadius;
         this.skylineRepeat = skylineRepeat;
+        this.skylineCenter = skylineCenter;
         this.skylineHeight = skylineHeight;
         this.skylineHorizon = skylineHorizon;
         this.skyRadius = skyRadius;
         this.waterLevel = waterLevel;
         this.floatDepth = floatDepth;
-        this.weaponDamage = weaponDamage;
-        this.useReach = useReach;
-        this.fadeInDuration = fadeInDuration;
-        this.disposables = [];
-
-        this.scene = new THREE.Scene();
-        this.scene.fog = new THREE.FogExp2(fogColor, fogDensity);
-        this.camera = new THREE.PerspectiveCamera(60, 1, 0.1, 2000);
+        this.doorApproach = doorApproach;
 
         this.createSky();
         this.createSkyline();
@@ -101,58 +91,40 @@ class LibertyIsland {
             ...passage,
         });
         this.scene.add(this.pier.group, this.ramp.group, this.plateau.group, this.passage.group, this.statue.group);
-        this.npcs = [...npcs, ...this.createPassageGuards(passageGuardGroups)];
-        this.npcs.forEach(npc => this.scene.add(npc.group));
-        this.objects = [...objects, ...this.createPassageCrates(passageGuardGroups, crateGroupSize)];
-        this.objects.forEach(object => this.scene.add(object.group));
         this.streetLamps = streetLamps;
         this.streetLamps.forEach(lamp => this.scene.add(lamp.group));
-        this.terminals = [this.createTunnelTerminal(tunnelTerminal)];
-        this.terminals.forEach(terminal => this.scene.add(terminal.group));
-        this.terminalWindow = new TerminalWindow({ onClose: () => this.leaveTerminal() });
-        this.createFade();
-        this.player = new FirstPersonController(this.camera, {
-            position: cameraPosition,
+        this.graffiti = this.createTunnelGraffiti(tunnelGraffiti);
+        this.scene.add(this.graffiti.group);
+        this.landAreas = this.walkableAreas(0, blockPassageWidth);
+        this.setUp({
+            cameraPosition,
             lookAt,
-            eyeHeight: cameraPosition[1],
-            walkableAreas: [
-                ...this.pier.walkableAreas(railingMargin),
-                this.ramp.walkableArea(railingMargin),
-                this.ramp.openingArea(railingMargin, 'right'),
-                this.ramp.openingArea(railingMargin, 'left'),
-                ...this.plateau.walkableAreas(railingMargin),
-                this.blockPassageArea(railingMargin, blockPassageWidth),
-                ...this.passage.walkableAreas(railingMargin),
-            ],
-            floorHeight: (x, z) => this.floorHeight(x, z),
-            obstacles: [
-                ...this.npcs.map(npc => ({ position: npc.group.position, radius: npcRadius, get solid() { return npc.solid; } })),
-                this.statue.obstacle(railingMargin),
-                ...this.objects,
-                ...this.streetLamps,
-                ...this.passage.lamps,
-            ],
-            ...controls,
+            walkableAreas: this.walkableAreas(railingMargin, blockPassageWidth),
+            obstacles: [this.statue.obstacle(railingMargin), ...this.streetLamps, ...this.passage.lamps],
+            npcs: [...npcs, ...this.createPassageGuards(passageGuardGroups)],
+            objects: [...objects, ...this.createPassageCrates(passageGuardGroups, crateGroupSize)],
+            terminals: [this.createTunnelTerminal(tunnelTerminal)],
         });
-        this.landAreas = [
-            ...this.pier.walkableAreas(0),
-            this.ramp.walkableArea(0),
-            this.ramp.openingArea(0, 'right'),
-            this.ramp.openingArea(0, 'left'),
-            ...this.plateau.walkableAreas(0),
-            this.blockPassageArea(0, blockPassageWidth),
-            ...this.passage.walkableAreas(0),
+    }
+
+    get doorPosition() {
+        return [this.passage.farX + this.doorApproach, this.passage.centerZ];
+    }
+
+    get doorInward() {
+        return [1, 0];
+    }
+
+    walkableAreas(margin, blockPassageWidth) {
+        return [
+            ...this.pier.walkableAreas(margin),
+            this.ramp.walkableArea(margin),
+            this.ramp.openingArea(margin, 'right'),
+            this.ramp.openingArea(margin, 'left'),
+            ...this.plateau.walkableAreas(margin),
+            this.blockPassageArea(margin, blockPassageWidth),
+            ...this.passage.walkableAreas(margin),
         ];
-        this.grabber = new Grabber(this.camera, {
-            objects: this.objects,
-            groundHeight: (x, z) => this.groundHeight(x, z),
-            isEnabled: () => this.player.enabled,
-            onUse: () => this.player.locked && this.use(),
-        });
-        this.weapon = new WeaponView(weapon);
-        this.hitScan = new HitScan(this.camera, { range: weaponRange });
-        this.time = 0;
-        this.checkpoints = [];
     }
 
     passageGroupCenters(groups) {
@@ -188,6 +160,12 @@ class LibertyIsland {
         });
     }
 
+    createTunnelGraffiti({ image, side, along, height, width }) {
+        const statue = this.statue;
+        const spot = statue.group.localToWorld(new THREE.Vector3(side * (statue.tunnelWidth / 2 - 0.01), 3 + height, along));
+        return new Graffiti({ image, width, position: spot.toArray(), facing: statue.group.rotation.y - side * Math.PI / 2 });
+    }
+
     createTunnelTerminal({ side, along, height }) {
         const statue = this.statue;
         const mount = statue.group.localToWorld(new THREE.Vector3(side * statue.tunnelWidth / 2, 3 + height, along));
@@ -197,33 +175,9 @@ class LibertyIsland {
     get blockers() {
         return [
             this.pier.group, this.ramp.group, this.plateau.group, this.passage.group, this.statue.group,
-            ...this.objects.map(object => object.group),
             ...this.streetLamps.map(lamp => lamp.group),
-            ...this.terminals.map(terminal => terminal.group),
+            ...super.blockers,
         ];
-    }
-
-    use() {
-        const hit = this.hitScan.trace(this.blockers);
-        const terminal = this.hitScan.owner(hit, this.terminals);
-        if (terminal && hit.distance <= this.useReach) this.enterTerminal(terminal);
-        else if (this.weapon.fire()) this.shoot();
-    }
-
-    enterTerminal(terminal) {
-        this.player.disable();
-        this.terminalWindow.open(terminal.name);
-    }
-
-    leaveTerminal() {
-        this.player.enable();
-        this.player.lock();
-    }
-
-    shoot() {
-        const targets = this.npcs.filter(npc => npc.alive);
-        const hit = this.hitScan.trace([...this.blockers, ...targets.map(npc => npc.group)]);
-        this.hitScan.owner(hit, targets)?.hit(this.weaponDamage);
     }
 
     floorHeight(x, z) {
@@ -235,18 +189,6 @@ class LibertyIsland {
     groundHeight(x, z) {
         const onLand = this.landAreas.some(area => this.player.insideArea(area, x, z));
         return onLand ? this.floorHeight(x, z) : this.waterLevel - this.floatDepth;
-    }
-
-    npc(name) {
-        return this.npcs.find(npc => npc.name === name) ?? null;
-    }
-
-    meets({ talkedTo = [], alive = [] } = {}) {
-        return talkedTo.every(name => this.npc(name)?.welcomed) && alive.every(name => this.npc(name)?.alive);
-    }
-
-    addCheckpoints(checkpoints) {
-        this.checkpoints.push(...checkpoints);
     }
 
     blockPassageArea(margin, width) {
@@ -282,11 +224,6 @@ class LibertyIsland {
         });
     }
 
-    track(resource) {
-        this.disposables.push(resource);
-        return resource;
-    }
-
     createSky() {
         const canvas = document.createElement('canvas');
         canvas.width = 1024;
@@ -307,6 +244,7 @@ class LibertyIsland {
             this.track(new THREE.SphereGeometry(this.skyRadius, 32, 16)),
             this.track(new THREE.MeshBasicMaterial({ map: this.track(new THREE.CanvasTexture(canvas)), side: THREE.BackSide, fog: false }))
         );
+        sky.position.set(this.skylineCenter[0], 0, this.skylineCenter[1]);
         this.scene.add(sky);
     }
 
@@ -314,10 +252,10 @@ class LibertyIsland {
         const material = this.track(new THREE.MeshBasicMaterial({ side: THREE.BackSide, fog: false, transparent: true, depthWrite: false }));
         const height = this.skylineHeight;
         const skyline = new THREE.Mesh(
-            this.track(new THREE.CylinderGeometry(this.skylineRadius, this.skylineRadius, height, 64, 1, true, Math.PI / 2, Math.PI)),
+            this.track(new THREE.CylinderGeometry(this.skylineRadius, this.skylineRadius, height, 128, 1, true)),
             material
         );
-        skyline.position.y = this.waterLevel + height / 2 - height * (1 - this.skylineHorizon);
+        skyline.position.set(this.skylineCenter[0], this.waterLevel + height / 2 - height * (1 - this.skylineHorizon), this.skylineCenter[1]);
         skyline.visible = false;
         this.scene.add(skyline);
         new THREE.TextureLoader().load(this.skylineImage, texture => {
@@ -335,7 +273,7 @@ class LibertyIsland {
             this.track(new THREE.MeshStandardMaterial({ color: 0x06090d, roughness: 0.35, metalness: 0.6 }))
         );
         water.rotation.x = -Math.PI / 2;
-        water.position.y = this.waterLevel;
+        water.position.set(this.skylineCenter[0], this.waterLevel, this.skylineCenter[1]);
         this.scene.add(water);
     }
 
@@ -346,75 +284,17 @@ class LibertyIsland {
         this.scene.add(moon);
     }
 
-    createFade() {
-        this.fadeScene = new THREE.Scene();
-        this.fadeCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-        this.fadeMaterial = this.track(new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, depthTest: false, depthWrite: false }));
-        this.fadeScene.add(new THREE.Mesh(this.track(new THREE.PlaneGeometry(2, 2)), this.fadeMaterial));
-    }
-
-    restart() {
-        this.time = 0;
-        this.player.reset();
-        this.player.enable();
-        this.grabber.reset();
-        this.npcs.forEach(npc => npc.reset());
-        this.checkpoints.forEach(checkpoint => checkpoint.reset());
-    }
-
-    stop() {
-        this.terminalWindow.close(false);
-        this.player.disable();
-    }
-
-    layout(viewportWidth, viewportHeight) {
-        this.camera.aspect = viewportWidth / viewportHeight;
-        this.camera.updateProjectionMatrix();
-        this.weapon.layout(viewportWidth, viewportHeight);
-    }
-
-    update(dt) {
-        this.time += dt;
-        this.player.update(dt);
-        this.grabber.update(dt);
-        this.weapon.update(dt, {
-            yaw: this.player.yaw,
-            pitch: this.player.pitch,
-            bobPhase: this.player.bobPhase,
-            lowered: !!this.grabber.held,
-        });
-        this.checkpoints.forEach(checkpoint => checkpoint.check(this.camera.position));
+    updateWorld(dt) {
         this.statue.update(dt);
-        this.npcs.forEach(npc => {
-            npc.lookAt(this.camera.position);
-            npc.avoidPositions([this.camera.position, ...this.npcs.filter(other => other !== npc && other.alive).map(other => other.group.position)]);
-            npc.update(dt);
-        });
-        this.fadeMaterial.opacity = 1 - Math.min(1, this.time / this.fadeInDuration);
     }
 
-    render(renderer) {
-        this.player.attach(renderer.domElement);
-        this.grabber.attach(renderer.domElement);
-        renderer.render(this.scene, this.camera);
-        this.weapon.render(renderer);
-        if (this.fadeMaterial.opacity > 0) renderer.render(this.fadeScene, this.fadeCamera);
-    }
-
-    dispose() {
-        this.player.dispose();
-        this.grabber.dispose();
-        this.weapon.dispose();
-        this.objects.forEach(object => object.dispose());
+    disposeWorld() {
         this.streetLamps.forEach(lamp => lamp.dispose());
-        this.terminals.forEach(terminal => terminal.dispose());
-        this.terminalWindow.dispose();
+        this.graffiti.dispose();
         this.pier.dispose();
         this.ramp.dispose();
         this.plateau.dispose();
         this.passage.dispose();
         this.statue.dispose();
-        this.npcs.forEach(npc => npc.dispose());
-        this.disposables.forEach(resource => resource.dispose());
     }
 }

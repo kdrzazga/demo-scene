@@ -244,6 +244,7 @@ class NPC {
     hit(damage = 1) {
         if (!this.alive) return;
         this.hitPoints = Math.max(0, this.hitPoints - damage);
+        console.log(`${this.name}, HP: ${this.hitPoints}/${this.maxHitPoints}`);
         this.flinch = 1;
         if (!this.alive) this.die();
     }

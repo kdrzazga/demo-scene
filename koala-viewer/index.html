@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Koala Viewer</title>
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+            background: #322dab;
+            color: #6b66e4;
+            font-family: monospace;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        body.active {
+            outline: 4px dashed #6b66e4;
+            outline-offset: -12px;
+        }
+
+        #screen {
+            padding: 32px 40px;
+            background: #000;
+            cursor: pointer;
+        }
+
+        #canvas {
+            display: block;
+            width: min(90vw, calc(75vh * 1.6));
+            image-rendering: pixelated;
+            visibility: hidden;
+            cursor: crosshair;
+        }
+
+        #screen.loaded #canvas {
+            visibility: visible;
+        }
+
+        select {
+            font: inherit;
+            color: inherit;
+            background: #000;
+            border: 1px solid currentColor;
+        }
+
+        #file {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div id="screen"><canvas id="canvas"></canvas></div>
+<div id="status">Drop .kla / .koa / .gg files here or click the screen to choose</div>
+<label>Palette <select id="palette"></select></label>
+<input id="file" type="file" accept=".kla,.koa,.gg" multiple>
+<script src="js/C64Palette.js"></script>
+<script src="js/KoalaImage.js"></script>
+<script src="js/GgUnpacker.js"></script>
+<script src="js/KoalaRenderer.js"></script>
+<script src="js/DropZone.js"></script>
+<script src="js/KoalaViewerApp.js"></script>
+</body>
+</html>

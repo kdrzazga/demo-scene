@@ -5,6 +5,8 @@ class GameObject {
         rotation = 0,
         size = [1, 1, 1],
         liftable = false,
+        collectible = false,
+        description = '',
         collisionRadius = null,
         gravity = 9.81,
     } = {}) {
@@ -13,6 +15,8 @@ class GameObject {
         this.startRotation = rotation;
         this.size = size;
         this.liftable = liftable;
+        this.collectible = collectible;
+        this.description = description;
         this.collisionRadius = collisionRadius ?? Math.hypot(size[0], size[2]) / 2 + 0.2;
         this.gravity = gravity;
         this.disposables = [];
@@ -33,6 +37,8 @@ class GameObject {
         this.group.position.set(...this.startPosition);
         this.group.rotation.set(0, this.startRotation, 0);
         this.held = false;
+        this.collected = false;
+        this.group.visible = true;
         this.fallSpeed = 0;
     }
 
@@ -45,7 +51,7 @@ class GameObject {
     }
 
     get solid() {
-        return !this.held;
+        return !this.held && !this.collected;
     }
 
     get halfHeight() {
@@ -59,6 +65,14 @@ class GameObject {
     overlaps(other) {
         const dx = Math.abs(this.position.x - other.position.x), dz = Math.abs(this.position.z - other.position.z);
         return dx < (this.size[0] + other.size[0]) * 0.45 && dz < (this.size[2] + other.size[2]) * 0.45;
+    }
+
+    collect() {
+        this.collected = true;
+        this.group.visible = false;
+    }
+
+    paintIcon() {
     }
 
     pickUp() {

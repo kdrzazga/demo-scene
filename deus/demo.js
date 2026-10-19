@@ -9,8 +9,12 @@ class Demo {
         this.startScreen = document.getElementById('start');
         this.stage = new Stage(document.getElementById('stage'));
         this.intro = new IntroLogo();
-        this.island = new LibertyIsland();
+        this.island = new LibertyIsland({ onCollect: item => this.collect(item) });
+        this.headquarters = new UnatcoHQ({ onCollect: item => this.collect(item) });
+        this.level = this.island;
         this.transmissionQueue = Promise.resolve();
+        this.island.addCheckpoints([this.island.exitCheckpoint(() => this.travel(this.headquarters))]);
+        this.headquarters.addCheckpoints([this.headquarters.exitCheckpoint(() => this.travel(this.island))]);
         this.island.addCheckpoints(transmissions.map(({ checkpoint, radius, requires, ...transmission }) => new Checkpoint({
             ...(Array.isArray(checkpoint) ? { position: checkpoint, radius } : { area: checkpoint }),
             condition: () => this.island.meets(requires),
@@ -37,16 +41,31 @@ class Demo {
         if (this.music.paused) this.music.play();
         await this.intro.leave();
         this.stage.remove(this.intro);
+        this.level = this.island;
         this.island.restart();
         this.stage.add(this.island);
         this.showHud();
         await this.wait(this.restartDelay);
         this.hideHud();
-        this.island.stop();
-        this.stage.remove(this.island);
+        this.stage.remove(this.level);
+        [this.island, this.headquarters].forEach(level => level.stop());
         this.intro.restart();
         this.stage.add(this.intro);
         this.startScreen.hidden = false;
+    }
+
+    travel(level) {
+        this.level.suspend();
+        this.stage.remove(this.level);
+        if (!level.started) level.restart();
+        level.resume(level.arrival);
+        this.stage.add(level);
+        this.level = level;
+    }
+
+    collect(item) {
+        this.inventory.addItem(item);
+        this.belt.addItem(item);
     }
 
     wait(seconds) {
@@ -60,6 +79,8 @@ class Demo {
 
     hideHud() {
         this.inventory.hide();
+        this.inventory.clear();
+        this.belt.clear();
         this.stage.remove(this.belt);
         this.stage.remove(this.inventory);
     }
