@@ -53,6 +53,112 @@ class Cleric extends Enemy {
     }
 }
 
+class BlackKnight extends Enemy {
+    constructor(battle, route, healthScale) {
+        super(battle, route, healthScale);
+        this.knockbackDistance = 3.5;
+        this.knockbackSpeed = 140;
+        this.pendingKnockback = 0;
+        this.healthBarWidth = 40;
+        this.healthBarLift = 46;
+        this.carryLabelLift = 46;
+        this.walkCadence = 6;
+        this.smiteExposureSeconds = 5;
+        this.smiteWindupSeconds = 0.7;
+        this.spireExposure = new Map();
+        this.smiteTarget = null;
+        this.smiteTimer = 0;
+        battle.notify(this.x, this.y - 40, `${this.name} rides in!`, '#ff5252');
+        battle.scene.cameras.main.shake(300, 0.004);
+    }
+
+    update(dt) {
+        const alive = super.update(dt);
+        if (alive) this.updateSmite(dt);
+        return alive;
+    }
+
+    updateSmite(dt) {
+        if (this.isStunned) {
+            this.interruptSmite();
+            return;
+        }
+        if (this.smiteTarget) {
+            this.smiteTimer -= dt;
+            if (this.smiteTimer <= 0) this.strike();
+            return;
+        }
+        const spiresInReach = this.battle.towers.filter(tower =>
+            tower.race === 'bone' && Phaser.Math.Distance.Between(tower.x, tower.y, this.x, this.y) <= tower.range);
+        [...this.spireExposure.keys()]
+            .filter(spire => !spiresInReach.includes(spire))
+            .forEach(spire => this.spireExposure.delete(spire));
+        spiresInReach.forEach(spire => {
+            const exposure = (this.spireExposure.get(spire) || 0) + dt;
+            this.spireExposure.set(spire, exposure);
+            if (exposure >= this.smiteExposureSeconds && !this.smiteTarget) this.raiseSword(spire);
+        });
+    }
+
+    raiseSword(spire) {
+        this.smiteTarget = spire;
+        this.smiteTimer = this.smiteWindupSeconds;
+        this.sprite.setTexture('hero-blackKnight-raised');
+    }
+
+    interruptSmite() {
+        if (!this.smiteTarget) return;
+        this.spireExposure.delete(this.smiteTarget);
+        this.lowerSword();
+    }
+
+    lowerSword() {
+        this.smiteTarget = null;
+        this.sprite.setTexture('hero-blackKnight');
+    }
+
+    strike() {
+        const spire = this.smiteTarget;
+        this.spireExposure.delete(spire);
+        this.lowerSword();
+        if (!this.battle.towers.includes(spire)) return;
+        this.battle.addEffect(new Blast(this.battle.scene, this.x, this.y - 30, 18, 0xff3030));
+        this.battle.shatterTower(spire);
+    }
+
+    describe() {
+        return {
+            name: 'Zawisza Czarny',
+            texture: 'hero-blackKnight',
+            health: 960,
+            speed: 20,
+            armor: 8,
+            capacity: 15,
+            goldReward: 150,
+            manaReward: 40,
+            weakness: 'Black plate laughs at arrows. Frost staggers him back, but 5s in a Bone Spire\'s reach and he shatters it. Dread breaks his swing.'
+        };
+    }
+
+    reactToChill() {
+        this.pendingKnockback += this.knockbackDistance;
+    }
+
+    advance(dt) {
+        if (this.smiteTarget) return;
+        if (this.pendingKnockback <= 0) {
+            super.advance(dt);
+            return;
+        }
+        const push = Math.min(this.pendingKnockback, this.knockbackSpeed * dt);
+        this.pendingKnockback -= push;
+        this.travelled = Phaser.Math.Clamp(this.travelled - this.heading * push, 0, this.route.length);
+        const point = this.route.pointAt(this.travelled);
+        this.x = point.x;
+        this.y = point.y;
+    }
+}
+
 class EnemyFactory {
     constructor() {
         this.enemyTypes = {
@@ -60,7 +166,8 @@ class EnemyFactory {
             squire: Squire,
             ranger: Ranger,
             paladin: Paladin,
-            cleric: Cleric
+            cleric: Cleric,
+            blackKnight: BlackKnight
         };
     }
 

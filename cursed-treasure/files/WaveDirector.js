@@ -4,7 +4,6 @@ class WaveDirector {
         this.waves = waves;
         this.firstWaveDelay = 30;
         this.betweenWaveDelay = 18;
-        this.earlyCallGoldPerSecond = 2;
         this.waveIndex = -1;
         this.countdown = this.firstWaveDelay;
         this.waveClock = 0;
@@ -55,9 +54,9 @@ class WaveDirector {
 
     callEarly() {
         if (!this.isCountingDown) return 0;
-        const bonus = this.waveIndex >= 0 ? Math.floor(this.countdown * this.earlyCallGoldPerSecond) : 0;
+        const manaBonus = this.waveIndex >= 0 ? Math.floor(this.countdown) : 0;
         this.launchNextWave();
-        return bonus;
+        return manaBonus;
     }
 
     launchNextWave() {

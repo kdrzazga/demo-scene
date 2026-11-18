@@ -62,6 +62,7 @@ class BoneSpire extends Tower {
             if (!hitEnemy) return;
             hitEnemy.takeDamage(this.damage);
             hitEnemy.applySlow(this.slowFactor, this.slowDuration);
+            hitEnemy.reactToChill();
         });
     }
 }

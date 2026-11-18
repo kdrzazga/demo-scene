@@ -6,7 +6,6 @@ class Battle {
         this.progress = progress;
         this.healthGrowthPerWave = 0.07;
         this.gemDropSpacing = 8;
-        this.healthBarWidth = 18;
         this.battlefield = new Battlefield(scene, level);
         this.hoard = new Hoard(scene, this.battlefield.hoardPosition, level.gems);
         this.treasury = new Treasury(level.startingGold, level.startingMana);
@@ -149,11 +148,10 @@ class Battle {
 
     callWave() {
         if (this.outcome) return;
-        const bonus = this.waveDirector.callEarly();
-        if (bonus > 0) {
-            this.treasury.earnGold(bonus);
-            this.notify(this.battlefield.pixelWidth / 2, this.battlefield.pixelHeight - 24, `Early call +${bonus}g`, '#ffd740');
-        }
+        const manaBonus = this.waveDirector.callEarly();
+        if (manaBonus === 0) return;
+        this.treasury.earnMana(manaBonus);
+        this.notify(this.battlefield.pixelWidth / 2, this.battlefield.pixelHeight - 24, `Early call +${manaBonus} mana`, '#c9a6ff');
     }
 
     buildTower(tile, blueprint) {
@@ -174,6 +172,15 @@ class Battle {
     breakSeal(site) {
         if (!site.breakSeal()) return;
         this.tileMenu.openForSite(site.tile, site);
+    }
+
+    shatterTower(tower) {
+        if (this.tileMenu.tile === tower.tile) this.tileMenu.close();
+        this.towers = this.towers.filter(candidate => candidate !== tower);
+        tower.destroy();
+        this.addEffect(new Blast(this.scene, tower.x, tower.y, 44, 0xff3030));
+        this.notify(tower.x, tower.y - 30, 'Spire shattered!', '#ff5252');
+        this.scene.cameras.main.shake(450, 0.014);
     }
 
     sellTower(tower) {
@@ -233,12 +240,13 @@ class Battle {
         }
         this.enemies.all.forEach(enemy => {
             if (!enemy.alive || enemy.health >= enemy.maxHealth) return;
-            const left = enemy.x - this.healthBarWidth / 2;
-            const top = enemy.y - 31;
+            const barWidth = enemy.healthBarWidth;
+            const left = enemy.x - barWidth / 2;
+            const top = enemy.y - enemy.healthBarLift;
             this.overlay.fillStyle(0x000000, 0.7);
-            this.overlay.fillRect(left - 1, top - 1, this.healthBarWidth + 2, 5);
+            this.overlay.fillRect(left - 1, top - 1, barWidth + 2, 5);
             this.overlay.fillStyle(enemy.healthRatio > 0.4 ? 0x69f0ae : 0xff5252, 1);
-            this.overlay.fillRect(left, top, this.healthBarWidth * enemy.healthRatio, 3);
+            this.overlay.fillRect(left, top, barWidth * enemy.healthRatio, 3);
         });
     }
 

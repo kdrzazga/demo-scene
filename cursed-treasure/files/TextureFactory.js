@@ -51,6 +51,7 @@ class TextureFactory {
         this.createSpring();
         this.createTowers();
         this.createHeroes();
+        this.createBlackKnight();
         this.createProjectiles();
     }
 
@@ -416,6 +417,72 @@ class TextureFactory {
         Object.entries(this.heroLooks).forEach(([kind, look]) => {
             this.draw(`hero-${kind}`, this.heroWidth, this.heroHeight, graphics => this.paintHero(graphics, look));
         });
+    }
+
+    createBlackKnight() {
+        this.draw('hero-blackKnight', 34, 44, graphics => this.paintBlackKnight(graphics, false));
+        this.draw('hero-blackKnight-raised', 34, 44, graphics => this.paintBlackKnight(graphics, true));
+    }
+
+    paintBlackKnight(graphics, swordRaised) {
+        const centerX = 16;
+        const steel = 0x1c1c22;
+        const plate = 0x2e2e38;
+        const gleam = 0x6a6a7a;
+        graphics.fillStyle(0x000000, 0.35);
+        graphics.fillEllipse(centerX, 41, 24, 6);
+        graphics.fillStyle(0x5a0f14, 1);
+        graphics.fillTriangle(centerX - 8, 14, centerX + 6, 14, centerX - 12, 36);
+        graphics.fillStyle(steel, 1);
+        graphics.fillRect(centerX - 6, 28, 5, 12);
+        graphics.fillRect(centerX + 1, 28, 5, 12);
+        graphics.fillStyle(plate, 1);
+        graphics.fillRect(centerX - 8, 14, 16, 15);
+        graphics.fillStyle(gleam, 1);
+        graphics.fillRect(centerX - 6, 16, 2, 10);
+        graphics.fillRect(centerX - 6, 38, 4, 2);
+        graphics.fillRect(centerX + 2, 38, 4, 2);
+        graphics.fillStyle(0xd4af37, 1);
+        graphics.fillRect(centerX - 8, 26, 16, 2);
+        graphics.fillStyle(steel, 1);
+        graphics.fillRect(centerX - 5, 2, 10, 12);
+        graphics.fillStyle(plate, 1);
+        graphics.fillRect(centerX - 5, 2, 10, 3);
+        graphics.fillStyle(0xff3030, 1);
+        graphics.fillRect(centerX - 3, 7, 6, 1);
+        graphics.fillStyle(0x0b0b0e, 1);
+        graphics.fillTriangle(centerX - 1, 2, centerX + 3, 2, centerX - 4, -1);
+        graphics.fillRect(centerX - 1, 0, 3, 3);
+        graphics.fillStyle(plate, 1);
+        graphics.fillRect(1, 15, 10, 15);
+        graphics.fillStyle(0xd4af37, 1);
+        graphics.fillRect(1, 15, 10, 1);
+        graphics.fillRect(1, 29, 10, 1);
+        graphics.fillStyle(0x8a1c1c, 1);
+        graphics.fillRect(5, 18, 2, 9);
+        graphics.fillRect(3, 21, 6, 2);
+        if (swordRaised) this.paintRaisedSword(graphics, centerX);
+        else this.paintLoweredSword(graphics, centerX);
+    }
+
+    paintLoweredSword(graphics, centerX) {
+        graphics.lineStyle(2, 0xb8bcc6, 1);
+        graphics.lineBetween(centerX + 11, 4, centerX + 11, 30);
+        graphics.fillStyle(0xd4af37, 1);
+        graphics.fillRect(centerX + 8, 28, 7, 2);
+        graphics.fillRect(centerX + 10, 30, 3, 5);
+    }
+
+    paintRaisedSword(graphics, centerX) {
+        graphics.fillStyle(0x2e2e38, 1);
+        graphics.fillRect(centerX + 7, 10, 4, 8);
+        graphics.lineStyle(5, 0xff3030, 0.35);
+        graphics.lineBetween(centerX + 10, 10, centerX + 16, 0);
+        graphics.lineStyle(2, 0xe8ecf5, 1);
+        graphics.lineBetween(centerX + 10, 10, centerX + 16, 0);
+        graphics.fillStyle(0xd4af37, 1);
+        graphics.fillRect(centerX + 6, 10, 8, 2);
+        graphics.fillRect(centerX + 8, 12, 3, 4);
     }
 
     paintHero(graphics, look) {

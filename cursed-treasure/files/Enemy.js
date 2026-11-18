@@ -12,6 +12,9 @@ class Enemy {
         this.goldReward = profile.goldReward;
         this.manaReward = profile.manaReward;
         this.gemPickupRadius = 12;
+        this.healthBarWidth = 18;
+        this.healthBarLift = 31;
+        this.carryLabelLift = 30;
         this.travelled = 0;
         this.heading = 1;
         this.carriedGems = 0;
@@ -28,6 +31,13 @@ class Enemy {
         this.y = start.y;
         this.sprite = battle.scene.add.image(this.x, this.y, profile.texture).setOrigin(0.5, 0.85);
         this.gemSprite = battle.scene.add.image(this.x, this.y, 'gem').setVisible(false);
+        this.gemCountText = battle.scene.add.text(this.x, this.y, '', {
+            fontFamily: 'monospace',
+            fontSize: '10px',
+            color: '#f8c4ff',
+            stroke: '#000000',
+            strokeThickness: 2
+        }).setOrigin(0, 0.5).setVisible(false);
     }
 
     describe() {
@@ -106,8 +116,15 @@ class Enemy {
         const depth = 100 + this.y;
         this.sprite.setPosition(this.x, this.y + bob).setDepth(depth);
         this.refreshTint();
-        this.gemSprite.setVisible(this.carriedGems > 0);
-        if (this.carriedGems > 0) this.gemSprite.setPosition(this.x, this.y - 30 + bob).setDepth(depth + 1);
+        const carrying = this.carriedGems > 0;
+        const gemY = this.y - this.carryLabelLift + bob;
+        this.gemSprite.setVisible(carrying);
+        this.gemCountText.setVisible(this.carriedGems > 1);
+        if (carrying) this.gemSprite.setPosition(this.x, gemY).setDepth(depth + 1);
+        if (this.carriedGems > 1) this.gemCountText.setText(`x${this.carriedGems}`).setPosition(this.x + 7, gemY).setDepth(depth + 1);
+    }
+
+    reactToChill() {
     }
 
     refreshTint() {
@@ -148,5 +165,6 @@ class Enemy {
     destroy() {
         this.sprite.destroy();
         this.gemSprite.destroy();
+        this.gemCountText.destroy();
     }
 }

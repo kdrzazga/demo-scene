@@ -4,11 +4,13 @@ class Bestiary {
         this.healthScale = level.healthScale;
         this.cycleSeconds = 15;
         this.width = 236;
-        this.height = 204;
+        this.height = 218;
         this.margin = 8;
         this.padding = 10;
         this.depth = 970;
         this.portraitScale = 2;
+        this.portraitBoxWidth = 56;
+        this.portraitBoxHeight = 70;
         this.hoverAlpha = 0.12;
         this.fadeSpeed = 6;
         this.alpha = 1;
@@ -45,7 +47,7 @@ class Bestiary {
         this.counterText = this.addPart(this.scene.add.text(left + this.width - this.padding, top + 8, '', smallStyle)
             .setOrigin(1, 0)
             .setDepth(this.depth + 1));
-        this.addPart(this.scene.add.rectangle(left + this.padding, top + 28, 56, 70, 0x2a2233)
+        this.addPart(this.scene.add.rectangle(left + this.padding, top + 28, this.portraitBoxWidth, this.portraitBoxHeight, 0x2a2233)
             .setOrigin(0)
             .setStrokeStyle(1, 0x5b3f7a)
             .setDepth(this.depth + 1));
@@ -77,6 +79,12 @@ class Bestiary {
         const profile = this.entries[this.index];
         this.counterText.setText(`${this.index + 1}/${this.entries.length}`);
         this.portrait.setTexture(profile.texture);
+        const fittingScale = Math.min(
+            this.portraitScale,
+            (this.portraitBoxWidth - 4) / this.portrait.frame.width,
+            (this.portraitBoxHeight - 4) / this.portrait.frame.height
+        );
+        this.portrait.setScale(fittingScale);
         this.nameText.setText(profile.name);
         const gemWord = profile.capacity > 1 ? 'gems' : 'gem';
         this.statsText.setText([
