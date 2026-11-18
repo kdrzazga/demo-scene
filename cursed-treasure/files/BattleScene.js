@@ -16,6 +16,7 @@ class BattleScene extends Phaser.Scene {
         this.levelCatalog = levelCatalog;
         this.battle = new Battle(this, levelCatalog.levels[this.levelIndex], this.levelIndex, progress);
         this.hud = new Hud(this, this.battle);
+        this.bestiary = new Bestiary(this, levelCatalog.levels[this.levelIndex], this.battle.enemyFactory);
         this.input.mouse.disableContextMenu();
         this.input.on('pointerdown', (pointer, objectsUnderPointer) => {
             if (objectsUnderPointer.length === 0) this.battle.handlePointerDown(pointer);
@@ -33,9 +34,10 @@ class BattleScene extends Phaser.Scene {
     }
 
     update(time, delta) {
-        const dt = Math.min(delta / 1000, this.maxFrameSeconds) * this.speedMultiplier;
-        this.battle.update(dt);
+        const realSeconds = Math.min(delta / 1000, this.maxFrameSeconds);
+        this.battle.update(realSeconds * this.speedMultiplier);
         this.hud.refresh();
+        this.bestiary.update(realSeconds);
         if (this.battle.outcome && !this.resultShown) this.showResult();
     }
 

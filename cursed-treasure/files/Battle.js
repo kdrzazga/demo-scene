@@ -19,6 +19,10 @@ class Battle {
         this.looseGems = new EntityList();
         this.effects = new EntityList();
         this.towers = [];
+        this.sites = [
+            ...this.battlefield.tilesOfTerrain('mine').map(tile => new GoldMine(this, tile)),
+            ...this.battlefield.tilesOfTerrain('spring').map(tile => new ManaSpring(this, tile))
+        ];
         this.tileMenu = new TileMenu(this);
         this.cursor = scene.add.graphics().setDepth(790);
         this.overlay = scene.add.graphics().setDepth(800);
@@ -31,6 +35,7 @@ class Battle {
         if (this.outcome) return;
         this.treasury.update(dt);
         this.waveDirector.update(dt);
+        this.sites.forEach(site => site.update(dt));
         this.enemies.update(dt);
         this.towers.forEach(tower => tower.update(dt));
         this.projectiles.update(dt);
@@ -115,6 +120,10 @@ class Battle {
             this.tileMenu.openForTower(tile, tile.tower);
             return;
         }
+        if (tile.site) {
+            this.tileMenu.openForSite(tile, tile.site);
+            return;
+        }
         const blueprint = this.towerFactory.blueprintFor(tile.terrain, this.progress);
         if (blueprint && this.battlefield.canBuildOn(tile)) {
             this.tileMenu.openForBuild(tile, blueprint);
@@ -162,6 +171,11 @@ class Battle {
         this.tileMenu.openForTower(tower.tile, tower);
     }
 
+    breakSeal(site) {
+        if (!site.breakSeal()) return;
+        this.tileMenu.openForSite(site.tile, site);
+    }
+
     sellTower(tower) {
         this.treasury.earnGold(tower.sellValue);
         this.notify(tower.x, tower.y - 20, `+${tower.sellValue}g`, '#ffd740');
@@ -182,7 +196,7 @@ class Battle {
         const tile = this.battlefield.tileAtWorld(pointer.worldX, pointer.worldY);
         if (!tile) return;
         let color = null;
-        if (tile.tower) color = 0xffd740;
+        if (tile.tower || tile.site) color = 0xffd740;
         else if (this.battlefield.canBuildOn(tile) && this.towerFactory.blueprintFor(tile.terrain, this.progress)) color = 0x69f0ae;
         if (color === null) return;
         this.strokeTile(tile, color);

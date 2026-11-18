@@ -2,7 +2,7 @@ class TileMenu {
     constructor(battle) {
         this.battle = battle;
         this.scene = battle.scene;
-        this.width = 190;
+        this.width = 230;
         this.entryHeight = 30;
         this.entryGap = 4;
         this.padding = 8;
@@ -44,6 +44,17 @@ class TileMenu {
                 action: () => this.battle.sellTower(tower)
             }
         ]);
+    }
+
+    openForSite(tile, site) {
+        const entries = site.isOpen ? [] : [
+            {
+                label: () => `Break seal  ${site.sealPriceLabel}`,
+                isEnabled: () => site.canAffordSeal(),
+                action: () => this.battle.breakSeal(site)
+            }
+        ];
+        this.open(tile, site.describeStatus(), entries);
     }
 
     open(tile, heading, entries) {

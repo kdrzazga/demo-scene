@@ -27,6 +27,7 @@ class MapScene extends Phaser.Scene {
         this.add.text(width / 2, 560, [
             'Click meadow, tundra or ashland to raise the tower that belongs there. Click a tower to upgrade or sell.',
             'Heroes grab gems and run home. Kill a carrier and the gem rolls back to your hoard.',
+            'Mines and springs are bound by 3 seals: mine seals cost 50 mana, spring seals 50 gold.',
             'Q Meteor   W Dread   E Clearcut   Space next wave   Esc / right-click cancel'
         ].join('\n'), {
             fontFamily: 'monospace',

@@ -2,7 +2,7 @@ class Treasury {
     constructor(gold, mana) {
         this.gold = gold;
         this.mana = mana;
-        this.maxMana = 100;
+        this.maxMana = 300;
         this.manaRegenPerSecond = 0.8;
     }
 

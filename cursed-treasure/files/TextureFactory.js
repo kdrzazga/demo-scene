@@ -47,6 +47,8 @@ class TextureFactory {
         this.createGem();
         this.createHoard();
         this.createGate();
+        this.createMine();
+        this.createSpring();
         this.createTowers();
         this.createHeroes();
         this.createProjectiles();
@@ -234,6 +236,49 @@ class TextureFactory {
             graphics.fillTriangle(12, 19, 20, 19, 16, 23);
             graphics.fillStyle(0xffd740, 1);
             graphics.fillCircle(16, 13, 2);
+        });
+    }
+
+    createMine() {
+        this.draw('mine', this.tileSize, this.tileSize, graphics => {
+            graphics.fillStyle(0x000000, 0.3);
+            graphics.fillEllipse(16, 28, 30, 6);
+            graphics.fillStyle(0x5d5560, 1);
+            graphics.fillEllipse(16, 20, 30, 22);
+            graphics.fillStyle(0x7a717d, 1);
+            graphics.fillEllipse(12, 15, 16, 9);
+            graphics.fillStyle(0x0e0a0c, 1);
+            graphics.fillRect(10, 15, 12, 13);
+            graphics.fillStyle(0x7a5532, 1);
+            graphics.fillRect(8, 13, 3, 15);
+            graphics.fillRect(21, 13, 3, 15);
+            graphics.fillRect(7, 12, 18, 3);
+            graphics.fillStyle(0xffd740, 1);
+            graphics.fillCircle(13, 26, 1.5);
+            graphics.fillCircle(18, 25, 1.5);
+            graphics.fillCircle(26, 24, 1.5);
+            graphics.fillStyle(0xc9ced6, 1);
+            graphics.fillRect(25, 17, 1, 7);
+            graphics.fillTriangle(22, 17, 29, 17, 25, 15);
+        });
+    }
+
+    createSpring() {
+        this.draw('spring', this.tileSize, this.tileSize, graphics => {
+            graphics.fillStyle(0x000000, 0.3);
+            graphics.fillEllipse(16, 26, 30, 8);
+            graphics.fillStyle(0x6d6f78, 1);
+            graphics.fillEllipse(16, 21, 30, 18);
+            graphics.fillStyle(0x3a1f66, 1);
+            graphics.fillEllipse(16, 20, 22, 12);
+            graphics.fillStyle(0x8e5cff, 1);
+            graphics.fillEllipse(16, 20, 17, 8);
+            graphics.fillStyle(0xd9c4ff, 1);
+            graphics.fillEllipse(13, 19, 6, 2);
+            graphics.fillStyle(0xc9a6ff, 0.8);
+            graphics.fillCircle(11, 10, 1.5);
+            graphics.fillCircle(19, 7, 1.5);
+            graphics.fillCircle(16, 12, 1);
         });
     }
 

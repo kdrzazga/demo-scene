@@ -13,6 +13,8 @@ class Battlefield {
         this.applyZones();
         this.applyForests();
         this.applyRocks();
+        this.applySites(level.mines, 'mine');
+        this.applySites(level.springs, 'spring');
         level.paths.forEach(waypoints => this.carvePath(waypoints));
         this.markHoard();
         this.routes = level.paths.map(waypoints => new Route(waypoints, this.tileSize));
@@ -43,6 +45,7 @@ class Battlefield {
                     ground: this.level.base,
                     forested: false,
                     tower: null,
+                    site: null,
                     forestImage: null
                 });
             }
@@ -84,6 +87,19 @@ class Battlefield {
             tile.terrain = 'rock';
             tile.forested = false;
         });
+    }
+
+    applySites(positions, terrain) {
+        positions.forEach(([column, row]) => {
+            const tile = this.tileAt(column, row);
+            if (!tile) return;
+            tile.terrain = terrain;
+            tile.forested = false;
+        });
+    }
+
+    tilesOfTerrain(terrain) {
+        return this.tiles.flat().filter(tile => tile.terrain === terrain);
     }
 
     carvePath(waypoints) {
