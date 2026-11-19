@@ -3,7 +3,12 @@ class BootScene extends Phaser.Scene {
         super('BootScene');
     }
 
+    preload() {
+        this.load.audio('music', 'files/ChopinRyujinWataru.mp3');
+    }
+
     create() {
+        this.sound.play('music', { loop: true, volume: 0.5 });
         new TextureFactory(this).createAll();
         const levelCatalog = new LevelCatalog();
         this.registry.set('levelCatalog', levelCatalog);
