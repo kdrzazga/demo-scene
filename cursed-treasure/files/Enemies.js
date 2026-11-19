@@ -66,7 +66,9 @@ class BlackKnight extends Enemy {
         this.walkCadence = 6;
         this.smiteExposureSeconds = 5;
         this.smiteWindupSeconds = 0.7;
-        this.spireExposure = new Map();
+        this.smashableRaces = new Set(['bone', 'cinder']);
+        this.focusTower = null;
+        this.smiteCharge = 0;
         this.smiteTarget = null;
         this.smiteTimer = 0;
         battle.notify(this.x, this.y - 40, `${this.name} rides in!`, '#ff5252');
@@ -80,37 +82,37 @@ class BlackKnight extends Enemy {
     }
 
     updateSmite(dt) {
-        if (this.isStunned) {
-            this.interruptSmite();
-            return;
-        }
         if (this.smiteTarget) {
             this.smiteTimer -= dt;
             if (this.smiteTimer <= 0) this.strike();
             return;
         }
-        const spiresInReach = this.battle.towers.filter(tower =>
-            tower.race === 'bone' && Phaser.Math.Distance.Between(tower.x, tower.y, this.x, this.y) <= tower.range);
-        [...this.spireExposure.keys()]
-            .filter(spire => !spiresInReach.includes(spire))
-            .forEach(spire => this.spireExposure.delete(spire));
-        spiresInReach.forEach(spire => {
-            const exposure = (this.spireExposure.get(spire) || 0) + dt;
-            this.spireExposure.set(spire, exposure);
-            if (exposure >= this.smiteExposureSeconds && !this.smiteTarget) this.raiseSword(spire);
-        });
+        const towersInReach = this.smashableTowersInReach();
+        if (!towersInReach.includes(this.focusTower)) {
+            this.focusTower = towersInReach.length > 0 ? towersInReach[0] : null;
+            this.smiteCharge = 0;
+        }
+        if (!this.focusTower) return;
+        this.smiteCharge += dt;
+        if (this.smiteCharge >= this.smiteExposureSeconds) this.raiseSword(this.focusTower);
     }
 
-    raiseSword(spire) {
-        this.smiteTarget = spire;
+    smashableTowersInReach() {
+        const distanceTo = tower => Phaser.Math.Distance.Between(tower.x, tower.y, this.x, this.y);
+        return this.battle.towers
+            .filter(tower => this.smashableRaces.has(tower.race) && distanceTo(tower) <= tower.range)
+            .sort((first, second) => distanceTo(first) - distanceTo(second));
+    }
+
+    resetSmite() {
+        this.focusTower = null;
+        this.smiteCharge = 0;
+    }
+
+    raiseSword(tower) {
+        this.smiteTarget = tower;
         this.smiteTimer = this.smiteWindupSeconds;
         this.sprite.setTexture('hero-blackKnight-raised');
-    }
-
-    interruptSmite() {
-        if (!this.smiteTarget) return;
-        this.spireExposure.delete(this.smiteTarget);
-        this.lowerSword();
     }
 
     lowerSword() {
@@ -119,25 +121,25 @@ class BlackKnight extends Enemy {
     }
 
     strike() {
-        const spire = this.smiteTarget;
-        this.spireExposure.delete(spire);
+        const tower = this.smiteTarget;
+        this.resetSmite();
         this.lowerSword();
-        if (!this.battle.towers.includes(spire)) return;
+        if (!this.battle.towers.includes(tower)) return;
         this.battle.addEffect(new Blast(this.battle.scene, this.x, this.y - 30, 18, 0xff3030));
-        this.battle.shatterTower(spire);
+        this.battle.shatterTower(tower);
     }
 
     describe() {
         return {
             name: 'Zawisza Czarny',
             texture: 'hero-blackKnight',
-            health: 960,
+            health: 1460,
             speed: 20,
             armor: 8,
             capacity: 15,
             goldReward: 150,
             manaReward: 40,
-            weakness: 'Black plate laughs at arrows. Frost staggers him back, but 5s in a Bone Spire\'s reach and he shatters it. Dread breaks his swing.'
+            weakness: 'Black plate laughs at arrows. Frost staggers him back, but 5s in reach of a Bone Spire or Cinder Shrine and he shatters it.'
         };
     }
 

@@ -180,7 +180,7 @@ class Battle {
         this.towers = this.towers.filter(candidate => candidate !== tower);
         tower.destroy();
         this.addEffect(new Blast(this.scene, tower.x, tower.y, 44, 0xff3030));
-        this.notify(tower.x, tower.y - 30, 'Spire shattered!', '#ff5252');
+        this.notify(tower.x, tower.y - 30, `${tower.title} shattered!`, '#ff5252');
         this.scene.cameras.main.shake(450, 0.014);
     }
 

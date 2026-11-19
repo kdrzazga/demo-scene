@@ -162,7 +162,7 @@ class LevelCatalog {
                 [squad('paladin', 4, 2, 1), squad('squire', 10, 0.8, 0, 2), squad('cleric', 3, 2.5, 1, 4)],
                 [squad('paladin', 6, 1.8, 0), squad('ranger', 12, 0.5, 1, 5)],
                 [squad('squire', 14, 0.6, 0), squad('squire', 14, 0.6, 1, 2), squad('cleric', 4, 2, 0, 6)],
-                [squad('paladin', 8, 1.5, 0), squad('paladin', 8, 1.5, 1, 4), squad('cleric', 4, 2.5, 1, 6), squad('ranger', 16, 0.4, 0, 12), squad('blackKnight', 1, 1, 0, 20)]
+                [squad('paladin', 8, 1.5, 0), squad('paladin', 8, 1.5, 1, 4), squad('cleric', 4, 2.5, 1, 6), squad('ranger', 16, 0.4, 0, 12), squad('blackKnight', 1, 1, 0, 20), squad('blackKnight', 1, 1, 1, 30)]
             ]
         };
     }
