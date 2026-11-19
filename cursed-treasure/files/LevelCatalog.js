@@ -29,6 +29,7 @@ class LevelCatalog {
             ],
             rocks: [[3, 8], [11, 2], [19, 12], [27, 3], [12, 15]],
             mines: [[3, 6]],
+            wideSegments: [],
             springs: [[18, 3]],
             paths: [
                 [[0, 4], [7, 4], [7, 11], [14, 11], [14, 6], [22, 6], [22, 13], [27, 13]]
@@ -45,7 +46,12 @@ class LevelCatalog {
                 [squad('squire', 6, 1.3), squad('cleric', 1, 1, 0, 4)],
                 [squad('peasant', 10, 0.6), squad('ranger', 5, 0.8, 0, 7)],
                 [squad('paladin', 2, 3.5), squad('squire', 5, 1.2, 0, 2)],
-                [squad('squire', 6, 1.0), squad('cleric', 2, 3, 0, 3), squad('paladin', 3, 2.5, 0, 9)]
+                [squad('squire', 6, 1.0), squad('cleric', 2, 3, 0, 3), squad('paladin', 3, 2.5, 0, 9)],
+                [squad('ranger', 10, 0.6), squad('peasant', 12, 0.5, 0, 4)],
+                [squad('squire', 10, 0.9), squad('cleric', 2, 3, 0, 4), squad('ranger', 6, 0.7, 0, 9)],
+                [squad('paladin', 4, 2.5), squad('cleric', 2, 3, 0, 3), squad('peasant', 14, 0.45, 0, 6)],
+                [squad('ranger', 14, 0.45), squad('squire', 8, 0.9, 0, 5), squad('paladin', 3, 2.5, 0, 10)],
+                [squad('paladin', 6, 2.0), squad('cleric', 3, 2.5, 0, 4), squad('squire', 10, 0.8, 0, 8), squad('ranger', 10, 0.5, 0, 14)]
             ]
         };
     }
@@ -73,6 +79,11 @@ class LevelCatalog {
             ],
             rocks: [[16, 1], [25, 7], [5, 16], [28, 11], [2, 0]],
             mines: [[6, 0]],
+            wideSegments: [
+                { from: [0, 2], to: [10, 2], lane: [0, 1] },
+                { from: [10, 2], to: [10, 8], lane: [-1, 0] },
+                { from: [10, 8], to: [20, 8], lane: [0, -1] }
+            ],
             springs: [[25, 11]],
             paths: [
                 [[0, 2], [10, 2], [10, 8], [20, 8], [20, 14], [26, 14]],
@@ -92,7 +103,12 @@ class LevelCatalog {
                 [squad('ranger', 10, 0.6, 0), squad('squire', 6, 1.0, 1, 3)],
                 [squad('paladin', 3, 2.5, 0), squad('cleric', 2, 3, 0, 2), squad('squire', 8, 0.9, 1)],
                 [squad('ranger', 8, 0.5, 1), squad('paladin', 4, 2.2, 0, 4), squad('cleric', 2, 3, 1, 6)],
-                [squad('paladin', 5, 2, 0), squad('paladin', 5, 2, 1, 3), squad('cleric', 3, 2.5, 0, 6), squad('ranger', 10, 0.5, 1, 10)]
+                [squad('paladin', 5, 2, 0), squad('paladin', 5, 2, 1, 3), squad('cleric', 3, 2.5, 0, 6), squad('ranger', 10, 0.5, 1, 10)],
+                [squad('ranger', 12, 0.5, 0), squad('ranger', 12, 0.5, 1, 2), squad('cleric', 2, 3, 0, 6)],
+                [squad('squire', 12, 0.8, 1), squad('paladin', 4, 2.2, 0, 3), squad('cleric', 3, 2.5, 1, 6)],
+                [squad('peasant', 20, 0.4, 0), squad('peasant', 20, 0.4, 1, 1), squad('paladin', 4, 2, 0, 8)],
+                [squad('paladin', 6, 1.8, 1), squad('squire', 12, 0.7, 0, 2), squad('cleric', 4, 2, 1, 5), squad('ranger', 10, 0.5, 0, 10)],
+                [squad('paladin', 8, 1.6, 0), squad('paladin', 8, 1.6, 1, 3), squad('cleric', 4, 2.2, 0, 6), squad('squire', 14, 0.6, 1, 8), squad('ranger', 14, 0.45, 0, 14)]
             ]
         };
     }
@@ -121,6 +137,10 @@ class LevelCatalog {
             ],
             rocks: [[2, 10], [11, 0], [26, 10], [14, 16], [19, 1]],
             mines: [[26, 11]],
+            wideSegments: [
+                { from: [20, 12], to: [20, 15], lane: [1, 0] },
+                { from: [13, 6], to: [13, 12], lane: [-1, 0] }
+            ],
             springs: [[2, 8]],
             paths: [
                 [[5, 0], [5, 6], [13, 6], [13, 12], [20, 12], [20, 15], [8, 15]],

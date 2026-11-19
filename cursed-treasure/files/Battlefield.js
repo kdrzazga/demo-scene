@@ -16,6 +16,7 @@ class Battlefield {
         this.applySites(level.mines, 'mine');
         this.applySites(level.springs, 'spring');
         level.paths.forEach(waypoints => this.carvePath(waypoints));
+        level.wideSegments.forEach(segment => this.widenSegment(segment));
         this.markHoard();
         this.routes = level.paths.map(waypoints => new Route(waypoints, this.tileSize));
         this.paint();
@@ -46,6 +47,7 @@ class Battlefield {
                     forested: false,
                     tower: null,
                     site: null,
+                    wideRoad: null,
                     forestImage: null
                 });
             }
@@ -116,6 +118,35 @@ class Battlefield {
                 tile.forested = false;
             }
         }
+    }
+
+    eachTileBetween(from, to, visit) {
+        const [fromColumn, fromRow] = from;
+        const [toColumn, toRow] = to;
+        const columnStep = Math.sign(toColumn - fromColumn);
+        const rowStep = Math.sign(toRow - fromRow);
+        const stepCount = Math.max(Math.abs(toColumn - fromColumn), Math.abs(toRow - fromRow));
+        for (let step = 0; step <= stepCount; step++) {
+            const tile = this.tileAt(fromColumn + columnStep * step, fromRow + rowStep * step);
+            if (tile) visit(tile);
+        }
+    }
+
+    widenSegment(segment) {
+        const [laneColumns, laneRows] = segment.lane;
+        const wideRoad = { laneX: laneColumns * this.tileSize, laneY: laneRows * this.tileSize };
+        this.eachTileBetween(segment.from, segment.to, tile => {
+            if (!tile.wideRoad) tile.wideRoad = wideRoad;
+            const laneTile = this.tileAt(tile.column + laneColumns, tile.row + laneRows);
+            if (!laneTile) return;
+            laneTile.terrain = 'path';
+            laneTile.forested = false;
+        });
+    }
+
+    wideRoadAt(x, y) {
+        const tile = this.tileAtWorld(x, y);
+        return tile ? tile.wideRoad : null;
     }
 
     markHoard() {

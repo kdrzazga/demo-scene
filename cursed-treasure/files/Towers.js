@@ -5,9 +5,9 @@ class GoblinWarren extends Tower {
 
     describeTiers() {
         return [
-            { cost: 60, damage: 9, interval: 0.6, range: 100 },
-            { cost: 70, damage: 15, interval: 0.5, range: 112 },
-            { cost: 110, damage: 26, interval: 0.4, range: 126 }
+            { cost: 60, damage: 9, interval: 0.6, range: 100, instantKillChance: 0 },
+            { cost: 70, damage: 15, interval: 0.5, range: 112, instantKillChance: 0 },
+            { cost: 110, damage: 26, interval: 0.4, range: 126, instantKillChance: 0 }
         ];
     }
 
@@ -21,7 +21,7 @@ class GoblinWarren extends Tower {
 
     fireAt(target) {
         this.launch(target, 'arrow', 420, hitEnemy => {
-            if (hitEnemy) hitEnemy.takeDamage(this.damage);
+            if (hitEnemy) hitEnemy.takeDamage(this.damage, false, this);
         });
     }
 }
@@ -39,9 +39,9 @@ class BoneSpire extends Tower {
 
     describeTiers() {
         return [
-            { cost: 70, damage: 6, interval: 1.0, range: 96, slowFactor: 0.6, slowDuration: 1.6 },
-            { cost: 80, damage: 10, interval: 0.9, range: 108, slowFactor: 0.5, slowDuration: 1.9 },
-            { cost: 120, damage: 16, interval: 0.8, range: 120, slowFactor: 0.4, slowDuration: 2.2 }
+            { cost: 70, damage: 6, interval: 1.0, range: 96, slowFactor: 0.6, slowDuration: 1.6, instantKillChance: 0 },
+            { cost: 80, damage: 10, interval: 0.9, range: 108, slowFactor: 0.5, slowDuration: 1.9, instantKillChance: 0 },
+            { cost: 120, damage: 16, interval: 0.8, range: 120, slowFactor: 0.4, slowDuration: 2.2, instantKillChance: 0.05 }
         ];
     }
 
@@ -54,13 +54,14 @@ class BoneSpire extends Tower {
     }
 
     describeSpecialty() {
-        return `Slows by ${Math.round((1 - this.slowFactor) * 100)}%`;
+        return `Slows by ${Math.round((1 - this.slowFactor) * 100)}%${this.describeInstantKill()}`;
     }
 
     fireAt(target) {
         this.launch(target, 'frostbolt', 300, hitEnemy => {
             if (!hitEnemy) return;
-            hitEnemy.takeDamage(this.damage);
+            if (this.tryInstantKill(hitEnemy, this)) return;
+            hitEnemy.takeDamage(this.damage, false, this);
             hitEnemy.applySlow(this.slowFactor, this.slowDuration);
             hitEnemy.reactToChill();
         });
@@ -80,25 +81,28 @@ class CinderShrine extends Tower {
 
     describeTiers() {
         return [
-            { cost: 90, damage: 16, interval: 1.7, range: 112, blastRadius: 40 },
-            { cost: 100, damage: 28, interval: 1.55, range: 122, blastRadius: 48 },
-            { cost: 150, damage: 46, interval: 1.4, range: 136, blastRadius: 56 }
+            { cost: 90, damage: 16, interval: 1.7, range: 112, blastRadius: 40, instantKillChance: 0 },
+            { cost: 100, damage: 28, interval: 1.55, range: 122, blastRadius: 48, instantKillChance: 0.01 },
+            { cost: 150, damage: 46, interval: 1.4, range: 136, blastRadius: 56, instantKillChance: 0.04 }
         ];
     }
 
     describeSpecialty() {
         const burning = this.hasPact('wildfire') ? ', burns' : '';
-        return `Blast radius ${this.tier.blastRadius}${burning}`;
+        return `Blast radius ${this.tier.blastRadius}${burning}${this.describeInstantKill()}`;
     }
 
     fireAt(target) {
         this.launch(target, 'fireball', 240, (hitEnemy, impactX, impactY) => {
             const radius = this.tier.blastRadius;
             const burns = this.hasPact('wildfire');
+            let blastKilled = false;
             this.battle.enemiesWithin(impactX, impactY + 12, radius).forEach(enemy => {
-                enemy.takeDamage(this.damage);
-                if (burns) enemy.applyBurn(this.damage * this.wildfireDamageRatio, this.wildfireDuration);
+                if (!this.tryInstantKill(enemy, null)) enemy.takeDamage(this.damage);
+                if (!enemy.alive) blastKilled = true;
+                else if (burns) enemy.applyBurn(this.damage * this.wildfireDamageRatio, this.wildfireDuration, this);
             });
+            if (blastKilled) this.creditKill();
             this.battle.addEffect(new Blast(this.battle.scene, impactX, impactY + 6, radius, 0xff6a00));
         });
     }

@@ -11,6 +11,7 @@ class Enemy {
         this.capacity = profile.capacity;
         this.goldReward = profile.goldReward;
         this.manaReward = profile.manaReward;
+        this.isBoss = false;
         this.gemPickupRadius = 12;
         this.healthBarWidth = 18;
         this.healthBarLift = 31;
@@ -23,12 +24,16 @@ class Enemy {
         this.stunRemaining = 0;
         this.burnDamagePerSecond = 0;
         this.burnRemaining = 0;
+        this.burnAttacker = null;
         this.walkPhase = Math.random() * Math.PI * 2;
         this.walkCadence = 11;
         this.alive = true;
-        const start = route.pointAt(0);
-        this.x = start.x;
-        this.y = start.y;
+        this.laneShiftSpeed = 40;
+        this.laneOffsetX = 0;
+        this.laneOffsetY = 0;
+        this.currentWideRoad = null;
+        this.walksExtraLane = false;
+        this.placeAt(0);
         this.sprite = battle.scene.add.image(this.x, this.y, profile.texture).setOrigin(0.5, 0.85);
         this.gemSprite = battle.scene.add.image(this.x, this.y, 'gem').setVisible(false);
         this.gemCountText = battle.scene.add.text(this.x, this.y, '', {
@@ -62,6 +67,7 @@ class Enemy {
         if (!this.alive) return false;
         if (!this.isStunned) this.advance(dt);
         if (!this.alive) return false;
+        if (!this.isStunned) this.drift(dt);
         this.collectNearbyGem();
         this.refreshSprite(dt);
         return true;
@@ -75,12 +81,12 @@ class Enemy {
         if (this.stunRemaining > 0) this.stunRemaining -= dt;
         if (this.burnRemaining > 0) {
             this.burnRemaining -= dt;
-            this.takeDamage(this.burnDamagePerSecond * dt, true);
+            this.takeDamage(this.burnDamagePerSecond * dt, true, this.burnAttacker);
         }
     }
 
     advance(dt) {
-        const previousX = this.x;
+        const previousRouteX = this.routeX;
         this.travelled += this.heading * this.currentSpeed * dt;
         if (this.heading > 0 && this.travelled >= this.route.length) {
             this.travelled = this.route.length;
@@ -90,10 +96,31 @@ class Enemy {
             this.battle.handleEscape(this);
             return;
         }
-        const point = this.route.pointAt(this.travelled);
-        this.x = point.x;
-        this.y = point.y;
-        if (this.x !== previousX) this.sprite.setFlipX(this.x < previousX);
+        this.placeAt(this.travelled);
+        if (this.routeX !== previousRouteX) this.sprite.setFlipX(this.routeX < previousRouteX);
+    }
+
+    placeAt(distance) {
+        const point = this.route.pointAt(distance);
+        this.routeX = point.x;
+        this.routeY = point.y;
+        this.x = this.routeX + this.laneOffsetX;
+        this.y = this.routeY + this.laneOffsetY;
+    }
+
+    drift(dt) {
+        const wideRoad = this.battle.battlefield.wideRoadAt(this.routeX, this.routeY);
+        if (wideRoad !== this.currentWideRoad) {
+            this.currentWideRoad = wideRoad;
+            this.walksExtraLane = wideRoad !== null && Math.random() < 0.5;
+        }
+        const targetX = this.walksExtraLane ? wideRoad.laneX : 0;
+        const targetY = this.walksExtraLane ? wideRoad.laneY : 0;
+        const step = this.laneShiftSpeed * dt;
+        this.laneOffsetX += Phaser.Math.Clamp(targetX - this.laneOffsetX, -step, step);
+        this.laneOffsetY += Phaser.Math.Clamp(targetY - this.laneOffsetY, -step, step);
+        this.x = this.routeX + this.laneOffsetX;
+        this.y = this.routeY + this.laneOffsetY;
     }
 
     reachHoard() {
@@ -103,7 +130,7 @@ class Enemy {
 
     collectNearbyGem() {
         if (this.carriedGems >= this.capacity) return;
-        const gem = this.battle.looseGemNear(this.x, this.y, this.gemPickupRadius);
+        const gem = this.battle.looseGemNear(this.routeX, this.routeY, this.gemPickupRadius);
         if (!gem) return;
         gem.collected = true;
         this.carriedGems += 1;
@@ -134,13 +161,13 @@ class Enemy {
         else this.sprite.clearTint();
     }
 
-    takeDamage(amount, piercing = false) {
+    takeDamage(amount, piercing = false, attacker = null) {
         if (!this.alive) return;
         const dealt = piercing ? amount : Math.max(1, amount - this.armor);
         this.health -= dealt;
         if (this.health > 0) return;
         this.alive = false;
-        this.battle.handleKill(this);
+        this.battle.handleKill(this, attacker);
     }
 
     heal(amount) {
@@ -157,7 +184,8 @@ class Enemy {
         this.stunRemaining = Math.max(this.stunRemaining, duration);
     }
 
-    applyBurn(damagePerSecond, duration) {
+    applyBurn(damagePerSecond, duration, attacker) {
+        this.burnAttacker = attacker;
         this.burnDamagePerSecond = Math.max(this.burnRemaining > 0 ? this.burnDamagePerSecond : 0, damagePerSecond);
         this.burnRemaining = Math.max(this.burnRemaining, duration);
     }

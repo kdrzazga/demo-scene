@@ -56,6 +56,7 @@ class Cleric extends Enemy {
 class BlackKnight extends Enemy {
     constructor(battle, route, healthScale) {
         super(battle, route, healthScale);
+        this.isBoss = true;
         this.knockbackDistance = 3.5;
         this.knockbackSpeed = 140;
         this.pendingKnockback = 0;
@@ -153,9 +154,7 @@ class BlackKnight extends Enemy {
         const push = Math.min(this.pendingKnockback, this.knockbackSpeed * dt);
         this.pendingKnockback -= push;
         this.travelled = Phaser.Math.Clamp(this.travelled - this.heading * push, 0, this.route.length);
-        const point = this.route.pointAt(this.travelled);
-        this.x = point.x;
-        this.y = point.y;
+        this.placeAt(this.travelled);
     }
 }
 

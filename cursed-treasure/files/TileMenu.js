@@ -34,8 +34,10 @@ class TileMenu {
         const treasury = this.battle.treasury;
         this.open(tile, tower.describeStats(), [
             {
-                label: () => tower.canUpgrade ? `Upgrade  ${tower.upgradeCost}g` : 'Fully upgraded',
-                isEnabled: () => tower.canUpgrade && treasury.gold >= tower.upgradeCost,
+                label: () => tower.canUpgrade
+                    ? `Upgrade  ${tower.upgradeCost}g  XP ${Math.min(tower.experience, tower.experienceNeeded)}/${tower.experienceNeeded}`
+                    : `Fully upgraded  XP ${tower.experience}`,
+                isEnabled: () => tower.canUpgrade && tower.hasEnoughExperience && treasury.gold >= tower.upgradeCost,
                 action: () => this.battle.upgradeTower(tower)
             },
             {

@@ -73,7 +73,8 @@ class Battle {
         return this.looseGems.all.find(gem => !gem.collected && Phaser.Math.Distance.Between(x, y, gem.x, gem.y) <= radius) || null;
     }
 
-    handleKill(enemy) {
+    handleKill(enemy, attacker) {
+        if (attacker) attacker.creditKill();
         this.treasury.earnGold(enemy.goldReward);
         this.treasury.earnMana(enemy.manaReward);
         this.notify(enemy.x, enemy.y - 24, `+${enemy.goldReward}g`, '#ffd740');
@@ -163,7 +164,7 @@ class Battle {
     }
 
     upgradeTower(tower) {
-        if (!tower.canUpgrade || !this.treasury.spendGold(tower.upgradeCost)) return;
+        if (!tower.canUpgrade || !tower.hasEnoughExperience || !this.treasury.spendGold(tower.upgradeCost)) return;
         tower.upgrade();
         this.addEffect(new Blast(this.scene, tower.x, tower.y, this.battlefield.tileSize, 0xffd740, false));
         this.tileMenu.openForTower(tower.tile, tower);
