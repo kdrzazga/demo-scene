@@ -14,6 +14,7 @@ class BattleScene extends Phaser.Scene {
         const levelCatalog = this.registry.get('levelCatalog');
         const progress = this.registry.get('progress');
         this.levelCatalog = levelCatalog;
+        this.registry.set('mapPackIndex', levelCatalog.packIndexOf(this.levelIndex));
         this.battle = new Battle(this, levelCatalog.levels[this.levelIndex], this.levelIndex, progress);
         this.hud = new Hud(this, this.battle);
         this.bestiary = new Bestiary(this, levelCatalog.levels[this.levelIndex], this.battle.enemyFactory);

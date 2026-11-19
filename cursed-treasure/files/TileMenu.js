@@ -41,6 +41,11 @@ class TileMenu {
                 action: () => this.battle.upgradeTower(tower)
             },
             {
+                label: () => `Target: ${tower.targetPriority.label}`,
+                isEnabled: () => true,
+                action: () => tower.cycleTargetPriority()
+            },
+            {
                 label: () => `Sell  +${tower.sellValue}g`,
                 isEnabled: () => true,
                 action: () => this.battle.sellTower(tower)

@@ -12,11 +12,11 @@ class GoblinWarren extends Tower {
     }
 
     describeSpecialty() {
-        return this.hasPact('volley') ? 'Shoots two heroes at once' : 'Quick arrows';
+        return this.volleySize() > 1 ? `Shoots ${this.volleySize()} heroes at once` : 'Quick arrows';
     }
 
     volleySize() {
-        return this.hasPact('volley') ? 2 : 1;
+        return 1 + (this.pactEffect('volley') || 0);
     }
 
     fireAt(target) {
@@ -27,12 +27,6 @@ class GoblinWarren extends Tower {
 }
 
 class BoneSpire extends Tower {
-    constructor(battle, tile) {
-        super(battle, tile);
-        this.deepChillSlowBonus = 0.15;
-        this.deepChillDurationBonus = 1;
-    }
-
     describeRace() {
         return { key: 'bone', title: 'Bone Spire', terrain: 'tundra' };
     }
@@ -45,12 +39,16 @@ class BoneSpire extends Tower {
         ];
     }
 
+    get deepChill() {
+        return this.pactEffect('deepChill') || { slow: 0, duration: 0 };
+    }
+
     get slowFactor() {
-        return this.hasPact('deepChill') ? this.tier.slowFactor - this.deepChillSlowBonus : this.tier.slowFactor;
+        return this.tier.slowFactor - this.deepChill.slow;
     }
 
     get slowDuration() {
-        return this.hasPact('deepChill') ? this.tier.slowDuration + this.deepChillDurationBonus : this.tier.slowDuration;
+        return this.tier.slowDuration + this.deepChill.duration;
     }
 
     describeSpecialty() {
@@ -71,7 +69,6 @@ class BoneSpire extends Tower {
 class CinderShrine extends Tower {
     constructor(battle, tile) {
         super(battle, tile);
-        this.wildfireDamageRatio = 0.3;
         this.wildfireDuration = 3;
     }
 
@@ -88,19 +85,20 @@ class CinderShrine extends Tower {
     }
 
     describeSpecialty() {
-        const burning = this.hasPact('wildfire') ? ', burns' : '';
+        const burnRatio = this.pactEffect('wildfire');
+        const burning = burnRatio ? `, burns ${Math.round(burnRatio * 100)}%/s` : '';
         return `Blast radius ${this.tier.blastRadius}${burning}${this.describeInstantKill()}`;
     }
 
     fireAt(target) {
         this.launch(target, 'fireball', 240, (hitEnemy, impactX, impactY) => {
             const radius = this.tier.blastRadius;
-            const burns = this.hasPact('wildfire');
+            const burnRatio = this.pactEffect('wildfire');
             let blastKilled = false;
             this.battle.enemiesWithin(impactX, impactY + 12, radius).forEach(enemy => {
                 if (!this.tryInstantKill(enemy, null)) enemy.takeDamage(this.damage);
                 if (!enemy.alive) blastKilled = true;
-                else if (burns) enemy.applyBurn(this.damage * this.wildfireDamageRatio, this.wildfireDuration, this);
+                else if (burnRatio) enemy.applyBurn(this.damage * burnRatio, this.wildfireDuration, this);
             });
             if (blastKilled) this.creditKill();
             this.battle.addEffect(new Blast(this.battle.scene, impactX, impactY + 6, radius, 0xff6a00));

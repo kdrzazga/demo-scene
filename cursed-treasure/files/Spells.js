@@ -3,6 +3,15 @@ class Spell {
         this.battle = battle;
         this.radius = 0;
         this.invalidTargetMessage = 'Not there';
+        this.isInstant = false;
+    }
+
+    get isReady() {
+        return true;
+    }
+
+    get statusLabel() {
+        return `${this.manaCost} mana`;
     }
 
     canCastAt(x, y) {
@@ -68,10 +77,71 @@ class ClearcutSpell extends Spell {
     }
 }
 
+class RecallSpell extends Spell {
+    constructor(battle) {
+        super(battle);
+        this.title = 'Recall';
+        this.hotkey = 'R';
+        this.manaCost = 25;
+        this.duration = 15;
+        this.isInstant = true;
+    }
+
+    get isReady() {
+        return !this.battle.isRecallingGems;
+    }
+
+    get statusLabel() {
+        const remaining = this.battle.gemRecallRemaining;
+        return remaining > 0 ? `${Math.ceil(remaining)}s left` : `${this.manaCost} mana`;
+    }
+
+    cast() {
+        this.battle.recallGems(this.duration);
+        const hoardPosition = this.battle.battlefield.hoardPosition;
+        this.battle.notify(hoardPosition.x, hoardPosition.y - 30, 'Gems roll home!', '#f19bff');
+    }
+}
+
+class ArmageddonSpell extends Spell {
+    constructor(battle) {
+        super(battle);
+        this.title = 'Armageddon';
+        this.hotkey = 'T';
+        this.manaCost = 75;
+        this.isInstant = true;
+        this.damage = 60;
+        this.bossDamage = 120;
+    }
+
+    cast() {
+        const battle = this.battle;
+        battle.enemies.all
+            .filter(enemy => enemy.alive)
+            .forEach(enemy => this.strike(enemy));
+        battle.addEffect(new Blast(battle.scene, battle.battlefield.pixelWidth / 2, battle.battlefield.pixelHeight / 2, battle.battlefield.pixelWidth * 0.6, 0xff3d00));
+        battle.scene.cameras.main.shake(600, 0.01);
+        battle.scene.cameras.main.flash(250, 255, 90, 20);
+    }
+
+    strike(enemy) {
+        if (enemy.isBoss) {
+            enemy.takeDamage(this.bossDamage, true);
+            return;
+        }
+        if (enemy.carriedGems > 0) {
+            enemy.takeDamage(enemy.health, true);
+            return;
+        }
+        if (enemy instanceof Peasant) return;
+        enemy.takeDamage(this.damage, true);
+    }
+}
+
 class Spellbook {
     constructor(battle) {
         this.battle = battle;
-        this.spells = [new MeteorSpell(battle), new DreadSpell(battle), new ClearcutSpell(battle)];
+        this.spells = [new MeteorSpell(battle), new DreadSpell(battle), new ClearcutSpell(battle), new RecallSpell(battle), new ArmageddonSpell(battle)];
         this.armedSpell = null;
     }
 
@@ -80,7 +150,12 @@ class Spellbook {
             this.disarm();
             return;
         }
-        if (this.battle.treasury.mana < spell.manaCost) return;
+        if (!spell.isReady || this.battle.treasury.mana < spell.manaCost) return;
+        if (spell.isInstant) {
+            this.disarm();
+            if (this.battle.treasury.spendMana(spell.manaCost)) spell.cast();
+            return;
+        }
         this.armedSpell = spell;
     }
 

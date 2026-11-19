@@ -52,6 +52,7 @@ class TextureFactory {
         this.createTowers();
         this.createHeroes();
         this.createBlackKnight();
+        this.createMage();
         this.createProjectiles();
     }
 
@@ -422,6 +423,58 @@ class TextureFactory {
     createBlackKnight() {
         this.draw('hero-blackKnight', 34, 44, graphics => this.paintBlackKnight(graphics, false));
         this.draw('hero-blackKnight-raised', 34, 44, graphics => this.paintBlackKnight(graphics, true));
+    }
+
+    createMage() {
+        this.draw('hero-mage', 32, 46, graphics => this.paintMage(graphics, false));
+        this.draw('hero-mage-casting', 32, 46, graphics => this.paintMage(graphics, true));
+    }
+
+    paintMage(graphics, casting) {
+        const centerX = 15;
+        const robe = 0x2b3f9e;
+        const robeShade = 0x1c2a6b;
+        const starColor = 0xffe066;
+        graphics.fillStyle(0x000000, 0.35);
+        graphics.fillEllipse(centerX, 43, 22, 6);
+        graphics.fillStyle(robeShade, 1);
+        graphics.fillTriangle(centerX - 10, 42, centerX + 10, 42, centerX, 16);
+        graphics.fillStyle(robe, 1);
+        graphics.fillRect(centerX - 7, 18, 14, 24);
+        graphics.fillStyle(starColor, 1);
+        graphics.fillRect(centerX - 4, 30, 2, 2);
+        graphics.fillRect(centerX + 3, 24, 2, 2);
+        graphics.fillRect(centerX + 1, 36, 2, 2);
+        graphics.fillStyle(0xf0c9a0, 1);
+        graphics.fillCircle(centerX, 15, 4);
+        graphics.fillStyle(0xf2f2f2, 1);
+        graphics.fillTriangle(centerX - 4, 16, centerX + 4, 16, centerX, 27);
+        graphics.fillStyle(robe, 1);
+        graphics.fillTriangle(centerX - 8, 12, centerX + 8, 12, centerX + 2, 0);
+        graphics.fillStyle(robeShade, 1);
+        graphics.fillRect(centerX - 8, 11, 16, 2);
+        graphics.fillStyle(starColor, 1);
+        graphics.fillRect(centerX, 6, 2, 2);
+        if (casting) this.paintRaisedStaff(graphics, centerX);
+        else this.paintLoweredStaff(graphics, centerX);
+    }
+
+    paintLoweredStaff(graphics, centerX) {
+        graphics.lineStyle(2, 0x7a5230, 1);
+        graphics.lineBetween(centerX + 11, 12, centerX + 11, 42);
+        graphics.fillStyle(0x7fdcff, 1);
+        graphics.fillCircle(centerX + 11, 10, 3);
+    }
+
+    paintRaisedStaff(graphics, centerX) {
+        graphics.fillStyle(0x2b3f9e, 1);
+        graphics.fillRect(centerX + 6, 18, 4, 6);
+        graphics.lineStyle(2, 0x7a5230, 1);
+        graphics.lineBetween(centerX + 9, 30, centerX + 13, 6);
+        graphics.fillStyle(0x7fdcff, 0.35);
+        graphics.fillCircle(centerX + 13, 5, 6);
+        graphics.fillStyle(0xd8f6ff, 1);
+        graphics.fillCircle(centerX + 13, 5, 3);
     }
 
     paintBlackKnight(graphics, swordRaised) {

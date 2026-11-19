@@ -7,8 +7,9 @@ class BootScene extends Phaser.Scene {
         new TextureFactory(this).createAll();
         const levelCatalog = new LevelCatalog();
         this.registry.set('levelCatalog', levelCatalog);
-        this.registry.set('pactCatalog', new PactCatalog());
-        this.registry.set('progress', new Progress(levelCatalog.levels.length));
+        const pactCatalog = new PactCatalog();
+        this.registry.set('pactCatalog', pactCatalog);
+        this.registry.set('progress', new Progress(levelCatalog.levels.length, pactCatalog));
         this.scene.start('MapScene');
     }
 }

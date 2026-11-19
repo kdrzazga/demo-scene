@@ -25,6 +25,9 @@ class Battle {
         this.tileMenu = new TileMenu(this);
         this.cursor = scene.add.graphics().setDepth(790);
         this.overlay = scene.add.graphics().setDepth(800);
+        this.towerSmashLimit = 3;
+        this.towersSmashed = 0;
+        this.gemRecallRemaining = 0;
         this.gemsLost = 0;
         this.outcome = null;
         this.starsEarned = 0;
@@ -33,6 +36,7 @@ class Battle {
     update(dt) {
         if (this.outcome) return;
         this.treasury.update(dt);
+        this.gemRecallRemaining = Math.max(0, this.gemRecallRemaining - dt);
         this.waveDirector.update(dt);
         this.sites.forEach(site => site.update(dt));
         this.enemies.update(dt);
@@ -84,7 +88,7 @@ class Battle {
     dropGems(enemy) {
         for (let gem = 0; gem < enemy.carriedGems; gem++) {
             const distance = Math.max(0, enemy.travelled - gem * this.gemDropSpacing);
-            this.looseGems.add(new LooseGem(this.scene, enemy.route, distance, this.hoard));
+            this.looseGems.add(new LooseGem(this, enemy.route, distance));
         }
         enemy.carriedGems = 0;
     }
@@ -175,7 +179,20 @@ class Battle {
         this.tileMenu.openForSite(site.tile, site);
     }
 
+    get isRecallingGems() {
+        return this.gemRecallRemaining > 0;
+    }
+
+    recallGems(duration) {
+        this.gemRecallRemaining = Math.max(this.gemRecallRemaining, duration);
+    }
+
+    get canSmashTowers() {
+        return this.towersSmashed < this.towerSmashLimit;
+    }
+
     shatterTower(tower) {
+        this.towersSmashed += 1;
         if (this.tileMenu.tile === tower.tile) this.tileMenu.close();
         this.towers = this.towers.filter(candidate => candidate !== tower);
         tower.destroy();

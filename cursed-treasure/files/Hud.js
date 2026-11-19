@@ -20,11 +20,11 @@ class Hud {
             fontSize: '11px',
             color: '#ffffff'
         }).setOrigin(0.5).setDepth(this.depth + 2);
-        this.callWaveButton = new Button(scene, 395, middle, 160, 44, '', () => battle.callWave()).setDepth(this.depth + 2);
+        this.callWaveButton = new Button(scene, 370, middle, 110, 50, '', () => battle.callWave()).setDepth(this.depth + 2);
         this.spellButtons = battle.spellbook.spells.map((spell, index) =>
-            new Button(scene, 530 + index * 96, middle, 88, 50, '', () => battle.toggleSpell(spell)).setDepth(this.depth + 2));
-        this.speedButton = new Button(scene, 805, middle, 54, 44, '', () => scene.toggleSpeed()).setDepth(this.depth + 2);
-        this.mapButton = new Button(scene, 900, middle, 100, 44, 'World map', () => scene.leaveToMap()).setDepth(this.depth + 2);
+            new Button(scene, 473 + index * 88, middle, 84, 50, '', () => battle.toggleSpell(spell)).setDepth(this.depth + 2));
+        this.speedButton = new Button(scene, 891, middle, 44, 44, '', () => scene.toggleSpeed()).setDepth(this.depth + 2);
+        this.mapButton = new Button(scene, 937, middle, 40, 44, 'Map', () => scene.leaveToMap()).setDepth(this.depth + 2);
     }
 
     refresh() {
@@ -37,8 +37,8 @@ class Hud {
         this.refreshCallWaveButton(waveDirector);
         spellbook.spells.forEach((spell, index) => {
             this.spellButtons[index]
-                .setLabel(`${spell.title} [${spell.hotkey}]\n${spell.manaCost} mana`)
-                .setEnabled(treasury.mana >= spell.manaCost || spellbook.armedSpell === spell)
+                .setLabel(`${spell.title} [${spell.hotkey}]\n${spell.statusLabel}`)
+                .setEnabled((spell.isReady && treasury.mana >= spell.manaCost) || spellbook.armedSpell === spell)
                 .setHighlighted(spellbook.armedSpell === spell);
         });
         this.speedButton.setLabel(`x${this.scene.speedMultiplier}`);

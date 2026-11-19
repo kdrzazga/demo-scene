@@ -87,7 +87,7 @@ class BlackKnight extends Enemy {
             if (this.smiteTimer <= 0) this.strike();
             return;
         }
-        const towersInReach = this.smashableTowersInReach();
+        const towersInReach = this.battle.canSmashTowers ? this.smashableTowersInReach() : [];
         if (!towersInReach.includes(this.focusTower)) {
             this.focusTower = towersInReach.length > 0 ? towersInReach[0] : null;
             this.smiteCharge = 0;
@@ -124,7 +124,7 @@ class BlackKnight extends Enemy {
         const tower = this.smiteTarget;
         this.resetSmite();
         this.lowerSword();
-        if (!this.battle.towers.includes(tower)) return;
+        if (!this.battle.towers.includes(tower) || !this.battle.canSmashTowers) return;
         this.battle.addEffect(new Blast(this.battle.scene, this.x, this.y - 30, 18, 0xff3030));
         this.battle.shatterTower(tower);
     }
@@ -139,7 +139,7 @@ class BlackKnight extends Enemy {
             capacity: 15,
             goldReward: 150,
             manaReward: 40,
-            weakness: 'Black plate laughs at arrows. Frost staggers him back, but 5s in reach of a Bone Spire or Cinder Shrine and he shatters it.'
+            weakness: 'Black plate laughs at arrows. Frost staggers him back, but 5s in reach of a Bone Spire or Cinder Shrine and he shatters it (3 towers per battle).'
         };
     }
 
@@ -160,6 +160,100 @@ class BlackKnight extends Enemy {
     }
 }
 
+class Mage extends Enemy {
+    constructor(battle, route, healthScale) {
+        super(battle, route, healthScale);
+        this.isBoss = true;
+        this.healthBarWidth = 36;
+        this.healthBarLift = 48;
+        this.carryLabelLift = 48;
+        this.walkCadence = 7;
+        this.callIntervalSeconds = 20;
+        this.callDurationSeconds = 5;
+        this.gemsPerCall = 3;
+        this.callTimer = 0;
+        this.isCalling = false;
+        this.calledGems = [];
+        battle.notify(this.x, this.y - 40, `${this.name} appears!`, '#7fdcff');
+        battle.scene.cameras.main.shake(300, 0.004);
+    }
+
+    describe() {
+        return {
+            name: 'Mage Merlin',
+            texture: 'hero-mage',
+            health: 900,
+            speed: 26,
+            armor: 3,
+            capacity: 10,
+            goldReward: 120,
+            manaReward: 40,
+            weakness: 'Every 20s he stands still for 5s and calls 3 gems along the road to him. Strike while he chants; Recall pulls dropped gems back.'
+        };
+    }
+
+    update(dt) {
+        const alive = super.update(dt);
+        if (alive) this.updateCall(dt);
+        else this.releaseGems();
+        return alive;
+    }
+
+    updateCall(dt) {
+        this.callTimer += dt;
+        if (!this.isCalling) {
+            if (this.callTimer >= this.callIntervalSeconds) this.startCall();
+            return;
+        }
+        if (this.callTimer >= this.callDurationSeconds) this.endCall();
+    }
+
+    startCall() {
+        this.isCalling = true;
+        this.callTimer = 0;
+        this.sprite.setTexture('hero-mage-casting');
+        const nearby = this.nearestLooseGems();
+        this.calledGems = [...nearby, ...this.gemsFromHoard(this.gemsPerCall - nearby.length)];
+        this.calledGems.forEach(gem => gem.answerCall(this));
+        this.battle.addEffect(new Blast(this.battle.scene, this.x, this.y - 20, 40, 0x7fdcff, false));
+        this.battle.notify(this.x, this.y - 44, `${this.name} calls the gems!`, '#7fdcff');
+    }
+
+    nearestLooseGems() {
+        return this.battle.looseGems.all
+            .filter(gem => !gem.collected && !gem.caller && gem.route === this.route)
+            .sort((first, second) => Math.abs(first.distance - this.travelled) - Math.abs(second.distance - this.travelled))
+            .slice(0, this.gemsPerCall);
+    }
+
+    gemsFromHoard(missing) {
+        if (missing <= 0) return [];
+        const taken = this.battle.hoard.takeGems(missing);
+        return Array.from({ length: taken }, () => {
+            const gem = new LooseGem(this.battle, this.route, this.route.length);
+            this.battle.looseGems.add(gem);
+            return gem;
+        });
+    }
+
+    endCall() {
+        this.isCalling = false;
+        this.callTimer = 0;
+        this.sprite.setTexture('hero-mage');
+        this.releaseGems();
+    }
+
+    releaseGems() {
+        this.calledGems.forEach(gem => gem.release());
+        this.calledGems = [];
+    }
+
+    advance(dt) {
+        if (this.isCalling) return;
+        super.advance(dt);
+    }
+}
+
 class EnemyFactory {
     constructor() {
         this.enemyTypes = {
@@ -168,7 +262,8 @@ class EnemyFactory {
             ranger: Ranger,
             paladin: Paladin,
             cleric: Cleric,
-            blackKnight: BlackKnight
+            blackKnight: BlackKnight,
+            mage: Mage
         };
     }
 

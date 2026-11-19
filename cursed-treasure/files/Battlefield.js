@@ -92,10 +92,11 @@ class Battlefield {
     }
 
     applySites(positions, terrain) {
-        positions.forEach(([column, row]) => {
+        positions.forEach(([column, row, sealCount = 3]) => {
             const tile = this.tileAt(column, row);
             if (!tile) return;
             tile.terrain = terrain;
+            tile.sealCount = sealCount;
             tile.forested = false;
         });
     }

@@ -15,7 +15,7 @@ class PactScene extends Phaser.Scene {
             stroke: '#3a1f55',
             strokeThickness: 6
         }).setOrigin(0.5);
-        this.add.text(width / 2, 92, `Unspent points: ${progress.freePoints}   (each star earned grants one)`, {
+        this.add.text(width / 2, 92, `Unspent points: ${progress.freePoints}   (each mission won grants one; each pact has 3 ranks)`, {
             fontFamily: 'monospace',
             fontSize: '14px',
             color: '#ffd740'
@@ -35,13 +35,16 @@ class PactScene extends Phaser.Scene {
             color: branch.color
         }).setOrigin(0.5);
         branch.pacts.forEach((pact, row) => {
-            const owned = progress.hasPact(pact.key);
-            const label = `${owned ? '✓ ' : ''}${pact.title}\n${pact.description}`;
-            new Button(this, x, 225 + row * 95, 270, 76, label, () => {
-                if (progress.unlockPact(pact.key)) this.scene.restart();
+            const rank = progress.pactRank(pact.key);
+            const maxRank = pact.ranks.length;
+            const current = rank > 0 ? pact.ranks[rank - 1].description : 'not sealed';
+            const next = rank < maxRank ? `next: ${pact.ranks[rank].description}` : 'fully sealed';
+            const label = `${pact.title}  ${'◆'.repeat(rank)}${'◇'.repeat(maxRank - rank)}\n${current}\n${next}`;
+            new Button(this, x, 225 + row * 95, 270, 80, label, () => {
+                if (progress.rankUpPact(pact.key)) this.scene.restart();
             })
-                .setHighlighted(owned)
-                .setEnabled(owned || progress.freePoints > 0);
+                .setHighlighted(rank > 0)
+                .setEnabled(rank > 0 || progress.canRankUpPact(pact.key));
         });
     }
 }

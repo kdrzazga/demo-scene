@@ -16,6 +16,13 @@ class Tower {
         this.destroyed = false;
         this.tierIndex = 0;
         this.cooldown = 0;
+        this.targetPriorities = [
+            { key: 'first', label: 'First', rank: enemy => this.progressOf(enemy) },
+            { key: 'last', label: 'Last', rank: enemy => -this.progressOf(enemy) },
+            { key: 'strong', label: 'Strong', rank: enemy => enemy.health * 1000000 + this.progressOf(enemy) },
+            { key: 'cleric', label: 'Cleric', rank: enemy => (enemy instanceof Cleric ? 1000000 : 0) + this.progressOf(enemy) }
+        ];
+        this.targetPriorityIndex = 0;
         this.investedGold = this.tiers[0].cost;
         const center = battle.battlefield.centerOf(tile);
         this.x = center.x;
@@ -139,8 +146,8 @@ class Tower {
 ${Math.round(chance * 100)}% instant kill` : '';
     }
 
-    hasPact(name) {
-        return this.battle.progress.hasPact(`${this.race}.${name}`);
+    pactEffect(name) {
+        return this.battle.progress.pactEffect(`${this.race}.${name}`);
     }
 
     describeStats() {
@@ -175,11 +182,19 @@ ${Math.round(chance * 100)}% instant kill` : '';
 
     chooseTargets() {
         return this.battle.enemiesWithin(this.x, this.y, this.range)
-            .sort((first, second) => this.threatOf(second) - this.threatOf(first))
+            .sort((first, second) => this.targetPriority.rank(second) - this.targetPriority.rank(first))
             .slice(0, this.volleySize());
     }
 
-    threatOf(enemy) {
+    get targetPriority() {
+        return this.targetPriorities[this.targetPriorityIndex];
+    }
+
+    cycleTargetPriority() {
+        this.targetPriorityIndex = (this.targetPriorityIndex + 1) % this.targetPriorities.length;
+    }
+
+    progressOf(enemy) {
         if (enemy.carriedGems > 0) return 100000 - enemy.travelled;
         return enemy.travelled;
     }

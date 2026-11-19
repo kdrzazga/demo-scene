@@ -4,7 +4,7 @@ class SealedSite {
         this.battle = battle;
         this.tile = tile;
         this.title = profile.title;
-        this.sealCount = 3;
+        this.sealCount = tile.sealCount;
         this.sealCost = 50;
         this.sealCurrency = profile.sealCurrency;
         this.brokenSeals = 0;
@@ -15,7 +15,8 @@ class SealedSite {
         const center = battle.battlefield.centerOf(tile);
         this.x = center.x;
         this.y = center.y;
-        this.sprite = battle.scene.add.image(this.x, this.y, profile.texture).setDepth(100 + this.y).setTint(this.sealedTint);
+        this.sprite = battle.scene.add.image(this.x, this.y, profile.texture).setDepth(100 + this.y);
+        if (!this.isOpen) this.sprite.setTint(this.sealedTint);
         this.sealGraphics = battle.scene.add.graphics().setDepth(101 + this.y);
         this.drawSeals();
         tile.site = this;
@@ -132,6 +133,7 @@ class GoldMine extends SealedSite {
 class ManaSpring extends SealedSite {
     constructor(battle, tile) {
         super(battle, tile);
+        this.sealCost = 25;
         this.manaPerPayout = 3;
         this.secondsPerPayout = 2;
     }
