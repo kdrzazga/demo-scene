@@ -1,0 +1,132 @@
+class GoblinWarren extends Tower {
+    describeRace() {
+        return { key: 'goblin', title: 'Goblin Warren', terrain: 'meadow' };
+    }
+
+    describeTiers() {
+        return [
+            { cost: 60, damage: 9, interval: 0.6, range: 100, instantKillChance: 0 },
+            { cost: 70, damage: 15, interval: 0.5, range: 112, instantKillChance: 0 },
+            { cost: 110, damage: 26, interval: 0.4, range: 126, instantKillChance: 0 }
+        ];
+    }
+
+    describeSpecialty() {
+        return this.volleySize() > 1 ? `Shoots ${this.volleySize()} heroes at once` : 'Quick arrows';
+    }
+
+    volleySize() {
+        return 1 + (this.pactEffect('volley') || 0);
+    }
+
+    fireAt(target) {
+        this.launch(target, 'arrow', 420, hitEnemy => {
+            if (hitEnemy) hitEnemy.takeDamage(this.damage, false, this);
+        });
+    }
+}
+
+class BoneSpire extends Tower {
+    describeRace() {
+        return { key: 'bone', title: 'Bone Spire', terrain: 'tundra' };
+    }
+
+    describeTiers() {
+        return [
+            { cost: 70, damage: 6, interval: 1.0, range: 96, slowFactor: 0.6, slowDuration: 1.6, instantKillChance: 0 },
+            { cost: 80, damage: 10, interval: 0.9, range: 108, slowFactor: 0.5, slowDuration: 1.9, instantKillChance: 0 },
+            { cost: 120, damage: 16, interval: 0.8, range: 120, slowFactor: 0.4, slowDuration: 2.2, instantKillChance: 0.05 }
+        ];
+    }
+
+    get deepChill() {
+        return this.pactEffect('deepChill') || { slow: 0, duration: 0 };
+    }
+
+    get slowFactor() {
+        return this.tier.slowFactor - this.deepChill.slow;
+    }
+
+    get slowDuration() {
+        return this.tier.slowDuration + this.deepChill.duration;
+    }
+
+    describeSpecialty() {
+        return `Slows by ${Math.round((1 - this.slowFactor) * 100)}%${this.describeInstantKill()}`;
+    }
+
+    fireAt(target) {
+        this.launch(target, 'frostbolt', 300, hitEnemy => {
+            if (!hitEnemy) return;
+            if (this.tryInstantKill(hitEnemy, this)) return;
+            hitEnemy.takeDamage(this.damage, false, this);
+            hitEnemy.applySlow(this.slowFactor, this.slowDuration);
+            hitEnemy.reactToChill();
+        });
+    }
+}
+
+class CinderShrine extends Tower {
+    constructor(battle, tile) {
+        super(battle, tile);
+        this.wildfireDuration = 3;
+    }
+
+    describeRace() {
+        return { key: 'cinder', title: 'Cinder Shrine', terrain: 'ashland' };
+    }
+
+    describeTiers() {
+        return [
+            { cost: 90, damage: 16, interval: 1.7, range: 112, blastRadius: 40, instantKillChance: 0 },
+            { cost: 100, damage: 28, interval: 1.55, range: 122, blastRadius: 48, instantKillChance: 0.01 },
+            { cost: 150, damage: 46, interval: 1.4, range: 136, blastRadius: 56, instantKillChance: 0.04 }
+        ];
+    }
+
+    describeSpecialty() {
+        const burnRatio = this.pactEffect('wildfire');
+        const burning = burnRatio ? `, burns ${Math.round(burnRatio * 100)}%/s` : '';
+        return `Blast radius ${this.tier.blastRadius}${burning}${this.describeInstantKill()}`;
+    }
+
+    fireAt(target) {
+        this.launch(target, 'fireball', 240, (hitEnemy, impactX, impactY) => {
+            const radius = this.tier.blastRadius;
+            const burnRatio = this.pactEffect('wildfire');
+            let blastKilled = false;
+            this.battle.enemiesWithin(impactX, impactY + 12, radius).forEach(enemy => {
+                if (!this.tryInstantKill(enemy, null)) enemy.takeDamage(this.damage);
+                if (!enemy.alive) blastKilled = true;
+                else if (burnRatio) enemy.applyBurn(this.damage * burnRatio, this.wildfireDuration, this);
+            });
+            if (blastKilled) this.creditKill();
+            this.battle.addEffect(new Blast(this.battle.scene, impactX, impactY + 6, radius, 0xff6a00));
+        });
+    }
+}
+
+class TowerFactory {
+    constructor() {
+        this.towerTypesByTerrain = {
+            meadow: GoblinWarren,
+            tundra: BoneSpire,
+            ashland: CinderShrine
+        };
+    }
+
+    blueprintFor(terrain, progress) {
+        const TowerType = this.towerTypesByTerrain[terrain];
+        if (!TowerType) return null;
+        const race = TowerType.prototype.describeRace();
+        const firstTier = TowerType.prototype.describeTiers()[0];
+        return {
+            type: TowerType,
+            race: race.key,
+            title: race.title,
+            cost: firstTier.cost,
+            damage: firstTier.damage * progress.damageMultiplier(race.key),
+            range: firstTier.range * progress.rangeMultiplier(race.key)
+        };
+    }
+}
