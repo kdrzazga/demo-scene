@@ -17,14 +17,20 @@
 .const KOALA_SCREEN_SIZE = 1000
 .const KOALA_COLORS_SIZE = 1000
 .const KOALA_BACKGROUND_SIZE = 1
+.const KOALA_SCREEN_OFFSET = KOALA_BITMAP_SIZE
+.const KOALA_COLORS_OFFSET = KOALA_SCREEN_OFFSET + KOALA_SCREEN_SIZE
+.const KOALA_BACKGROUND_OFFSET = KOALA_COLORS_OFFSET + KOALA_COLORS_SIZE
 .const KILOBYTE_PAGES = 4
 
 .const WELCOME_SCREEN = $8800
 .const WELCOME_DD00 = %01
 .const WELCOME_D018 = %00100100
 .const WELCOME_TEXT_COLOR = WHITE
+.const WELCOME_WARNING_COLOR = YELLOW
 .const SCREEN_COLUMNS = 40
-.const WELCOME_FIRST_ROW = 11
+.const WELCOME_TITLE_ROW = 11
+.const WELCOME_LOADING_ROW = 13
+.const WELCOME_WARNING_ROW = 17
 .const SPACE_SCREEN_CODE = $20
 
 .const SCREEN_VISIBLE_TEXT = %00011011
@@ -33,6 +39,20 @@
 .const MULTICOLOR_40_COLUMNS = %11011000
 .const MUSIC_RASTER_LINE = $80
 .const FIRST_BORDER_LINE = $fb
+
+#if SD2IEC
+.const KERNAL_SETMSG = $ff90
+.const KERNAL_SETLFS = $ffba
+.const KERNAL_SETNAM = $ffbd
+.const KERNAL_LOAD = $ffd5
+.const LAST_USED_DEVICE = $ba
+.const DEFAULT_DEVICE = 8
+.const PICTURE_FILE_NUMBER = 1
+.const LOAD_TO_GIVEN_ADDRESS = 0
+.const LOAD_BUFFER = $8c00
+.const PROCESSOR_PORT = $01
+.const RAM_UNDER_BASIC_WITH_IO_AND_KERNAL = $36
+#endif
 
 .macro CopyPages(source, target, pageCount) {
 			ldx #0
@@ -44,13 +64,46 @@
 			}
 }
 
+.macro CopyBytes(source, target, count) {
+			.var fullPages = floor(count/$100)
+			.var remainder = count - fullPages*$100
+			CopyPages(source, target, fullPages)
+			.if (remainder > 0) {
+				ldx #0
+!:				lda source+fullPages*$100,x
+				sta target+fullPages*$100,x
+				inx
+				cpx #remainder
+				bne !-
+			}
+}
+
+.macro PrintCentered(text, textEnd, row, color) {
+			ldx #textEnd-text-1
+!:			lda text,x
+			sta WELCOME_SCREEN+row*SCREEN_COLUMNS+floor((SCREEN_COLUMNS-(textEnd-text))/2),x
+			lda #color
+			sta $d800+row*SCREEN_COLUMNS+floor((SCREEN_COLUMNS-(textEnd-text))/2),x
+			dex
+			bpl !-
+}
+
 start:
 			lda #BLACK
 			sta $d020
 			sta $d021
+#if SD2IEC
+			lda #RAM_UNDER_BASIC_WITH_IO_AND_KERNAL
+			sta PROCESSOR_PORT
+#endif
 			jsr showWelcomeScreen
+			CopyBytes(musicData, music.location, music.size)
 			jsr startMusic
+#if SD2IEC
+			jsr kernalLoaderInstall
+#else
 			jsr fastLoaderInstall
+#endif
 
 pictureLoop:
 			jsr loadPictureIntoHiddenBank
@@ -72,22 +125,15 @@ showWelcomeScreen:
 			.for (var page=0; page<KILOBYTE_PAGES; page++) {
 				sta WELCOME_SCREEN+page*$100,x
 			}
-			lda #WELCOME_TEXT_COLOR
-			.for (var page=0; page<KILOBYTE_PAGES; page++) {
-				sta $d800+page*$100,x
-			}
 			inx
 			bne !-
-			ldx #welcomeTitleEnd-welcomeTitle-1
-!:			lda welcomeTitle,x
-			sta WELCOME_SCREEN+WELCOME_FIRST_ROW*SCREEN_COLUMNS+(SCREEN_COLUMNS-(welcomeTitleEnd-welcomeTitle))/2,x
-			dex
-			bpl !-
-			ldx #welcomeLoadingEnd-welcomeLoading-1
-!:			lda welcomeLoading,x
-			sta WELCOME_SCREEN+(WELCOME_FIRST_ROW+2)*SCREEN_COLUMNS+(SCREEN_COLUMNS-(welcomeLoadingEnd-welcomeLoading))/2,x
-			dex
-			bpl !-
+			PrintCentered(welcomeTitle, welcomeTitleEnd, WELCOME_TITLE_ROW, WELCOME_TEXT_COLOR)
+			PrintCentered(welcomeLoading, welcomeLoadingEnd, WELCOME_LOADING_ROW, WELCOME_TEXT_COLOR)
+#if !SD2IEC
+			PrintCentered(welcomeWarning1, welcomeWarning1End, WELCOME_WARNING_ROW, WELCOME_WARNING_COLOR)
+			PrintCentered(welcomeWarning2, welcomeWarning2End, WELCOME_WARNING_ROW+1, WELCOME_WARNING_COLOR)
+			PrintCentered(welcomeWarning3, welcomeWarning3End, WELCOME_WARNING_ROW+3, WELCOME_WARNING_COLOR)
+#endif
 			lda $dd00
 			and #%11111100
 			ora #WELCOME_DD00
@@ -130,6 +176,57 @@ musicIrq:
 			pla
 			rti
 
+#if SD2IEC
+kernalLoaderInstall:
+			lda LAST_USED_DEVICE
+			bne !+
+			lda #DEFAULT_DEVICE
+!:			sta pictureDevice
+			lda #0
+			jmp KERNAL_SETMSG
+
+loadPictureIntoHiddenBank:
+			ldx pictureIndex
+			lda pictureBorderColors,x
+			sta nextBorderColor
+			lda pictureNameLengths,x
+			ldy pictureNamesHigh,x
+			pha
+			lda pictureNamesLow,x
+			tax
+			pla
+			jsr KERNAL_SETNAM
+			lda #PICTURE_FILE_NUMBER
+			ldx pictureDevice
+			ldy #LOAD_TO_GIVEN_ADDRESS
+			jsr KERNAL_SETLFS
+			lda #0
+			ldx #<LOAD_BUFFER
+			ldy #>LOAD_BUFFER
+			jsr KERNAL_LOAD
+			bcc pictureLoaded
+			rts
+pictureLoaded:
+			lda hiddenBank
+			beq copyIntoBank0
+			jmp copyIntoBank1
+copyIntoBank0:
+			CopyBytes(LOAD_BUFFER, BANK0_BITMAP, KOALA_BITMAP_SIZE)
+			CopyBytes(LOAD_BUFFER+KOALA_SCREEN_OFFSET, BANK0_SCREEN, KOALA_SCREEN_SIZE)
+			CopyBytes(LOAD_BUFFER+KOALA_COLORS_OFFSET, BANK0_COLORS, KOALA_COLORS_SIZE)
+			lda LOAD_BUFFER+KOALA_BACKGROUND_OFFSET
+			sta bank0Background
+			clc
+			rts
+copyIntoBank1:
+			CopyBytes(LOAD_BUFFER, BANK1_BITMAP, KOALA_BITMAP_SIZE)
+			CopyBytes(LOAD_BUFFER+KOALA_SCREEN_OFFSET, BANK1_SCREEN, KOALA_SCREEN_SIZE)
+			CopyBytes(LOAD_BUFFER+KOALA_COLORS_OFFSET, BANK1_COLORS, KOALA_COLORS_SIZE)
+			lda LOAD_BUFFER+KOALA_BACKGROUND_OFFSET
+			sta bank1Background
+			clc
+			rts
+#else
 loadPictureIntoHiddenBank:
 			ldx pictureIndex
 			lda pictureBorderColors,x
@@ -150,6 +247,7 @@ loadIntoBank1:
 			ldx #<bank1Segments
 			ldy #>bank1Segments
 			jmp fastLoad
+#endif
 
 waitForBottomBorder:
 			lda #FIRST_BORDER_LINE
@@ -194,6 +292,7 @@ showBank1:
 			sta hiddenBank
 			rts
 
+#if !SD2IEC
 bank0Segments:
 			.word BANK0_BITMAP, KOALA_BITMAP_SIZE
 			.word BANK0_SCREEN, KOALA_SCREEN_SIZE
@@ -206,21 +305,35 @@ bank1Segments:
 			.word BANK1_COLORS, KOALA_COLORS_SIZE
 			.word bank1Background, KOALA_BACKGROUND_SIZE
 			.word 0, 0
+#endif
 
 pictureIndex:		.byte 0
 hiddenBank:			.byte 0
 nextBorderColor:	.byte BLACK
+bank0Background:	.byte BLACK
+bank1Background:	.byte BLACK
+#if SD2IEC
+pictureDevice:		.byte DEFAULT_DEVICE
+#endif
 
 .encoding "screencode_upper"
 welcomeTitle:		.text "WELCOME TO PICTURE VIEWER"
 welcomeTitleEnd:
 welcomeLoading:		.text "LOADING ..."
 welcomeLoadingEnd:
-bank0Background:	.byte BLACK
-bank1Background:	.byte BLACK
+#if !SD2IEC
+welcomeWarning1:	.text "THIS WILL NOT WORK ON SD2IEC"
+welcomeWarning1End:
+welcomeWarning2:	.text "(DISK DRIVE RAM REQUIRED)"
+welcomeWarning2End:
+welcomeWarning3:	.text "FOR SD2IEC RUN KDPICSSD.PRG"
+welcomeWarning3End:
+#endif
 
 #import "PictureList.asm"
+#if !SD2IEC
 #import "FastLoader.asm"
+#endif
 
-.pc=music.location "Music"
-.fill music.size, music.getData(i)
+musicData:
+			.fill music.size, music.getData(i)

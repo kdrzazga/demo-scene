@@ -4,11 +4,14 @@ from pathlib import Path
 
 KICK_ASSEMBLER = "KickAss.jar"
 SOURCE = "KdPicsViewer.asm"
-PROGRAM = "KdPicsViewer.prg"
+FAST_LOADER_PROGRAM = "KdPicsViewer.prg"
+SD2IEC_PROGRAM = "KdPicsSD.prg"
+SD2IEC_SYMBOL = "SD2IEC"
 PICTURE_LIST = "PictureList.asm"
 DISK = "kdpics.d64"
 DISK_HEADER = "kdpics,kd"
-DISK_PROGRAM_NAME = "kdpics"
+FAST_LOADER_DISK_NAME = "kdpics"
+SD2IEC_DISK_NAME = "kdpicssd"
 MAX_DISK_NAME_LENGTH = 16
 MAX_COLOR = 15
 C1541 = Path(r"D:\GTK3VICE-3.8-win64\bin\c1541.exe")
@@ -52,12 +55,16 @@ def write_picture_list(folder, pictures):
     (folder / PICTURE_LIST).write_text("\n".join(lines) + "\n")
 
 
-def assemble(folder):
-    subprocess.run(["java", "-jar", KICK_ASSEMBLER, SOURCE, "-showmem"], cwd=folder, check=True)
+def assemble(folder, program, symbols=()):
+    defines = [argument for symbol in symbols for argument in ("-define", symbol)]
+    command = ["java", "-jar", KICK_ASSEMBLER, SOURCE, "-showmem", "-o", program, *defines]
+    subprocess.run(command, cwd=folder, check=True)
 
 
 def build_disk(folder, pictures):
-    commands = [str(C1541), "-format", DISK_HEADER, "d64", DISK, "-write", PROGRAM, DISK_PROGRAM_NAME]
+    commands = [str(C1541), "-format", DISK_HEADER, "d64", DISK,
+                "-write", FAST_LOADER_PROGRAM, FAST_LOADER_DISK_NAME,
+                "-write", SD2IEC_PROGRAM, SD2IEC_DISK_NAME]
     for name in pictures:
         commands += ["-write", name, disk_name(name).lower()]
     commands += ["-list"]
@@ -69,7 +76,8 @@ def main():
     pictures = find_pictures(folder)
     print("pictures in order:", ", ".join(pictures))
     write_picture_list(folder, pictures)
-    assemble(folder)
+    assemble(folder, FAST_LOADER_PROGRAM)
+    assemble(folder, SD2IEC_PROGRAM, [SD2IEC_SYMBOL])
     build_disk(folder, pictures)
 
 
