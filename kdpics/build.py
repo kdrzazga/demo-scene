@@ -21,10 +21,14 @@ def numeric_order(name):
 
 def find_pictures(folder):
     pictures = sorted((path.name for path in folder.glob("*.kla")), key=numeric_order)
-    too_long = [name for name in pictures if len(name) > MAX_DISK_NAME_LENGTH]
+    too_long = [name for name in pictures if len(disk_name(name)) > MAX_DISK_NAME_LENGTH]
     if too_long:
         raise SystemExit(f"names longer than {MAX_DISK_NAME_LENGTH} characters: {too_long}")
     return pictures
+
+
+def disk_name(name):
+    return Path(name).stem.upper()
 
 
 def border_color(name):
@@ -40,11 +44,11 @@ def write_picture_list(folder, pictures):
         f".label PICTURE_COUNT = {len(pictures)}",
         '.encoding "petscii_upper"',
         "pictureBorderColors:\t.byte " + ", ".join(str(border_color(name)) for name in pictures),
-        "pictureNameLengths:\t.byte " + ", ".join(str(len(name)) for name in pictures),
+        "pictureNameLengths:\t.byte " + ", ".join(str(len(disk_name(name))) for name in pictures),
         "pictureNamesLow:\t.byte " + ", ".join(f"<{label}" for label in labels),
         "pictureNamesHigh:\t.byte " + ", ".join(f">{label}" for label in labels),
     ]
-    lines += [f'{label}:\t.text "{name.upper()}"' for label, name in zip(labels, pictures)]
+    lines += [f'{label}:\t.text "{disk_name(name)}"' for label, name in zip(labels, pictures)]
     (folder / PICTURE_LIST).write_text("\n".join(lines) + "\n")
 
 
@@ -55,7 +59,7 @@ def assemble(folder):
 def build_disk(folder, pictures):
     commands = [str(C1541), "-format", DISK_HEADER, "d64", DISK, "-write", PROGRAM, DISK_PROGRAM_NAME]
     for name in pictures:
-        commands += ["-write", name, name]
+        commands += ["-write", name, disk_name(name).lower()]
     commands += ["-list"]
     subprocess.run(commands, cwd=folder, check=True)
 
