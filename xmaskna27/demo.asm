@@ -6,8 +6,9 @@
 .const RESET_VECTOR = $fffc
 .const SID = $d400
 .const SID_REGISTER_COUNT = $19
-.const MUSIC_LENGTH_FRAMES = 8578
+.const MUSIC_LENGTH_FRAMES = 8578 - 85 * 50 / 10
 .const MUSIC_END_CALL = MUSIC_LENGTH_FRAMES + 1
+.const FAREWELL_CALL = MUSIC_END_CALL - 4 * 50
 .const SCREEN = $0400
 .const SCROLL_LINE = SCREEN + 24 * 40
 .const FRAME_IRQ_LINE = $fc
@@ -515,6 +516,7 @@ waitForSecondCaptions:
 	jsr showMainScene
 mainLoop:
 	jsr cycleNames
+	jsr showThanks
 	jmp mainLoop
 
 introIrq:
@@ -535,6 +537,17 @@ playMusicOnce:
 	inc musicFramesPlayed
 	bne !+
 	inc musicFramesPlayed + 1
+!:	lda musicFramesPlayed + 1
+	cmp #>FAREWELL_CALL
+	bne !+
+	lda musicFramesPlayed
+	cmp #<FAREWELL_CALL
+	bne !+
+	lda #0
+	sta $d015
+	lda #1
+	sta logoKilled
+	sta thanksRequest
 !:	lda musicFramesPlayed + 1
 	cmp #>MUSIC_END_CALL
 	bne !+

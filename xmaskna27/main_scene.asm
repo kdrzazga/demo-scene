@@ -185,6 +185,10 @@ mainSceneIrq:
 	jmp IRQ_EXIT
 
 runLogoEffects:
+	lda logoKilled
+	beq !+
+	rts
+!:
 	lda logoEffectTimer
 	beq nextLogoEffect
 	dec logoEffectTimer
@@ -258,6 +262,8 @@ circlePhase:
 logoHighX:
 	.byte 0
 logoEffectStep:
+	.byte 0
+logoKilled:
 	.byte 0
 logoEffectTimer:
 	.byte 0

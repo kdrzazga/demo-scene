@@ -8,13 +8,17 @@ NAMES_PER_ROW = 3
 NAME_SLOT_COLUMNS = 13
 NAME_CELL_ROWS = 2
 FONT_SCALE_Y = 2
-WHITE, RED, PURPLE, GREEN, BLUE = 1, 2, 4, 5, 6
+BLACK, WHITE, RED, PURPLE, GREEN, BLUE = 0, 1, 2, 4, 5, 6
 LETTER_COLORS = [RED, BLUE, PURPLE, GREEN]
 BACKGROUND_COLOR = WHITE
 LETTER_BITS = 0b10
 LETTER_GAP = 1
 SPACE_WIDTH = 3
 OUTPUT_PATH = "NAMES.kla"
+THANKS_LINES = ["THANKS FOR", "WATCHING"]
+THANKS_CELL_ROW = 20
+THANKS_SCALE_X = 2
+THANKS_COLOR = BLACK
 NAME_PIXEL_ROWS = NAME_CELL_ROWS * 8
 
 FONT = {
@@ -58,6 +62,12 @@ FONT = {
     ".": [".", ".", ".", ".", ".", ".", "#"],
 }
 
+THANKS_LINE_SHIFTS = [0, len(FONT["A"][0]) * THANKS_SCALE_X // 2]
+
+
+def scaled_pixels(name, scale_x):
+    return [column for column in name_pixels(name) for _ in range(scale_x)]
+
 
 def name_pixels(name):
     columns = []
@@ -73,18 +83,11 @@ def name_pixels(name):
     return columns
 
 
-def build_koala():
-    bitmap = bytearray(8000)
-    screen = bytearray(1000)
-    colors = bytearray(1000)
-    for index, name in enumerate(NAMES):
-        cell_row = (index // NAMES_PER_ROW) * NAME_CELL_ROWS
-        first_column = (index % NAMES_PER_ROW) * NAME_SLOT_COLUMNS
-        columns = name_pixels(name)
-        cells = (len(columns) + 3) // 4
-        assert cells <= NAME_SLOT_COLUMNS, name
-        letter_color = LETTER_COLORS[index % len(LETTER_COLORS)]
-        for row_offset in range(NAME_CELL_ROWS):
+def draw_text(bitmap, screen, colors, text, cell_row, first_column, letter_color, max_cells, scale_x=1, left_padding=0):
+    columns = [[False] * NAME_PIXEL_ROWS for _ in range(left_padding)] + scaled_pixels(text, scale_x)
+    cells = (len(columns) + 3) // 4
+    assert cells <= max_cells, text
+    for row_offset in range(NAME_CELL_ROWS):
             for cell_offset in range(cells):
                 cell = (cell_row + row_offset) * 40 + first_column + cell_offset
                 screen[cell] = letter_color
@@ -96,11 +99,25 @@ def build_koala():
                         if x < len(columns) and columns[x][row_offset * 8 + row]:
                             value |= LETTER_BITS << (6 - 2 * pixel)
                     bitmap[cell * 8 + row] = value
+
+
+def build_koala():
+    bitmap = bytearray(8000)
+    screen = bytearray(1000)
+    colors = bytearray(1000)
+    for index, name in enumerate(NAMES):
+        cell_row = (index // NAMES_PER_ROW) * NAME_CELL_ROWS
+        first_column = (index % NAMES_PER_ROW) * NAME_SLOT_COLUMNS
+        letter_color = LETTER_COLORS[index % len(LETTER_COLORS)]
+        draw_text(bitmap, screen, colors, name, cell_row, first_column, letter_color, NAME_SLOT_COLUMNS)
+    for line, text in enumerate(THANKS_LINES):
+        draw_text(bitmap, screen, colors, text, THANKS_CELL_ROW + line * NAME_CELL_ROWS, 0, THANKS_COLOR, 40, THANKS_SCALE_X, THANKS_LINE_SHIFTS[line])
     return bytes([0x00, 0x60]) + bitmap + screen + colors + bytes([BACKGROUND_COLOR])
 
 
 def main():
-    assert ((len(NAMES) + NAMES_PER_ROW - 1) // NAMES_PER_ROW) * NAME_CELL_ROWS <= 25
+    assert ((len(NAMES) + NAMES_PER_ROW - 1) // NAMES_PER_ROW) * NAME_CELL_ROWS <= THANKS_CELL_ROW
+    assert THANKS_CELL_ROW + len(THANKS_LINES) * NAME_CELL_ROWS <= 25
     open(OUTPUT_PATH, "wb").write(build_koala())
 
 

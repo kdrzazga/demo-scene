@@ -4,6 +4,9 @@
 .const NAMES_BELOW_LOGO = 3
 .const NAMES_ABOVE_LOGO = 2
 .const NAME_LAYOUT_SEED = 2027
+.const THANKS_SOURCE_ROW = 20
+.const THANKS_TARGET_ROW = 10
+.const THANKS_LINES = 2
 .const NAME_CELL_ROWS = 2
 .const NAME_SLOT_COLUMNS = 13
 .const NAMES_PER_KOALA_ROW = 3
@@ -62,7 +65,6 @@
         }
     }
 }
-.eval nameWidths.lock()
 .const NAME_COUNT = nameWidths.size()
 
 .var placementNames = List()
@@ -141,9 +143,28 @@
     }
 }
 .eval groupStarts.add(placementNames.size())
+
+.const THANKS_FIRST_PLACEMENT = placementNames.size()
+.for (var thanksLine = 0; thanksLine < THANKS_LINES; thanksLine++) {
+    .var sourceRow = THANKS_SOURCE_ROW + thanksLine * NAME_CELL_ROWS
+    .var lineCells = 0
+    .for (var row = sourceRow; row < sourceRow + NAME_CELL_ROWS; row++) {
+        .for (var column = 0; column < 40; column++) {
+            .for (var line = 0; line < 8; line++) {
+                .if (namesPicture.getBitmap((row * 40 + column) * 8 + line) != 0) {
+                    .eval lineCells = max(lineCells, column + 1)
+                }
+            }
+        }
+    }
+    .eval nameWidths.add(lineCells)
+    .eval placementNames.add(NAME_COUNT + thanksLine)
+    .eval placementCells.add((THANKS_TARGET_ROW + thanksLine * NAME_CELL_ROWS) * 40 + floor((40 - lineCells) / 2))
+}
 .eval placementNames.lock()
 .eval placementCells.lock()
 .eval groupStarts.lock()
+.eval nameWidths.lock()
 .const NAME_GROUP_COUNT = groupCount
 
 .macro CellToBitmapAddress(cell, base, target) {
@@ -175,6 +196,20 @@
     adc #>base
     sta target + 2
 }
+
+showThanks:
+	lda thanksRequest
+	bne !+
+	rts
+!:	lda #0
+	sta thanksRequest
+	lda #1
+	sta pasteMode
+	.for (var thanksLine = 0; thanksLine < THANKS_LINES; thanksLine++) {
+		ldx #THANKS_FIRST_PLACEMENT + thanksLine
+		jsr pasteName
+	}
+	rts
 
 cycleNames:
 	lda namesRequest
@@ -299,6 +334,8 @@ nameRowDone:
 
 namesRequest:
 	.byte 0
+thanksRequest:
+	.byte 0
 pasteMode:
 	.byte 0
 previousNameGroup:
@@ -323,11 +360,13 @@ nameRowsLeft:
 nameGroupStarts:
 	.fill groupStarts.size(), groupStarts.get(i)
 nameCellCount:
-	.fill NAME_COUNT, nameWidths.get(i)
+	.fill NAME_COUNT + THANKS_LINES, nameWidths.get(i)
 nameSourceCellLow:
 	.fill NAME_COUNT, <nameSlotCell(i)
+	.fill THANKS_LINES, <((THANKS_SOURCE_ROW + i * NAME_CELL_ROWS) * 40)
 nameSourceCellHigh:
 	.fill NAME_COUNT, >nameSlotCell(i)
+	.fill THANKS_LINES, >((THANKS_SOURCE_ROW + i * NAME_CELL_ROWS) * 40)
 placementName:
 	.fill placementNames.size(), placementNames.get(i)
 placementCellLow:
