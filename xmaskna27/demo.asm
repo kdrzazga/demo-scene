@@ -3,13 +3,19 @@
 .var music = LoadSid("Hej_Koleda.sid")
 
 .const IRQ_EXIT = $ea81
+.const RESET_VECTOR = $fffc
+.const SID = $d400
+.const SID_REGISTER_COUNT = $19
+.const MUSIC_LENGTH_FRAMES = 8578
+.const MUSIC_END_CALL = MUSIC_LENGTH_FRAMES + 1
 .const SCREEN = $0400
 .const SCROLL_LINE = SCREEN + 24 * 40
 .const FRAME_IRQ_LINE = $fc
 .const CHARSET = $2000
 .const SCROLL_FIRST_CHAR = 128
-.const SCROLL_PASSES = 2
+.const SCROLL_PASSES = 1
 .const SCROLL_OUT_GLYPHS = 41
+.const SNOW_STOP_LEAD_GLYPHS = 25
 .const SCROLL_CHAR_DATA = CHARSET + SCROLL_FIRST_CHAR * 8
 .const KOALA_START = $6000
 .const KOALA_END = $8711
@@ -464,6 +470,10 @@
 *=SNOW_SPRITES + 64 "More snowflakes"
 	:MoreSnowflakes()
 
+#import "loading_captions.asm"
+#import "scene_names.asm"
+.assert "Captions must end below the music", * <= music.location, true
+
 *=music.location "Music"
 	.fill music.size, music.getData(i)
 
@@ -493,15 +503,24 @@ startDemo:
 waitForSnowToSettle:
 	lda snowActive
 	bne waitForSnowToSettle
+	jsr showFirstCaptions
 	jsr loadMainScene
+waitForSecondCaptions:
+	sei
+	lda captionTimer
+	ora captionTimer + 1
+	cli
+	cmp #0
+	bne waitForSecondCaptions
 	jsr showMainScene
 mainLoop:
+	jsr cycleNames
 	jmp mainLoop
 
 introIrq:
 	lda #$01
 	sta $d019
-	jsr music.play
+	jsr playMusicOnce
 	lda scrollFinished
 	bne !+
 	jsr moveScroll
@@ -509,7 +528,32 @@ introIrq:
 !:	lda #1
 	sta snowStopping
 !:	jsr animateSnow
+	jsr tickCaptions
 	jmp IRQ_EXIT
+
+playMusicOnce:
+	inc musicFramesPlayed
+	bne !+
+	inc musicFramesPlayed + 1
+!:	lda musicFramesPlayed + 1
+	cmp #>MUSIC_END_CALL
+	bne !+
+	lda musicFramesPlayed
+	cmp #<MUSIC_END_CALL
+	beq softReset
+!:	jmp music.play
+
+softReset:
+	sei
+	lda #0
+	ldx #SID_REGISTER_COUNT - 1
+!:	sta SID, x
+	dex
+	bpl !-
+	jmp (RESET_VECTOR)
+
+musicFramesPlayed:
+	.word 0
 
 setupScroll:
 	ldx #39
@@ -554,6 +598,11 @@ nextScrollGlyph:
 	sta glyphBitsLeft
 	inc blankGlyphs
 	lda blankGlyphs
+	cmp #SCROLL_OUT_GLYPHS - SNOW_STOP_LEAD_GLYPHS
+	bne !+
+	lda #1
+	sta snowStopping
+!:	lda blankGlyphs
 	cmp #SCROLL_OUT_GLYPHS
 	bne !+
 	inc scrollFinished
@@ -727,5 +776,6 @@ scrollText:
 
 .disk [filename="demo.d64", name="KA+ XMAS 27", id="KA"] {
 	[name="KA+XMAS-27", type="prg", segments="Default"],
-	[name="SCENE", type="prg", prgFiles="SCENE.kla"],
+	[name="SCENE", type="seq", prgFiles="SCENE.kla"],
+	[name="NAMES", type="seq", prgFiles="NAMES.kla"],
 }
