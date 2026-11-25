@@ -1,9 +1,9 @@
 .encoding "screencode_upper"
 
 #import "merry_sprites.asm"
+#import "kna-sprites.asm"
 
 .var music = LoadSid("Hej_Koleda.sid")
-.var kna = LoadBinary("KNA.kla", BF_KOALA)
 
 .const SETLFS = $ffba
 .const SETNAM = $ffbd
@@ -29,6 +29,8 @@
 .const IRQ_LINE = 250
 .const SCENE_FRAMES = 1100
 .const REVEAL_FRAMES = 100
+.const FIRST_SCREEN_HOLD_FRAMES = 150
+.const SECOND_SCREEN_DELAY_FRAMES = 50
 
 .const AREA_LEFT = 33 * 2
 .const AREA_RIGHT = 108 * 2
@@ -49,14 +51,34 @@
 .const CAPTION_ROW = 12
 .const CAPTION_WIDTH = 31
 .const CAPTION_HEIGHT = 6
-.const KNA_COL = 9
-.const KNA_ROW = 7
-.const KNA_WIDTH = 19
-.const KNA_HEIGHT = 10
 
-.const BITMAP_KNA = BITMAP + KNA_ROW * 320 + KNA_COL * 8
-.const SCREEN_KNA = SCREEN + KNA_ROW * 40 + KNA_COL
-.const COLOR_KNA = COLOR_RAM + KNA_ROW * 40 + KNA_COL
+.function knaVisibleRows() {
+    .var visibleRows = 0
+    .for (var row = 0; row < knaLogo.size(); row++) {
+        .var line = knaLogo.get(row)
+        .for (var x = 0; x < line.size(); x++) {
+            .if (line.substring(x, x + 1) != ".") {
+                .eval visibleRows = row + 1
+            }
+        }
+    }
+    .return visibleRows
+}
+
+.const MERRY_SPRITE_POINTER = (SPRITE_DATA & $3fff) / 64
+.const LOGO_SPRITE_POINTER = MERRY_SPRITE_POINTER + 5
+.const CLEARED_LEFT = CAPTION_COL * 8
+.const CLEARED_RIGHT = (CAPTION_COL + CAPTION_WIDTH) * 8
+.const CLEARED_TOP = MERRY_ROW * 8
+.const CLEARED_BOTTOM = (CAPTION_ROW + CAPTION_HEIGHT) * 8
+.const LOGO_WIDTH = KNA_SPRITE_COLUMNS * 48
+.const LOGO_VISIBLE_HEIGHT = knaVisibleRows() * 2
+.const LOGO_SHIFT_LEFT = 25
+.const LOGO_LEFT = floor((CLEARED_LEFT + CLEARED_RIGHT - LOGO_WIDTH) / 2) - LOGO_SHIFT_LEFT
+.const LOGO_TOP = floor((CLEARED_TOP + CLEARED_BOTTOM - LOGO_VISIBLE_HEIGHT) / 2)
+.const LOGO_CIRCLE_RADIUS = 12
+.const STAR_LEFT = 31 * 8
+.const LOGO_CIRCLE_STEPS = 256
 
 .var greetingRows = List().add(7, 9, 11, 13, 15).lock()
 .var greetingLines = List().add(
@@ -65,6 +87,26 @@
     List().add("TO ALL ", BLACK, "READERS", BLUE),
     List().add("AND ALL RETRO FANS", BLACK),
     List().add("DEC 24, 2026", BLUE)).lock()
+
+.var greetingRows2 = List().add(9, 11, 13).lock()
+.var greetingLines2 = List().add(
+    List().add("LET", BLACK, " SID ", LIGHT_RED, "PLAY YOUR CAROLS.", BLACK),
+    List().add("LET ", BLACK, "VIC-II", PURPLE, " SHINE YOUR XMAS TREE LAMPS", BLACK),
+    List().add("AND ALWAYS KEEP ", BLACK, "MOS 6510", BLUE, " IN YOUR HEART!", BLACK)).lock()
+
+.var allGreetingRows = List()
+.var allGreetingLines = List()
+.for (var i = 0; i < greetingLines.size(); i++) {
+    .eval allGreetingRows.add(greetingRows.get(i))
+    .eval allGreetingLines.add(greetingLines.get(i))
+}
+.for (var i = 0; i < greetingLines2.size(); i++) {
+    .eval allGreetingRows.add(greetingRows2.get(i))
+    .eval allGreetingLines.add(greetingLines2.get(i))
+}
+.eval allGreetingRows.lock()
+.eval allGreetingLines.lock()
+.const FIRST_SCREEN_LINES = greetingLines.size()
 
 .function lineLength(segments) {
     .var length = 0
@@ -157,16 +199,16 @@ start:
         jsr waitGreetings
         jsr showPicture
         jsr backupRect
-        jsr setupSprites
+        jsr copySprites
 
 sceneLoop:
-        lda #%00011111
-        sta $d015
+        jsr showMerry
         jsr waitScene
-        lda #0
-        sta $d015
-        jsr showKnaFragment
+        jsr hideSprites
+        jsr clearCaption
+        jsr showLogo
         jsr waitScene
+        jsr hideSprites
         jsr restoreRect
         jmp sceneLoop
 
@@ -211,15 +253,43 @@ revealGreetings:
         rts
 revealNextLine:
         ldx revealedLines
-        cpx #greetingLines.size()
-        beq !+
+        cpx #FIRST_SCREEN_LINES
+        bne !+
+        lda firstScreenCleared
+        bne !+
+        inc firstScreenCleared
+        jsr clearTextScreen
+        lda #<SECOND_SCREEN_DELAY_FRAMES
+        ldy #>SECOND_SCREEN_DELAY_FRAMES
+        jmp setRevealTimer
+!:      cpx #allGreetingLines.size()
+        beq revealDone
         jsr printGreetingLine
         inc revealedLines
         lda #<REVEAL_FRAMES
+        ldy #>REVEAL_FRAMES
+        ldx revealedLines
+        cpx #FIRST_SCREEN_LINES
+        bne setRevealTimer
+        lda #<FIRST_SCREEN_HOLD_FRAMES
+        ldy #>FIRST_SCREEN_HOLD_FRAMES
+setRevealTimer:
         sta revealTimer
-        lda #>REVEAL_FRAMES
-        sta revealTimer + 1
-!:      rts
+        sty revealTimer + 1
+revealDone:
+        rts
+
+clearTextScreen:
+        lda #$20
+        ldx #0
+!:
+        .for (var i = 0; i < 4; i++) {
+            sta TEXT_SCREEN + i * 250, x
+        }
+        inx
+        cpx #250
+        bne !-
+        rts
 
 waitGreetings:
         sei
@@ -229,7 +299,7 @@ waitGreetings:
         cli
         cmp #0
         bne waitGreetings
-        cpx #greetingLines.size()
+        cpx #allGreetingLines.size()
         bne waitGreetings
         rts
 
@@ -258,8 +328,12 @@ irq:
         sta $d019
         jsr music.play
         jsr revealGreetings
+        lda logoMode
+        bne !+
         jsr animateLetters
-        jsr tickSceneTimer
+        jmp !++
+!:      jsr animateLogo
+!:      jsr tickSceneTimer
         jmp IRQ_EXIT
 
 animateLetters:
@@ -274,6 +348,36 @@ animateLetters:
             clc
             adc #LETTER_SPRITE_Y
             sta $d001 + i * 2
+        }
+        rts
+
+animateLogo:
+        inc circlePhase
+        ldx circlePhase
+        lda #0
+        sta logoHighX
+        .for (var column = 0; column < KNA_SPRITE_COLUMNS; column++) {
+            lda logoXTable, x
+            clc
+            adc #column * 48
+            sta $d000 + column * 2
+            sta $d000 + (column + KNA_SPRITE_COLUMNS) * 2
+            bcc !+
+            lda logoHighX
+            ora #(1 << column) | (1 << (column + KNA_SPRITE_COLUMNS))
+            sta logoHighX
+        !:
+        }
+        lda logoHighX
+        sta $d010
+        lda logoYTable, x
+        .for (var column = 0; column < KNA_SPRITE_COLUMNS; column++) {
+            sta $d001 + column * 2
+        }
+        clc
+        adc #42
+        .for (var column = 0; column < KNA_SPRITE_COLUMNS; column++) {
+            sta $d001 + (column + KNA_SPRITE_COLUMNS) * 2
         }
         rts
 
@@ -347,30 +451,67 @@ showPicture:
         sta $d011
         rts
 
-setupSprites:
-        ldx #63
+copySprites:
+        ldx #0
 !:
-        .for (var i = 0; i < 5; i++) {
-            lda merrySprites + i * 64, x
-            sta SPRITE_DATA + i * 64, x
+        .for (var page = 0; page < 4; page++) {
+            lda allSprites + page * 256, x
+            sta SPRITE_DATA + page * 256, x
         }
-        dex
-        bpl !-
+        inx
+        bne !-
+        lda #0
+        sta $d01b
+        lda #$ff
+        sta $d017
+        sta $d01d
+        rts
+
+showMerry:
+        sei
+        lda #0
+        sta logoMode
+        sta $d010
+        sta $d01c
         .for (var i = 0; i < 5; i++) {
-            lda #((SPRITE_DATA & $3fff) / 64) + i
+            lda #MERRY_SPRITE_POINTER + i
             sta SPRITE_POINTERS + i
             lda #letterX(i)
             sta $d000 + i * 2
             lda #letterColors.get(i)
             sta $d027 + i
         }
-        lda #0
-        sta $d010
-        sta $d01b
-        sta $d01c
+        jsr animateLetters
         lda #%00011111
-        sta $d017
-        sta $d01d
+        sta $d015
+        cli
+        rts
+
+showLogo:
+        sei
+        lda #1
+        sta logoMode
+        lda #$ff
+        sta $d01c
+        lda #KNA_SHARED_COLOR_1
+        sta $d025
+        lda #KNA_SHARED_COLOR_2
+        sta $d026
+        .for (var i = 0; i < KNA_SPRITE_COUNT; i++) {
+            lda #LOGO_SPRITE_POINTER + i
+            sta SPRITE_POINTERS + i
+            lda #KNA_SPRITE_COLOR
+            sta $d027 + i
+        }
+        jsr animateLogo
+        lda #$ff
+        sta $d015
+        cli
+        rts
+
+hideSprites:
+        lda #0
+        sta $d015
         rts
 
 backupRect:
@@ -383,12 +524,9 @@ restoreRect:
         :RestoreRect(CAPTION_COL, CAPTION_ROW, CAPTION_WIDTH, CAPTION_HEIGHT, CAPTION_BACKUP)
         rts
 
-showKnaFragment:
+clearCaption:
         :ClearRect(MERRY_COL, MERRY_ROW, MERRY_WIDTH, MERRY_HEIGHT)
         :ClearRect(CAPTION_COL, CAPTION_ROW, CAPTION_WIDTH, CAPTION_HEIGHT)
-        :CopyRows(knaBitmap, KNA_WIDTH * 8, BITMAP_KNA, 320, KNA_WIDTH * 8, KNA_HEIGHT)
-        :CopyRows(knaScreen, KNA_WIDTH, SCREEN_KNA, 40, KNA_WIDTH, KNA_HEIGHT)
-        :CopyRows(knaColor, KNA_WIDTH, COLOR_KNA, 40, KNA_WIDTH, KNA_HEIGHT)
         rts
 
 * = music.location "Music"
@@ -409,50 +547,55 @@ revealTimer:
         .word 0
 revealedLines:
         .byte 0
+firstScreenCleared:
+        .byte 0
+logoMode:
+        .byte 0
+circlePhase:
+        .byte 0
+logoHighX:
+        .byte 0
 
 bounceTable:
         .fill 64, (round(BOUNCE_AMPLITUDE * sin(toRadians(i * 360 / 64))) + 256) & 255
 
 greetingChars:
-        .for (var i = 0; i < greetingLines.size(); i++) {
-            :LineChars(greetingLines.get(i))
+        .for (var i = 0; i < allGreetingLines.size(); i++) {
+            :LineChars(allGreetingLines.get(i))
         }
 greetingColors:
-        .for (var i = 0; i < greetingLines.size(); i++) {
-            :LineColors(greetingLines.get(i))
+        .for (var i = 0; i < allGreetingLines.size(); i++) {
+            :LineColors(allGreetingLines.get(i))
         }
 
 greetingCharsLow:
-        .fill greetingLines.size(), <(greetingChars + i * 40)
+        .fill allGreetingLines.size(), <(greetingChars + i * 40)
 greetingCharsHigh:
-        .fill greetingLines.size(), >(greetingChars + i * 40)
+        .fill allGreetingLines.size(), >(greetingChars + i * 40)
 greetingColorsLow:
-        .fill greetingLines.size(), <(greetingColors + i * 40)
+        .fill allGreetingLines.size(), <(greetingColors + i * 40)
 greetingColorsHigh:
-        .fill greetingLines.size(), >(greetingColors + i * 40)
+        .fill allGreetingLines.size(), >(greetingColors + i * 40)
 greetingScreenLow:
-        .fill greetingLines.size(), <(TEXT_SCREEN + greetingRows.get(i) * 40)
+        .fill allGreetingLines.size(), <(TEXT_SCREEN + allGreetingRows.get(i) * 40)
 greetingScreenHigh:
-        .fill greetingLines.size(), >(TEXT_SCREEN + greetingRows.get(i) * 40)
+        .fill allGreetingLines.size(), >(TEXT_SCREEN + allGreetingRows.get(i) * 40)
 
-merrySprites:
+logoXTable:
+        .fill LOGO_CIRCLE_STEPS, 24 + LOGO_LEFT + round(LOGO_CIRCLE_RADIUS * cos(toRadians(i * 360 / LOGO_CIRCLE_STEPS)))
+logoYTable:
+        .fill LOGO_CIRCLE_STEPS, 50 + LOGO_TOP + round(LOGO_CIRCLE_RADIUS * sin(toRadians(i * 360 / LOGO_CIRCLE_STEPS)))
+
+allSprites:
         :MerrySprites()
-
-knaBitmap:
-        .for (var row = 0; row < KNA_HEIGHT; row++) {
-            .fill KNA_WIDTH * 8, kna.getBitmap(row * 320 + i)
-        }
-knaScreen:
-        .for (var row = 0; row < KNA_HEIGHT; row++) {
-            .fill KNA_WIDTH, kna.getScreenRam(row * 40 + i)
-        }
-knaColor:
-        .for (var row = 0; row < KNA_HEIGHT; row++) {
-            .fill KNA_WIDTH, kna.getColorRam(row * 40 + i)
-        }
+        :KnaSprites()
 
 .assert "Every greeting line needs a row", greetingRows.size() == greetingLines.size(), true
+.assert "Every second greeting line needs a row", greetingRows2.size() == greetingLines2.size(), true
 .assert "Data must end below sprite bank", * <= SPRITE_DATA, true
+.assert "Sprites must end below screen", SPRITE_DATA + (5 + KNA_SPRITE_COUNT) * 64 <= SCREEN, true
+.assert "Logo must stay left of the star", LOGO_LEFT + LOGO_CIRCLE_RADIUS + LOGO_WIDTH <= STAR_LEFT, true
+.assert "Logo must stay inside the cleared rows", LOGO_TOP + LOGO_CIRCLE_RADIUS + LOGO_VISIBLE_HEIGHT <= CLEARED_BOTTOM, true
 .assert "Merry backup must end below caption backup", MERRY_BACKUP + MERRY_WIDTH * 10 * MERRY_HEIGHT <= CAPTION_BACKUP, true
 .assert "Caption backup must end below bitmap", CAPTION_BACKUP + CAPTION_WIDTH * 10 * CAPTION_HEIGHT <= BITMAP, true
 
