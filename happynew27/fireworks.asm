@@ -39,6 +39,15 @@ BasicUpstart2(start)
 .const FRAMES_PER_SECOND = 50
 .const FIREWORKS_ONLY_FRAMES = 3 * FRAMES_PER_SECOND
 .const FIREWORKS_WITH_DRAWING_FRAMES = 5 * FRAMES_PER_SECOND
+.var wishes = "WISHES YOU..."
+.const WISHES_ROW = 24
+.const WISHES_COLUMN = floor((40 - wishes.size()) / 2)
+.const WISHES_COLOR = WHITE
+.const FRAMES_PER_TYPED_CHARACTER = 6
+.const TYPING_DONE_BEFORE_PICTURES_FRAMES = 1 * FRAMES_PER_SECOND
+.const TYPING_FRAMES = wishes.size() * FRAMES_PER_TYPED_CHARACTER
+.const DRAWING_BEFORE_TYPING_FRAMES = FIREWORKS_WITH_DRAWING_FRAMES - TYPING_DONE_BEFORE_PICTURES_FRAMES - TYPING_FRAMES
+.assert "Typing must fit into the drawing phase", DRAWING_BEFORE_TYPING_FRAMES > 0, true
 .const CHAMPAGNE_SCENE_FRAMES = 7 * FRAMES_PER_SECOND
 .const FIRST_CAPTION_FRAMES = 1
 .const CAPTION_INTERVAL_FRAMES = FRAMES_PER_SECOND / 2
@@ -82,65 +91,61 @@ BasicUpstart2(start)
 .const SPRITE_HEIGHT = 21
 .const SCREEN_LEFT_IN_SPRITE_COORDINATES = 24
 .const SCREEN_TOP_IN_SPRITE_COORDINATES = 50
-.const LOGO_ELLIPSE_STEPS = 256
-
-.var champagneEllipse = Hashtable().put("centerLeft", 192, "centerTop", 130, "radiusX", 28, "radiusY", 40).lock()
-.var commodoreEllipse = Hashtable().put("centerLeft", 112, "centerTop", 170, "radiusX", 112, "radiusY", 0).lock()
+.const LOGO_RECORD_SIZE = KNA_SPRITE_COLUMNS + 2
 .const HIDDEN_IN_LEFT_BORDER = 0
+.const LOGO_REST_LEFT = 192
+.const LOGO_REST_TOP = 170
+.const CHAMPAGNE_ELLIPSE_RADIUS_X = 28
+.const CHAMPAGNE_ELLIPSE_RADIUS_Y = 40
+.const CHAMPAGNE_REST_ANGLE = 90
+.const CHAMPAGNE_LOOPS = 2
+.const COMMODORE_TRAVEL_CENTER_LEFT = 112
+.const COMMODORE_TRAVEL_RADIUS = 112
+.const COMMODORE_TRAVEL_TURNS = 2
+.const CHAMPAGNE_PATH = CHAMPAGNE_BANK + COLORS_IN_BANK + $400
+.const COMMODORE_PATH = COMMODORE_BANK + $1000
 
-.function logoLeftAt(ellipse, step) {
-    .var angle = toRadians(step * 360 / LOGO_ELLIPSE_STEPS)
-    .return SCREEN_LEFT_IN_SPRITE_COORDINATES + ellipse.get("centerLeft") + round(ellipse.get("radiusX") * cos(angle))
+.function champagneLeftAt(frame, frames) {
+    .var angle = toRadians(CHAMPAGNE_REST_ANGLE + 360 * CHAMPAGNE_LOOPS * frame / (frames - 1))
+    .return LOGO_REST_LEFT + round(CHAMPAGNE_ELLIPSE_RADIUS_X * cos(angle))
 }
 
-.function logoTopAt(ellipse, step) {
-    .var angle = toRadians(step * 360 / LOGO_ELLIPSE_STEPS)
-    .return SCREEN_TOP_IN_SPRITE_COORDINATES + ellipse.get("centerTop") + round(ellipse.get("radiusY") * sin(angle))
+.function champagneTopAt(frame, frames) {
+    .var angle = toRadians(CHAMPAGNE_REST_ANGLE + 360 * CHAMPAGNE_LOOPS * frame / (frames - 1))
+    .return LOGO_REST_TOP - CHAMPAGNE_ELLIPSE_RADIUS_Y + round(CHAMPAGNE_ELLIPSE_RADIUS_Y * sin(angle))
 }
 
-.function logoSpriteXAt(ellipse, step, column) {
-    .return max(HIDDEN_IN_LEFT_BORDER, logoLeftAt(ellipse, step) + column * SPRITE_WIDTH)
+.function commodoreLeftAt(frame, frames) {
+    .var restAngle = toDegrees(acos((LOGO_REST_LEFT - COMMODORE_TRAVEL_CENTER_LEFT) / COMMODORE_TRAVEL_RADIUS))
+    .var travel = 360 * COMMODORE_TRAVEL_TURNS - 2 * restAngle
+    .var angle = toRadians(restAngle + travel * frame / (frames - 1))
+    .return COMMODORE_TRAVEL_CENTER_LEFT + round(COMMODORE_TRAVEL_RADIUS * cos(angle))
 }
 
-.function logoHighBitsAt(ellipse, step) {
+.function logoSpriteX(left, column) {
+    .return max(HIDDEN_IN_LEFT_BORDER, SCREEN_LEFT_IN_SPRITE_COORDINATES + left + column * SPRITE_WIDTH)
+}
+
+.macro LogoRecord(left, top) {
     .var highBits = 0
     .for (var column = 0; column < KNA_SPRITE_COLUMNS; column++) {
-        .if (logoSpriteXAt(ellipse, step, column) > 255) {
-            .eval highBits = highBits | (1 << column) | (1 << (column + KNA_SPRITE_COLUMNS))
-        }
+        .var x = logoSpriteX(left, column)
+        .if (x > 255) .eval highBits = highBits | (1 << column) | (1 << (column + KNA_SPRITE_COLUMNS))
+        .byte <x
     }
-    .return highBits
+    .byte highBits, SCREEN_TOP_IN_SPRITE_COORDINATES + top
 }
 
-.macro LogoPathTables(ellipse) {
-lefts:
-    .for (var column = 0; column < KNA_SPRITE_COLUMNS; column++) {
-        .fill LOGO_ELLIPSE_STEPS, <logoSpriteXAt(ellipse, i, column)
+.macro ChampagnePath(frames) {
+    .for (var frame = 0; frame < frames; frame++) {
+        :LogoRecord(champagneLeftAt(frame, frames), champagneTopAt(frame, frames))
     }
-highBits:
-    .fill LOGO_ELLIPSE_STEPS, logoHighBitsAt(ellipse, i)
-tops:
-    .fill LOGO_ELLIPSE_STEPS, logoTopAt(ellipse, i)
 }
 
-.macro MoveLogoAlong(path) {
-    .for (var column = 0; column < KNA_SPRITE_COLUMNS; column++) {
-        lda path.lefts + column * LOGO_ELLIPSE_STEPS,x
-        sta SPRITE_X + column * 2
-        sta SPRITE_X + (column + KNA_SPRITE_COLUMNS) * 2
+.macro CommodorePath(frames) {
+    .for (var frame = 0; frame < frames; frame++) {
+        :LogoRecord(commodoreLeftAt(frame, frames), LOGO_REST_TOP)
     }
-    lda path.highBits,x
-    sta SPRITE_X_HIGH_BITS
-    lda path.tops,x
-    .for (var column = 0; column < KNA_SPRITE_COLUMNS; column++) {
-        sta SPRITE_Y + column * 2
-    }
-    clc
-    adc #SPRITE_HEIGHT
-    .for (var column = 0; column < KNA_SPRITE_COLUMNS; column++) {
-        sta SPRITE_Y + (column + KNA_SPRITE_COLUMNS) * 2
-    }
-    rts
 }
 
 .macro ShowPictureFromBank(bank, bankBits) {
@@ -239,10 +244,10 @@ tops:
 .const colorPointer = $fd
 .const phaseJump = $f7
 .const drawingPointer = $f9
-.const captionPointer = $fb
-.const captionBitmapPointer = $fd
-.const captionScreenPointer = $f7
-.const captionColorPointer = $f9
+.const captionPointer = $f1
+.const captionBitmapPointer = $f3
+.const captionScreenPointer = $f5
+.const captionColorPointer = $fc
 
 .macro DrawRing(ringRadius, style) {
     lda #ringRadius
@@ -279,7 +284,9 @@ start:
 
     :WaitFrames(FIREWORKS_ONLY_FRAMES)
     jsr showDrawing
-    :WaitFrames(FIREWORKS_WITH_DRAWING_FRAMES)
+    :WaitFrames(DRAWING_BEFORE_TYPING_FRAMES)
+    jsr typeWishes
+    :WaitFrames(TYPING_DONE_BEFORE_PICTURES_FRAMES)
     jsr startPictures
 stayInPictures:
     jmp stayInPictures
@@ -330,6 +337,22 @@ copyDrawing:
     inx
     cpx #250
     bne copyDrawing
+    rts
+
+typeWishes:
+    ldx #0
+typeNextCharacter:
+    stx typedCharacters
+    lda wishesText,x
+    sta DRAWING_CHARS + WISHES_ROW * SCREEN_COLUMNS + WISHES_COLUMN,x
+    sta SCREEN + WISHES_ROW * SCREEN_COLUMNS + WISHES_COLUMN,x
+    lda #WISHES_COLOR
+    sta COLOR_RAM + WISHES_ROW * SCREEN_COLUMNS + WISHES_COLUMN,x
+    :WaitFrames(FRAMES_PER_TYPED_CHARACTER)
+    ldx typedCharacters
+    inx
+    cpx #wishes.size()
+    bne typeNextCharacter
     rts
 
 startPictures:
@@ -393,9 +416,13 @@ pictureInterrupt:
     and #1
     beq checkMusicTimer
     sta INTERRUPT_STATUS
+    lda frameWorkRunning
+    bne checkMusicTimer
+    inc frameWorkRunning
     jsr animateLogo
     jsr countSceneFrames
     jsr tickCaptions
+    dec frameWorkRunning
 checkMusicTimer:
     lda CIA1_INTERRUPT_CONTROL
     and #1
@@ -428,17 +455,25 @@ showCurrentScene:
     lda sceneFramesHigh,x
     sta sceneFramesLeft + 1
     lda #0
-    sta logoPhase
+    lda logoPathStartsLow,x
+    sta logoRecord
+    lda logoPathStartsHigh,x
+    sta logoRecord + 1
+    lda logoPathLastsLow,x
+    sta logoLastRecord
+    lda logoPathLastsHigh,x
+    sta logoLastRecord + 1
+    lda #0
     sta captionsShown
     lda #<FIRST_CAPTION_FRAMES
     sta captionFramesLeft
     lda #>FIRST_CAPTION_FRAMES
     sta captionFramesLeft + 1
     lda currentScene
-    bne showCommodoreWithoutCaptions
-    jmp showChampagne
-showCommodoreWithoutCaptions:
-    jsr clearLogoCaptions
+    bne showCommodoreScene
+    jsr showChampagne
+    jmp clearLogoCaptions
+showCommodoreScene:
     jmp showCommodore
 
 tickCaptions:
@@ -568,17 +603,43 @@ showCommodore:
     :ShowPictureFromBank(COMMODORE_BANK, COMMODORE_BANK_BITS)
 
 animateLogo:
-    inc logoPhase
-    ldx logoPhase
-    lda currentScene
-    beq moveLogoOnChampagne
-    jmp moveLogoOnCommodore
-
-moveLogoOnChampagne:
-    :MoveLogoAlong(champagnePath)
-
-moveLogoOnCommodore:
-    :MoveLogoAlong(commodorePath)
+    ldx #LOGO_RECORD_SIZE - 1
+readLogoRecord:
+    lda logoRecord: $ffff,x
+    sta logoRecordBuffer,x
+    dex
+    bpl readLogoRecord
+    .for (var column = 0; column < KNA_SPRITE_COLUMNS; column++) {
+        lda logoRecordBuffer + column
+        sta SPRITE_X + column * 2
+        sta SPRITE_X + (column + KNA_SPRITE_COLUMNS) * 2
+    }
+    lda logoRecordBuffer + KNA_SPRITE_COLUMNS
+    sta SPRITE_X_HIGH_BITS
+    lda logoRecordBuffer + KNA_SPRITE_COLUMNS + 1
+    .for (var column = 0; column < KNA_SPRITE_COLUMNS; column++) {
+        sta SPRITE_Y + column * 2
+    }
+    clc
+    adc #SPRITE_HEIGHT
+    .for (var column = 0; column < KNA_SPRITE_COLUMNS; column++) {
+        sta SPRITE_Y + (column + KNA_SPRITE_COLUMNS) * 2
+    }
+    lda logoRecord
+    cmp logoLastRecord
+    bne nextLogoRecord
+    lda logoRecord + 1
+    cmp logoLastRecord + 1
+    beq logoResting
+nextLogoRecord:
+    lda logoRecord
+    clc
+    adc #LOGO_RECORD_SIZE
+    sta logoRecord
+    bcc logoResting
+    inc logoRecord + 1
+logoResting:
+    rts
 
 updateFireworks:
     ldx #0
@@ -997,11 +1058,16 @@ plotColor: .byte 0
 framesToWait: .byte 0
 fireworksRunning: .byte 1
 drawingShown: .byte 0
+typedCharacters: .byte 0
+wishesText:
+    .encoding "screencode_upper"
+    .text wishes
 currentScene: .byte SCENE_CHAMPAGNE
 sceneFramesLeft: .word CHAMPAGNE_SCENE_FRAMES
 sceneFramesLow: .byte <CHAMPAGNE_SCENE_FRAMES, <COMMODORE_SCENE_FRAMES
 sceneFramesHigh: .byte >CHAMPAGNE_SCENE_FRAMES, >COMMODORE_SCENE_FRAMES
 captionsShown: .byte 0
+frameWorkRunning: .byte 0
 captionFramesLeft: .word FIRST_CAPTION_FRAMES
 captionIndex: .byte 0
 captionVisible: .byte 0
@@ -1009,10 +1075,13 @@ captionBytes: .byte 0
 captionCells: .byte 0
 captionScreenValue: .byte 0
 captionColorValue: .byte 0
-logoPhase: .byte 0
+logoLastRecord: .word CHAMPAGNE_PATH
+logoRecordBuffer: .fill LOGO_RECORD_SIZE, 0
+logoPathStartsLow: .byte <CHAMPAGNE_PATH, <COMMODORE_PATH
+logoPathStartsHigh: .byte >CHAMPAGNE_PATH, >COMMODORE_PATH
+logoPathLastsLow: .byte <champagnePathLast, <commodorePathLast
+logoPathLastsHigh: .byte >champagnePathLast, >commodorePathLast
 
-champagnePath: :LogoPathTables(champagneEllipse)
-commodorePath: :LogoPathTables(commodoreEllipse)
 
 .assert "Code must end below the champagne bank", * <= CHAMPAGNE_BANK, true
 
@@ -1028,6 +1097,15 @@ commodorePath: :LogoPathTables(commodoreEllipse)
 
 :PictureBank(CHAMPAGNE_BANK, champagne)
 :PictureBank(COMMODORE_BANK, commodore)
+
+*=CHAMPAGNE_PATH "Champagne logo path"
+    :ChampagnePath(CHAMPAGNE_SCENE_FRAMES)
+.label champagnePathLast = * - LOGO_RECORD_SIZE
+.assert "Champagne logo path must end below the champagne bitmap", * <= CHAMPAGNE_BANK + BITMAP_IN_BANK, true
+*=COMMODORE_PATH "Commodore logo path"
+    :CommodorePath(COMMODORE_SCENE_FRAMES)
+.label commodorePathLast = * - LOGO_RECORD_SIZE
+.assert "Commodore logo path must end below the Commodore bitmap", * <= COMMODORE_BANK + BITMAP_IN_BANK, true
 
 .const LOGO_CAPTION_BITMAP = COMMODORE_BANK + BITMAP_IN_BANK
 *=COMMODORE_BANK + COLORS_IN_BANK + $400 "Logo captions"
